@@ -31,14 +31,18 @@ urlpatterns = [
     
     path("api/user/register/", CreateUserView.as_view(), name="register"),
     # POST endpoint for new user registration - accepts username and password
+    # POST /api/user/register/ → Create new account
     
     path("api/token/", TokenObtainPairView.as_view(), name="get_token"),
     # POST endpoint for user login - returns access and refresh JWT tokens
+    # POST /api/token/ → Get tokens (login)
     
     path("api/token/refresh/", TokenRefreshView.as_view(), name="refresh"),
     # POST endpoint to get a new access token using an unexpired refresh token
+    # POST /api/token/refresh/ → Renew access token
     
     path("api-auth/", include("rest_framework.urls")),
     # Adds login/logout views for Django REST Framework's browsable API interface
+    # GET /admin/ → Django admin panel (in browser)
 ]
 
