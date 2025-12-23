@@ -1,3 +1,24 @@
+/**
+ * Axios API Configuration
+ * 
+ * Creates a pre-configured axios instance for all HTTP requests to the Django backend.
+ * 
+ * Key Features:
+ * - Centralized base URL management via environment variables
+ * - Automatic JWT token injection for authenticated requests
+ * - Request interceptor adds Authorization header to every API call
+ * 
+ * Usage:
+ * Import this configured instance instead of raw axios:
+ *   import api from "./api"
+ *   api.get("/api/gifts/")  // Automatically includes baseURL and auth token
+ * 
+ * Benefits:
+ * - DRY principle: Configure once, use everywhere
+ * - Easy environment switching (development/production URLs)
+ * - Automatic authentication without manual header management
+ */
+
 import axios from "axios";
 // HTTP client library for making API requests to Django backend
 
