@@ -44,5 +44,8 @@ urlpatterns = [
     path("api-auth/", include("rest_framework.urls")),
     # Adds login/logout views for Django REST Framework's browsable API interface
     # GET /admin/ → Django admin panel (in browser)
+
+    path("api/", include("api.urls")),
+    # Routes all /api/ requests to the api app's URL configuration
 ]
 
