@@ -65,7 +65,6 @@ function Form({ route, method }) {
     } catch (error) {
       // API request failed (invalid credentials, network error, etc.)
       alert(error);
-
     } finally {
       setLoading(false);
       // Re-enable form regardless of success or failure
@@ -73,35 +72,38 @@ function Form({ route, method }) {
   };
 
   return (
-    <>
-      <form onSubmit={handleSubmit} className="form-container">
-        <h1>{name}</h1>
-        {/* Dynamic heading: "Login" or "Register" */}
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-8 rounded-lg shadow-md w-full max-w-md"
+      >
+        <h1 className="text-2xl font-bold text-center mb-6">{name}</h1>
 
         <input
-          className="form-input"
+          className="w-full px-4 py-2 border border-gray-300 rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
           type="text"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          // Updates username state on every keystroke
           placeholder="Username"
         />
 
         <input
-          className="form-input"
+          className="w-full px-4 py-2 border border-gray-300 rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          // Updates password state on every keystroke
           placeholder="Password"
         />
 
-        <button className="form-button" type="submit">
-          {name}
-          {/* Button text: "Login" or "Register" */}
+        <button
+          className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 disabled:bg-gray-400"
+          type="submit"
+          disabled={loading}
+        >
+          {loading ? "Loading..." : name}
         </button>
       </form>
-    </>
+    </div>
   );
 }
 
