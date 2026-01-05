@@ -39,12 +39,37 @@ function Form({ route, method }) {
   const name = method === "login" ? "Login" : "Register";
   // Dynamic label based on form purpose
 
-  const handleSubmit = (e) => {
-    // Handles form submission - will send data to API
+  const handleSubmit = async (e) => {
+    // Handles form submission - sends credentials to Django API
+
+    setLoading(true);
+    // Disables form during submission to prevent duplicate requests
+
     e.preventDefault();
     // Prevents default form submission (page reload)
 
-    // TODO: API call logic will be added here
+    try {
+      const res = await api.post(route, { username, password });
+      // Sends POST request to either /api/token/ (login) or /api/user/register/
+
+      if (method === "login") {
+        // Login successful - store JWT tokens
+        localStorage.setItem(ACCESS_TOKEN, res.data.access);
+        localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
+        navigate("/");
+        // Redirect to home page (protected route)
+      } else {
+        // Registration successful - redirect to login page
+        navigate("/login");
+      }
+    } catch (error) {
+      // API request failed (invalid credentials, network error, etc.)
+      alert(error);
+
+    } finally {
+      setLoading(false);
+      // Re-enable form regardless of success or failure
+    }
   };
 
   return (
