@@ -45,6 +45,8 @@ function RegisterAndLogout() {
   // Renders the registration page
 }
 
+
+
 function App() {
   return (
     <BrowserRouter>
