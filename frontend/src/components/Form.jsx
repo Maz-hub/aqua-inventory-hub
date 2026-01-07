@@ -9,6 +9,8 @@
  * - method: "login" or "register" - determines form behavior and labels
  */
 
+import logo from "../assets/images/WorldAquatics-Logo_WhiteBkgrd_RGB_Gradient_Horiz.png";
+
 import { useState } from "react";
 // React hook for managing component state
 
@@ -72,31 +74,48 @@ function Form({ route, method }) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-wa-navy p-4 gap-6">
+      {/* Navy blue background matching World Aquatics branding */}
+
+      {/* App Title */}
+      <h2 className="text-4xl font-bold text-white text-center font-termina">
+        AQUA Inventory Hub
+      </h2>
+
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-lg shadow-md w-full max-w-md"
+        className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md font-termina"
       >
-        <h1 className="text-2xl font-bold text-center mb-6">{name}</h1>
+        {/* Logo */}
+        <div className="flex justify-center mb-6">
+          <img src={logo} alt="World Aquatics" className="h-16 w-auto" />
+        </div>
+
+        {/* Form Title (Login/Register) */}
+        <h1 className="text-2xl font-medium text-wa-blue text-center mb-6">
+          {name}
+        </h1>
 
         <input
-          className="w-full px-4 py-2 border border-gray-300 rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2 border border-gray-300 rounded-md mb-4 font-termina focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
           type="text"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           placeholder="Username"
+          disabled={loading}
         />
 
         <input
-          className="w-full px-4 py-2 border border-gray-300 rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2 border border-gray-300 rounded-md mb-6 font-termina focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
+          disabled={loading}
         />
 
         <button
-          className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 disabled:bg-gray-400 cursor-pointer"
+          className="cursor-pointer w-full bg-wa-blue text-white py-3 rounded-md font-medium hover:bg-wa-ocean focus:ring-4 focus:ring-wa-cyan focus:ring-opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200"
           type="submit"
           disabled={loading}
         >

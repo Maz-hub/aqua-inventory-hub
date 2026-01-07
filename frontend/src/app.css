@@ -1,1 +1,51 @@
 @import "tailwindcss";
+
+/* World Aquatics Brand Configuration */
+@theme {
+  /* Brand Colors */
+  --color-wa-navy: #023E73;      /* Deep navy blue - primary dark */
+  --color-wa-blue: #055BA6;      /* Medium blue - primary */
+  --color-wa-ocean: #048ABF;     /* Bright ocean blue */
+  --color-wa-cyan: #0DB3D9;      /* Vibrant cyan - accent */
+  --color-wa-black: #0D0D0D;     /* Near black - text */
+  
+  /* Font Family */
+  --font-termina: 'Termina', sans-serif;
+}
+
+/* Termina Font Face Declarations */
+@font-face {
+  font-family: 'Termina';
+  src: url('./assets/fonts/Termina-Regular.woff2') format('woff2'),
+       url('./assets/fonts/Termina-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Termina';
+  src: url('./assets/fonts/Termina-Medium.woff2') format('woff2'),
+       url('./assets/fonts/Termina-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Termina';
+  src: url('./assets/fonts/Termina-Bold.woff2') format('woff2'),
+       url('./assets/fonts/Termina-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Termina';
+  src: url('./assets/fonts/Termina-Black.woff2') format('woff2'),
+       url('./assets/fonts/Termina-Black.woff') format('woff');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
