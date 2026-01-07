@@ -1,18 +1,15 @@
 @import "tailwindcss";
+@layer theme, base, components, utilities;
 
 /* World Aquatics Brand Configuration */
 @theme {
   /* Brand Colors */
   --color-wa-navy: #023E73;
-  /* Deep navy blue - primary dark */
   --color-wa-blue: #055BA6;
-  /* Medium blue - primary */
   --color-wa-ocean: #048ABF;
-  /* Bright ocean blue */
   --color-wa-cyan: #0DB3D9;
-  /* Vibrant cyan - accent */
   --color-wa-black: #0D0D0D;
-  /* Near black - text */
+  --color-wa-red: #DC2626;
 
   /* Font Family */
   --font-sans: 'Termina', system-ui, sans-serif;
@@ -54,3 +51,4 @@
   font-style: normal;
   font-display: swap;
 }
+

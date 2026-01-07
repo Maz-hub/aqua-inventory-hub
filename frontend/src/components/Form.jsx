@@ -97,7 +97,7 @@ function Form({ route, method }) {
         </h1>
 
         <input
-          className="w-full px-4 py-2 border border-gray-300 rounded-md mb-4 font-termina focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+          className="w-full px-4 py-2 border border-gray-300 rounded-md mb-6 font-termina focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
           type="text"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
