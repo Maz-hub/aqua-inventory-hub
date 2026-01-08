@@ -88,11 +88,25 @@ function Gifts() {
               >
                 <div className="h-48 bg-gray-200 flex items-center justify-center">
                   {gift.product_image ? (
-                    <img
-                      src={gift.product_image}
-                      alt={gift.product_name}
-                      className="w-full h-full object-cover"
-                    />
+                    <>
+                      {/* Remove the temporary console.log once confirmed */}
+                      {console.log(
+                        "Full image URL from API:",
+                        gift.product_image
+                      )}
+
+                      <img
+                        src={gift.product_image.replace(
+                          "http://localhost:8000",
+                          ""
+                        )}
+                        alt={gift.product_name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = "none";
+                        }}
+                      />
+                    </>
                   ) : (
                     <span className="text-gray-400 text-4xl">📦</span>
                   )}

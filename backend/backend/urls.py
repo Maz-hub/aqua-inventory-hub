@@ -25,6 +25,10 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 # TokenObtainPairView: Validates username/password and returns access + refresh tokens
 # TokenRefreshView: Exchanges an expired access token for a new one using the refresh token
 
+# media files
+from django.conf import settings
+from django.conf.urls.static import static
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     # Django's built-in admin panel - manage users and data through web interface
@@ -49,3 +53,6 @@ urlpatterns = [
     # Routes all /api/ requests to the api app's URL configuration
 ]
 
+# Serve media files in development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
