@@ -106,12 +106,25 @@ function Gifts() {
                     </span>
                   </div>
 
-                  <button
-                    onClick={() => setSelectedGift(gift)}
-                    className="w-full bg-wa-blue text-white py-2 rounded-md hover:bg-wa-ocean text-sm font-medium cursor-pointer transition-all"
-                  >
-                    View Details
-                  </button>
+                  {/* Action Buttons */}
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => setSelectedGift(gift)}
+                      className="w-full bg-wa-blue text-white py-2 rounded-md hover:bg-wa-ocean text-sm font-medium cursor-pointer transition-all"
+                    >
+                      View Details
+                    </button>
+
+                    <div className="flex gap-2">
+                      <button className="flex-1 bg-wa-ocean text-white py-2 rounded-md hover:bg-wa-navy text-sm font-medium cursor-pointer transition-all">
+                        Take
+                      </button>
+
+                      <button className="flex-1 bg-wa-cyan text-white py-2 rounded-md hover:bg-wa-navy text-sm font-medium cursor-pointer transition-all">
+                        Return
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
