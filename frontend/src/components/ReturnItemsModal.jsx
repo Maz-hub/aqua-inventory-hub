@@ -12,34 +12,47 @@ function ReturnItemsModal({ gift, onClose, onSuccess }) {
   const [quantity, setQuantity] = useState("");
   const [notes, setNotes] = useState("");
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+const handleSubmit = (e) => {
+  // Prevent default form submission (stops page reload)
+  e.preventDefault();
 
-    // Validation
-    if (!quantity || quantity <= 0) {
-      alert("Please enter a valid quantity");
-      return;
-    }
+  // ============================================
+  // VALIDATION - Check data before sending to API
+  // ============================================
+  
+  // Check if quantity is valid
+  if (!quantity || quantity <= 0) {
+    alert("Please enter a valid quantity");
+    return;
+  }
 
-    // Call API to update stock
-    api
-      .patch(`/api/gifts/update-stock/${gift.id}/`, {
-        action: "return",
-        quantity: parseInt(quantity),
-      })
-      .then((res) => {
-        if (res.status === 200) {
-          alert(
-            `Successfully returned ${quantity} items. New stock: ${res.data.new_stock}`
-          );
-          onSuccess(); // Refresh the gift list
-          onClose(); // Close modal
-        }
-      })
-      .catch((err) => {
-        alert(err.response?.data?.error || "Failed to update stock");
-      });
-  };
+  // ============================================
+  // API CALL - Send update to Django backend
+  // ============================================
+  
+  api
+    .patch(`/api/gifts/update-stock/${gift.id}/`, {
+      // PATCH request to update stock endpoint
+      // Sends gift ID in URL and data in request body
+      action: "return",                  // Tell backend we're returning items (increases stock)
+      quantity: parseInt(quantity),      // Convert string to number
+    })
+    .then((res) => {
+      // Success handler - runs if API call succeeds
+      if (res.status === 200) {
+        // Show success message with new stock level from backend
+        alert(`Successfully returned ${quantity} items. New stock: ${res.data.new_stock}`);
+        
+        onSuccess();  // Call parent function to refresh gift list
+        onClose();    // Close the modal
+      }
+    })
+    .catch((err) => {
+      // Error handler - runs if API call fails
+      // Shows backend error message or generic fallback
+      alert(err.response?.data?.error || "Failed to update stock");
+    });
+};
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
