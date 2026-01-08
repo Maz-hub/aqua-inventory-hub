@@ -75,7 +75,9 @@ function Gifts() {
             <h1 className="text-4xl font-bold text-wa-navy mb-2">
               Gifts Inventory
             </h1>
-            <p className="text-gray-600">{filteredGifts.length} items in stock</p>
+            <p className="text-gray-600">
+              {filteredGifts.length} items in stock
+            </p>
           </div>
         </div>
 
@@ -189,7 +191,7 @@ function Gifts() {
                     <span className="text-gray-600">
                       Stock: <strong>{gift.qty_stock}</strong>
                     </span>
-                    <span className="text-sm text-wa-blue mb-2">
+                    <span className="text-sm text-wa-blue">
                       {gift.category.name}
                     </span>
                   </div>

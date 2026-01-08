@@ -4,6 +4,8 @@ from django.urls import path
 from . import views
 # Import views from current app
 
+from .views import update_gift_stock
+
 
 urlpatterns = [
     path("gifts/", views.GiftListCreate.as_view(), name="gift-list"),
@@ -14,4 +16,6 @@ urlpatterns = [
     
     path("categories/", views.GiftCategoryList.as_view(), name="category-list"),
     # GET: Fetch all gift categories for dropdown menus
+
+    path("gifts/update-stock/<int:pk>/", update_gift_stock, name="update-gift-stock"),
 ]
