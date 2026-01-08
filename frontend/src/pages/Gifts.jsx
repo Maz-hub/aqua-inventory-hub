@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
-import GiftForm from "../components/GiftForm"; // Import the form
+import GiftForm from "../components/GiftForm";
+import GiftDetailsModal from "../components/GiftDetailsModal";
 
 function Gifts() {
   const [gifts, setGifts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedGift, setSelectedGift] = useState(null); // Tracks which gift is selected for viewing details
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,28 +27,6 @@ function Gifts() {
         setLoading(false);
       });
   };
-
-  const deleteGift = (id) => {
-    api
-      .delete(`/api/gifts/delete/${id}/`)
-      .then((res) => {
-        if (res.status === 204) {
-          alert("Gift deleted!");
-          getGifts();
-        } else {
-          alert("Failed to delete gift.");
-        }
-      })
-      .catch((error) => alert(error));
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-xl text-gray-600">Loading gifts...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -116,18 +96,20 @@ function Gifts() {
                   <h3 className="font-bold text-lg text-wa-navy mb-1 truncate">
                     {gift.product_name}
                   </h3>
-                  <p className="text-sm text-wa-blue mb-2">
-                    {gift.category.name}
-                  </p>
 
-                  <div className="flex justify-between items-center mb-3">
+                  <div className="flex justify-between items-center my-5">
                     <span className="text-gray-600">
                       Stock: <strong>{gift.qty_stock}</strong>
                     </span>
-                    <span className="text-gray-600">${gift.unit_price}</span>
+                    <span className="text-sm text-wa-blue mb-2">
+                      {gift.category.name}
+                    </span>
                   </div>
 
-                  <button className="w-full bg-wa-blue text-white py-2 rounded-md hover:bg-wa-ocean text-sm font-medium cursor-pointer transition-all">
+                  <button
+                    onClick={() => setSelectedGift(gift)}
+                    className="w-full bg-wa-blue text-white py-2 rounded-md hover:bg-wa-ocean text-sm font-medium cursor-pointer transition-all"
+                  >
                     View Details
                   </button>
                 </div>
@@ -135,6 +117,11 @@ function Gifts() {
             ))}
           </div>
         )}
+        {/* Gift Details Modal - OUTSIDE the map */}
+        <GiftDetailsModal
+          gift={selectedGift}
+          onClose={() => setSelectedGift(null)}
+        />
       </div>
     </div>
   );
