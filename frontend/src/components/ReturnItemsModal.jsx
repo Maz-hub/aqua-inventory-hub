@@ -6,6 +6,7 @@
  */
 
 import { useState } from "react";
+import api from "../api";
 
 function ReturnItemsModal({ gift, onClose, onSuccess }) {
   const [quantity, setQuantity] = useState("");
@@ -20,17 +21,24 @@ function ReturnItemsModal({ gift, onClose, onSuccess }) {
       return;
     }
 
-    // TODO: Send to backend API
-    console.log({
-      gift_id: gift.id,
-      quantity: parseInt(quantity),
-      notes: notes,
-      action: "return",
-    });
-
-    alert(`Successfully recorded: ${quantity} items returned`);
-    onSuccess();
-    onClose();
+    // Call API to update stock
+    api
+      .patch(`/api/gifts/update-stock/${gift.id}/`, {
+        action: "return",
+        quantity: parseInt(quantity),
+      })
+      .then((res) => {
+        if (res.status === 200) {
+          alert(
+            `Successfully returned ${quantity} items. New stock: ${res.data.new_stock}`
+          );
+          onSuccess(); // Refresh the gift list
+          onClose(); // Close modal
+        }
+      })
+      .catch((err) => {
+        alert(err.response?.data?.error || "Failed to update stock");
+      });
   };
 
   return (
