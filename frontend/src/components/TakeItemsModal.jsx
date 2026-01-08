@@ -1,6 +1,6 @@
 /**
  * Take Items Modal Component
- * 
+ *
  * Allows users to deduct items from inventory with reason tracking.
  * Records who took items, when, how many, and why.
  */
@@ -14,18 +14,18 @@ function TakeItemsModal({ gift, onClose, onSuccess }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // Validation
     if (!quantity || quantity <= 0) {
       alert("Please enter a valid quantity");
       return;
     }
-    
+
     if (quantity > gift.qty_stock) {
       alert(`Cannot take ${quantity} items. Only ${gift.qty_stock} in stock.`);
       return;
     }
-    
+
     if (!reason) {
       alert("Please select a reason");
       return;
@@ -37,7 +37,7 @@ function TakeItemsModal({ gift, onClose, onSuccess }) {
       quantity: parseInt(quantity),
       reason: reason,
       notes: notes,
-      action: "take"
+      action: "take",
     });
 
     alert(`Successfully recorded: ${quantity} items taken`);
@@ -54,7 +54,9 @@ function TakeItemsModal({ gift, onClose, onSuccess }) {
             <div>
               <h2 className="text-2xl font-bold text-wa-navy">Take Items</h2>
               <p className="text-sm text-gray-600 mt-1">{gift.product_name}</p>
-              <p className="text-sm text-gray-600">Available: {gift.qty_stock} units</p>
+              <p className="text-sm text-gray-600">
+                Available: {gift.qty_stock} units
+              </p>
             </div>
             <button
               onClick={onClose}
@@ -68,7 +70,10 @@ function TakeItemsModal({ gift, onClose, onSuccess }) {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Quantity */}
             <div>
-              <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="quantity"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 How many are you taking? *
               </label>
               <input
@@ -86,7 +91,10 @@ function TakeItemsModal({ gift, onClose, onSuccess }) {
 
             {/* Reason */}
             <div>
-              <label htmlFor="reason" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="reason"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Reason *
               </label>
               <select
@@ -99,7 +107,10 @@ function TakeItemsModal({ gift, onClose, onSuccess }) {
                 <option value="">Select a reason</option>
                 <option value="event">Event</option>
                 <option value="office_use">Office Use</option>
-                <option value="donation">Donation</option>
+                <option value="external_gift">
+                  External Gift (e.g. Visitors)
+                </option>
+                <option value="new_employee">New Employee Welcome</option>
                 <option value="damaged">Damaged/Defective</option>
                 <option value="sample">Sample</option>
                 <option value="other">Other</option>
@@ -108,14 +119,17 @@ function TakeItemsModal({ gift, onClose, onSuccess }) {
 
             {/* Notes */}
             <div>
-              <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="notes"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Notes (optional)
               </label>
               <textarea
                 id="notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md min-h-[80px] resize-y focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md min-h-20 resize-y focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
                 placeholder="Additional details..."
               />
             </div>

@@ -4,6 +4,7 @@ import api from "../api";
 import GiftForm from "../components/GiftForm";
 import GiftDetailsModal from "../components/GiftDetailsModal";
 import TakeItemsModal from "../components/TakeItemsModal";
+import ReturnItemsModal from "../components/ReturnItemsModal";
 
 function Gifts() {
   const [gifts, setGifts] = useState([]);
@@ -11,6 +12,7 @@ function Gifts() {
   const [selectedGift, setSelectedGift] = useState(null); // Tracks which gift is selected for viewing details
   const [showTakeModal, setShowTakeModal] = useState(false);
   const [selectedGiftForAction, setSelectedGiftForAction] = useState(null);
+  const [showReturnModal, setShowReturnModal] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -129,7 +131,13 @@ function Gifts() {
                         Take
                       </button>
 
-                      <button className="flex-1 bg-wa-cyan text-white py-2 rounded-md hover:bg-wa-navy text-sm font-medium cursor-pointer transition-all">
+                      <button
+                        onClick={() => {
+                          setSelectedGiftForAction(gift);
+                          setShowReturnModal(true);
+                        }}
+                        className="flex-1 bg-wa-cyan text-white py-2 rounded-md hover:bg-wa-navy text-sm font-medium cursor-pointer transition-all"
+                      >
                         Return
                       </button>
                     </div>
@@ -144,12 +152,25 @@ function Gifts() {
           gift={selectedGift}
           onClose={() => setSelectedGift(null)}
         />
+
         {/* Take Items Modal */}
         {showTakeModal && selectedGiftForAction && (
           <TakeItemsModal
             gift={selectedGiftForAction}
             onClose={() => {
               setShowTakeModal(false);
+              setSelectedGiftForAction(null);
+            }}
+            onSuccess={getGifts}
+          />
+        )}
+
+        {/* Return Items Modal */}
+        {showReturnModal && selectedGiftForAction && (
+          <ReturnItemsModal
+            gift={selectedGiftForAction}
+            onClose={() => {
+              setShowReturnModal(false);
               setSelectedGiftForAction(null);
             }}
             onSuccess={getGifts}
