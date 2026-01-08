@@ -13,6 +13,7 @@ function Gifts() {
   const [showTakeModal, setShowTakeModal] = useState(false);
   const [selectedGiftForAction, setSelectedGiftForAction] = useState(null);
   const [showReturnModal, setShowReturnModal] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -52,8 +53,32 @@ function Gifts() {
           </div>
         </div>
 
-        {/* Use the GiftForm component */}
-        <GiftForm onSuccess={getGifts} />
+        {/* Add New Item Button / Form Toggle */}
+        {!showAddForm ? (
+          <div className="bg-white p-6 rounded-lg shadow mb-8 text-center">
+            <button
+              onClick={() => setShowAddForm(true)}
+              className="bg-wa-blue text-white px-8 py-3 rounded-md font-medium hover:bg-wa-ocean cursor-pointer transition-all duration-200"
+            >
+              + Add New Item
+            </button>
+          </div>
+        ) : (
+          <div>
+            <button
+              onClick={() => setShowAddForm(false)}
+              className="mb-4 text-gray-600 hover:text-gray-800 flex items-center gap-2 cursor-pointer font-medium transition-colors"
+            >
+              ← Cancel
+            </button>
+            <GiftForm
+              onSuccess={() => {
+                getGifts();
+                setShowAddForm(false);
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {/* Gifts Grid */}
@@ -147,7 +172,7 @@ function Gifts() {
             ))}
           </div>
         )}
-        {/* Gift Details Modal - OUTSIDE the map */}
+        {/* Gift Details Modal */}
         <GiftDetailsModal
           gift={selectedGift}
           onClose={() => setSelectedGift(null)}
