@@ -127,17 +127,9 @@ function Gifts() {
                     <span className="text-gray-600">${gift.unit_price}</span>
                   </div>
 
-                  <div className="flex gap-2">
-                    <button className="flex-1 bg-wa-blue text-white py-2 rounded-md hover:bg-wa-ocean text-sm font-medium cursor-pointer transition-all">
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => deleteGift(gift.id)}
-                      className="flex-1 bg-wa-red text-white py-2 rounded-md hover:bg-red-700 text-sm font-medium cursor-pointer transition-all"
-                    >
-                      Delete
-                    </button>
-                  </div>
+                  <button className="w-full bg-wa-blue text-white py-2 rounded-md hover:bg-wa-ocean text-sm font-medium cursor-pointer transition-all">
+                    View Details
+                  </button>
                 </div>
               </div>
             ))}
