@@ -14,10 +14,14 @@ function Gifts() {
   const [selectedGiftForAction, setSelectedGiftForAction] = useState(null);
   const [showReturnModal, setShowReturnModal] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     getGifts();
+    getCategories();
   }, []);
 
   const getGifts = () => {
@@ -34,6 +38,28 @@ function Gifts() {
       });
   };
 
+  const getCategories = () => {
+    api
+      .get("/api/categories/")
+      .then((res) => res.data)
+      .then((data) => setCategories(data))
+      .catch((err) => alert(err));
+  };
+
+  const filteredGifts = gifts.filter((gift) => {
+    // Search filter
+    const matchesSearch = gift.product_name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+
+    // Category filter
+    const matchesCategory =
+      selectedCategory === "" ||
+      gift.category.id === parseInt(selectedCategory);
+
+    return matchesSearch && matchesCategory;
+  });
+
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-7xl mx-auto mb-8">
@@ -49,7 +75,39 @@ function Gifts() {
             <h1 className="text-4xl font-bold text-wa-navy mb-2">
               Gifts Inventory
             </h1>
-            <p className="text-gray-600">{gifts.length} items in stock</p>
+            <p className="text-gray-600">{filteredGifts.length} items in stock</p>
+          </div>
+        </div>
+
+        {/* Search and Filter Bar */}
+        <div className="bg-white p-4 rounded-lg shadow mb-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            {/* Search Bar */}
+            <div className="flex-1">
+              <input
+                type="text"
+                placeholder="Search gifts by name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+              />
+            </div>
+
+            {/* Category Filter */}
+            <div className="md:w-64">
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+              >
+                <option value="">All Categories</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
@@ -83,15 +141,15 @@ function Gifts() {
 
       {/* Gifts Grid */}
       <div className="max-w-7xl mx-auto">
-        {gifts.length === 0 ? (
+        {filteredGifts.length === 0 ? (
           <div className="bg-white p-12 rounded-lg shadow text-center">
             <p className="text-gray-500 text-lg">
-              No gifts in inventory yet. Add your first item above!
+              No items found. Try adjusting your filters.
             </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {gifts.map((gift) => (
+            {filteredGifts.map((gift) => (
               <div
                 key={gift.id}
                 className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden"
