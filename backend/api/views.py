@@ -13,7 +13,7 @@ from .serializers import UserSerializer, GiftSerializer, GiftCategorySerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 # Controls API endpoint access: IsAuthenticated requires login, AllowAny allows public access
 
-from .models import Gift, GiftCategory
+from .models import Gift, GiftCategory, InventoryTransaction
 # Import our Gift and GiftCategory models
 
 from rest_framework.decorators import api_view, permission_classes
@@ -83,17 +83,7 @@ def update_gift_stock(request, pk):
     Updates gift stock quantity for Take/Return actions
     PATCH /api/gifts/update-stock/{id}/
     
-    Request body:
-    {
-        "action": "take" or "return",
-        "quantity": 5
-    }
-    
-    Returns:
-    {
-        "message": "Stock updated successfully",
-        "new_stock": 54
-    }
+    Now also creates InventoryTransaction record for audit trail
     """
     # Try to find the gift by ID
     try:
@@ -104,9 +94,11 @@ def update_gift_stock(request, pk):
             status=status.HTTP_404_NOT_FOUND
         )
     
-    # Get action and quantity from request
+    # Get action, quantity, reason, and notes from request
     action = request.data.get('action')  # 'take' or 'return'
     quantity = request.data.get('quantity')
+    reason = request.data.get('reason', '')  # Optional for returns
+    notes = request.data.get('notes', '')  # Optional notes
     
     # Validate required fields
     if not action or not quantity:
@@ -123,6 +115,9 @@ def update_gift_stock(request, pk):
             {"error": "Invalid quantity"}, 
             status=status.HTTP_400_BAD_REQUEST
         )
+    
+    # Record stock level before change
+    stock_before = gift.qty_stock
     
     # Handle 'take' action - reduce stock
     if action == 'take':
@@ -146,9 +141,24 @@ def update_gift_stock(request, pk):
             status=status.HTTP_400_BAD_REQUEST
         )
     
-    # Record who made the change and save
+    # Record stock level after change
+    stock_after = gift.qty_stock
+    
+    # Save the updated gift
     gift.updated_by = request.user
     gift.save()
+    
+    # Create transaction record for audit trail
+    InventoryTransaction.objects.create(
+        gift=gift,
+        transaction_type=action,
+        quantity=quantity,
+        reason=reason if action == 'take' else None,  # Only save reason for takes
+        notes=notes,
+        created_by=request.user,
+        stock_before=stock_before,
+        stock_after=stock_after
+    )
     
     # Return success response with new stock level
     return Response({

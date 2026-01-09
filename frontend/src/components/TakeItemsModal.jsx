@@ -14,58 +14,62 @@ function TakeItemsModal({ gift, onClose, onSuccess }) {
   const [notes, setNotes] = useState("");
 
   const handleSubmit = (e) => {
-  // Prevent default form submission (stops page reload)
-  e.preventDefault();
+    // Prevent default form submission (stops page reload)
+    e.preventDefault();
 
-  // ============================================
-  // VALIDATION - Check data before sending to API
-  // ============================================
-  
-  // Check if quantity is valid
-  if (!quantity || quantity <= 0) {
-    alert("Please enter a valid quantity");
-    return;
-  }
+    // ============================================
+    // VALIDATION - Check data before sending to API
+    // ============================================
 
-  // Check if enough stock available
-  if (quantity > gift.qty_stock) {
-    alert(`Cannot take ${quantity} items. Only ${gift.qty_stock} in stock.`);
-    return;
-  }
+    // Check if quantity is valid
+    if (!quantity || quantity <= 0) {
+      alert("Please enter a valid quantity");
+      return;
+    }
 
-  // Check if reason is selected
-  if (!reason) {
-    alert("Please select a reason");
-    return;
-  }
+    // Check if enough stock available
+    if (quantity > gift.qty_stock) {
+      alert(`Cannot take ${quantity} items. Only ${gift.qty_stock} in stock.`);
+      return;
+    }
 
-  // ============================================
-  // API CALL - Send update to Django backend
-  // ============================================
-  
-  api
-    .patch(`/api/gifts/update-stock/${gift.id}/`, {
-      // PATCH request to update stock endpoint
-      // Sends gift ID in URL and data in request body
-      action: "take",                    // Tell backend we're taking items (reduces stock)
-      quantity: parseInt(quantity),      // Convert string to number
-    })
-    .then((res) => {
-      // Success handler - runs if API call succeeds
-      if (res.status === 200) {
-        // Show success message with new stock level from backend
-        alert(`Successfully took ${quantity} items. New stock: ${res.data.new_stock}`);
-        
-        onSuccess();  // Call parent function to refresh gift list
-        onClose();    // Close the modal
-      }
-    })
-    .catch((err) => {
-      // Error handler - runs if API call fails
-      // Shows backend error message or generic fallback
-      alert(err.response?.data?.error || "Failed to update stock");
-    });
-};
+    // Check if reason is selected
+    if (!reason) {
+      alert("Please select a reason");
+      return;
+    }
+
+    // ============================================
+    // API CALL - Send update to Django backend
+    // ============================================
+
+    api
+      .patch(`/api/gifts/update-stock/${gift.id}/`, {
+        // PATCH request to update stock endpoint
+        // Sends gift ID in URL and data in request body
+        action: "take", // Tell backend we're taking items (reduces stock)
+        quantity: parseInt(quantity),
+        reason: reason,
+        notes: notes, // Convert string to number
+      })
+      .then((res) => {
+        // Success handler - runs if API call succeeds
+        if (res.status === 200) {
+          // Show success message with new stock level from backend
+          alert(
+            `Successfully took ${quantity} items. New stock: ${res.data.new_stock}`
+          );
+
+          onSuccess(); // Call parent function to refresh gift list
+          onClose(); // Close the modal
+        }
+      })
+      .catch((err) => {
+        // Error handler - runs if API call fails
+        // Shows backend error message or generic fallback
+        alert(err.response?.data?.error || "Failed to update stock");
+      });
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
