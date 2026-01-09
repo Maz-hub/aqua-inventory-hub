@@ -5,8 +5,28 @@
  * Shows all fields from the Gift model including customs and supplier data.
  */
 
-function GiftDetailsModal({ gift, onClose }) {
+import { useState } from "react";
+import EditGiftForm from "./EditGiftForm";
+
+function GiftDetailsModal({ gift, onClose, onSuccess }) {
   if (!gift) return null;
+
+  const [showEditForm, setShowEditForm] = useState(false);
+
+  // If edit form is open, show it instead of details
+  if (showEditForm) {
+    return (
+      <EditGiftForm
+        gift={gift}
+        onClose={() => setShowEditForm(false)}
+        onSuccess={() => {
+          setShowEditForm(false);
+          onSuccess();
+          onClose(); // Close details modal too
+        }}
+      />
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -168,7 +188,10 @@ function GiftDetailsModal({ gift, onClose }) {
             >
               Close
             </button>
-            <button className="flex-1 bg-wa-blue text-white py-2 rounded-md hover:bg-wa-ocean cursor-pointer transition-all font-medium">
+            <button
+              onClick={() => setShowEditForm(true)}
+              className="flex-1 bg-wa-blue text-white py-2 rounded-md hover:bg-wa-ocean cursor-pointer transition-all font-medium"
+            >
               Edit Product
             </button>
           </div>

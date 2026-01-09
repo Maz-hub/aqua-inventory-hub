@@ -26,6 +26,7 @@ from rest_framework import status
 # HTTP status codes (200 OK, 404 Not Found, etc.)
 
 
+
 # ============================================
 # GIFT INVENTORY VIEWS
 # ============================================
@@ -155,6 +156,44 @@ def update_gift_stock(request, pk):
         "new_stock": gift.qty_stock
     }, status=status.HTTP_200_OK)
 
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def update_gift(request, pk):
+    """
+    Updates gift product information
+    PATCH /api/gifts/update/{id}/
+    
+    Handles both file uploads (images) and regular field updates.
+    Records who made the update and when.
+    """
+    # Try to find the gift by ID
+    try:
+        gift = Gift.objects.get(pk=pk)
+    except Gift.DoesNotExist:
+        return Response(
+            {"error": "Gift not found"}, 
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    # Use serializer to validate and update data
+    # partial=True allows updating only some fields, not all required
+    serializer = GiftSerializer(gift, data=request.data, partial=True)
+    
+    if serializer.is_valid():
+        # Save updates and record who made the change
+        serializer.save(updated_by=request.user)
+        
+        return Response({
+            "message": "Product updated successfully",
+            "gift": serializer.data
+        }, status=status.HTTP_200_OK)
+    else:
+        # Return validation errors if data is invalid
+        return Response(
+            serializer.errors, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 # ============================================
 # GIFT CATEGORY VIEWS

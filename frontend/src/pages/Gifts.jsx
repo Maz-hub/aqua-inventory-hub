@@ -236,6 +236,7 @@ function Gifts() {
         <GiftDetailsModal
           gift={selectedGift}
           onClose={() => setSelectedGift(null)}
+          onSuccess={getGifts}
         />
 
         {/* Take Items Modal */}
