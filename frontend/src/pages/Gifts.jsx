@@ -17,6 +17,7 @@ function Gifts() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [categories, setCategories] = useState([]);
+  const [showLowStockOnly, setShowLowStockOnly] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -47,17 +48,21 @@ function Gifts() {
   };
 
   const filteredGifts = gifts.filter((gift) => {
-    // Search filter
+    // Search filter - matches product name
     const matchesSearch = gift.product_name
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
 
-    // Category filter
+    // Category filter - shows all or specific category
     const matchesCategory =
       selectedCategory === "" ||
       gift.category.id === parseInt(selectedCategory);
 
-    return matchesSearch && matchesCategory;
+    // Low stock filter - shows only items below minimum stock level
+    const matchesLowStock =
+      !showLowStockOnly || gift.qty_stock <= gift.minimum_stock_level;
+
+    return matchesSearch && matchesCategory && matchesLowStock;
   });
 
   return (
@@ -110,6 +115,18 @@ function Gifts() {
                 ))}
               </select>
             </div>
+
+            {/* Low Stock Filter Toggle */}
+            <button
+              onClick={() => setShowLowStockOnly(!showLowStockOnly)}
+              className={`px-6 py-2 rounded-md font-light cursor-pointer transition-all whitespace-nowrap ${
+                showLowStockOnly
+                  ? "bg-wa-red text-white hover:bg-red-700"
+                  : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+              }`}
+            >
+              {showLowStockOnly ? "✓ Low Stock Only" : "Show Low Stock"}
+            </button>
           </div>
         </div>
 
@@ -188,9 +205,17 @@ function Gifts() {
                   </h3>
 
                   <div className="flex justify-between items-center my-5">
-                    <span className="text-gray-600">
-                      Stock: <strong>{gift.qty_stock}</strong>
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-600">
+                        Stock: <strong>{gift.qty_stock}</strong>
+                      </span>
+                      {/* Low Stock Badge */}
+                      {gift.qty_stock <= gift.minimum_stock_level && (
+                        <span className="bg-wa-red text-white text-xs px-2 py-1 rounded-full font-light">
+                          LOW
+                        </span>
+                      )}
+                    </div>
                     <span className="text-sm text-wa-blue">
                       {gift.category.name}
                     </span>
