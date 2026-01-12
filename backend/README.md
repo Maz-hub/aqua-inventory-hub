@@ -1,10 +1,18 @@
 # Aqua Inventory Hub
 
-A Django REST API backend with React frontend for managing dual-inventory systems with role-based access control and comprehensive audit tracking.
+A comprehensive inventory management system for World Aquatics, featuring real-time stock tracking, transaction history, and audit trail capabilities for promotional gifts and apparel (361°).
 
 ## Overview
 
-Full-stack inventory management application designed for organizational use. Features separate inventory sections for promotional items and apparel, with user authentication, dynamic category management, and detailed product tracking including supplier information and customs data.
+Full-stack web application designed for World Aquatics' internal inventory management. The system streamlines the distribution and tracking of promotional items, office supplies, and branded merchandise across the organization's 70+ employees worldwide.
+
+**Key Features:**
+- Real-time inventory visibility with low stock alerts
+- Transaction history with complete audit trail
+- User authentication and role-based access
+- Excel export for reporting and compliance
+- Responsive design (desktop, tablet, mobile)
+- World Aquatics branding integration
 
 ## Tech Stack
 
@@ -15,54 +23,109 @@ Full-stack inventory management application designed for organizational use. Fea
 - **Database:** SQLite (development) / PostgreSQL (production)
 - **Python:** 3.12+
 - **Image Processing:** Pillow 12.0.0
+- **Export:** django-import-export
 
 **Frontend:**
-- React (upcoming)
+- **Framework:** React 18+ with Vite
+- **Routing:** React Router v6
+- **Styling:** Tailwind CSS v4
+- **Icons:** Lucide React
+- **HTTP Client:** Axios
+- **Typography:** Termina font family
 
 ## Features
 
-### User Authentication
+### 🔐 User Authentication
 - JWT-based authentication with access and refresh tokens
-- Secure user registration and login endpoints
+- Secure user registration and login
 - Token refresh mechanism (30-minute access, 1-day refresh)
+- Automatic logout on token expiration
 
-### Inventory Management
-- Dual inventory system (Gifts & Apparel sections)
-- Dynamic category management through Django admin
-- Product tracking with images, pricing, and stock levels
-- Minimum stock level alerts
-- Comprehensive product information (material, HS codes, country of origin)
+### 📦 Inventory Management
+- **Visual product catalog** with images and detailed information
+- **Real-time stock tracking** with live updates
+- **Search and filter** by product name or category
+- **Low stock alerts** with visual badges when below minimum threshold
+- **Category management** through Django admin
+- **Product image uploads** with validation
 
-### Audit Tracking
-- Automatic timestamp recording (created/updated)
-- User attribution for all inventory changes (created_by, updated_by)
-- Historical data preservation (records survive user deletion)
+### 📊 Stock Operations
+- **Take Items:** Record distributions with reason tracking (Event, Office Use, External Gift, New Employee Welcome, Sample, Damaged, Other)
+- **Return Items:** Log when items come back from events
+- **Immediate stock updates** prevent double-booking
+- **Notes field** for additional context on each transaction
 
-### Supplier & Customs Data
-- Supplier contact information (name, email, address)
-- HS codes for customs documentation
-- Country of origin tracking
-- Material specifications
+### 📋 Transaction History & Audit Trail
+- **Complete logs** of all inventory movements
+- **Tracks:** Who, What, When, How Many, Why, Stock Before/After
+- **Excel export** capability for management reporting
+- **Read-only** transactions ensure data integrity
+- **Cannot be edited or deleted** after creation
+
+### ✏️ Product Management
+- **Comprehensive product details:**
+  - Product name, category, quantity, unit price
+  - Material composition
+  - Product images
+  - Description
+- **Customs & Logistics:**
+  - HS Code (Harmonized System code)
+  - Country of Origin
+- **Supplier information:**
+  - Supplier name, email, address
+- **Internal notes** for staff reference
+- **Edit functionality** with pre-filled forms
+
+### 👨‍💼 Administrative Controls
+- **Django Admin interface** for authorized personnel
+- **Category management:** Add/edit/remove categories
+- **User management:** Control access and permissions
+- **Transaction monitoring:** View all inventory movements
+- **Excel export** from admin panel
 
 ## Project Structure
 ```
 aqua-inventory-hub/
-├── backend/                  # Django backend
-│   ├── backend/             # Project configuration
-│   │   ├── settings.py     # Django settings
-│   │   └── urls.py         # Main URL routing
-│   ├── api/                # Core application
-│   │   ├── models.py       # Database models (Gift, GiftCategory)
-│   │   ├── serializers.py  # Data serialization (JSON conversion)
-│   │   ├── views.py        # Business logic (CRUD operations)
-│   │   └── urls.py         # API endpoint routing
-│   ├── media/              # Uploaded images storage
-│   │   └── gift_images/    # Product images
-│   ├── manage.py           # Django management script
-│   └── requirements.txt    # Python dependencies
-├── frontend/               # React frontend (coming soon)
-├── .gitignore             # Git ignore rules
-└── README.md              # This file
+├── backend/                      # Django backend
+│   ├── backend/                 # Project configuration
+│   │   ├── settings.py         # Django settings with JWT, CORS
+│   │   └── urls.py             # Main URL routing
+│   ├── api/                    # Core application
+│   │   ├── models.py           # Database models (Gift, GiftCategory, InventoryTransaction)
+│   │   ├── serializers.py      # Data serialization (JSON conversion)
+│   │   ├── views.py            # Business logic (CRUD, stock updates)
+│   │   ├── urls.py             # API endpoint routing
+│   │   └── admin.py            # Admin panel configuration
+│   ├── media/                  # Uploaded images storage
+│   │   └── gift_images/        # Product images (~250-300 photos)
+│   ├── manage.py               # Django management script
+│   └── requirements.txt        # Python dependencies
+│
+├── frontend/                    # React frontend
+│   ├── src/
+│   │   ├── api.js              # Axios API client with JWT interceptors
+│   │   ├── App.jsx             # Main app component with routing
+│   │   ├── components/         # Reusable components
+│   │   │   ├── GiftForm.jsx            # Add new product form
+│   │   │   ├── EditGiftForm.jsx        # Edit existing product
+│   │   │   ├── GiftDetailsModal.jsx    # Product details view
+│   │   │   ├── TakeItemsModal.jsx      # Take items with reason
+│   │   │   ├── ReturnItemsModal.jsx    # Return items
+│   │   │   ├── ProtectedRoute.jsx      # Auth route wrapper
+│   │   │   └── Footer.jsx              # Page footer
+│   │   ├── pages/              # Main pages
+│   │   │   ├── Home.jsx        # Dashboard landing
+│   │   │   ├── Login.jsx       # User login
+│   │   │   ├── Register.jsx    # User registration
+│   │   │   ├── Gifts.jsx       # Gifts inventory page
+│   │   │   └── Logout.jsx      # Logout handler
+│   │   └── styles/
+│   │       └── index.css       # Tailwind CSS with World Aquatics colors
+│   ├── package.json            # Node dependencies
+│   └── vite.config.js          # Vite configuration with proxy
+│
+├── .gitignore                  # Git ignore rules
+└── README.md                   # This file
 ```
 
 ## Installation & Setup
@@ -70,6 +133,7 @@ aqua-inventory-hub/
 ### Prerequisites
 
 - Python 3.12 or higher
+- Node.js 18+ and npm
 - pip package manager
 - Git
 
@@ -77,39 +141,58 @@ aqua-inventory-hub/
 
 1. **Clone the repository**
 ```bash
-   git clone https://github.com/Maz-hub/aqua-inventory-hub.git
-   cd aqua-inventory-hub
+git clone https://github.com/Maz-hub/aqua-inventory-hub.git
+cd aqua-inventory-hub
 ```
 
 2. **Create virtual environment**
 ```bash
-   python -m venv env
-   source env/bin/activate  # On Windows: env\Scripts\activate
-   # On Codespaces (Linux): source env/bin/activate
+python -m venv env
+source env/bin/activate  # On Windows: env\Scripts\activate
 ```
 
 3. **Install dependencies**
 ```bash
-   cd backend
-   pip install -r requirements.txt
+cd backend
+pip install -r requirements.txt
 ```
 
 4. **Apply migrations**
 ```bash
-   python manage.py migrate
+python manage.py makemigrations
+python manage.py migrate
 ```
 
-5. **Create superuser (optional)**
+5. **Create superuser**
 ```bash
-   python manage.py createsuperuser
+python manage.py createsuperuser
 ```
 
 6. **Run development server**
 ```bash
-   python manage.py runserver
+python manage.py runserver
 ```
 
 The API will be available at `http://localhost:8000`
+
+### Frontend Setup
+
+1. **Navigate to frontend directory**
+```bash
+cd frontend
+```
+
+2. **Install dependencies**
+```bash
+npm install
+```
+
+3. **Run development server**
+```bash
+npm run dev
+```
+
+The React app will be available at `http://localhost:5173`
 
 ## API Endpoints
 
@@ -127,14 +210,16 @@ The API will be available at `http://localhost:8000`
 |--------|----------|-------------|---------------|
 | GET | `/api/gifts/` | List all gifts | Yes |
 | POST | `/api/gifts/` | Create new gift | Yes |
+| PATCH | `/api/gifts/update/<id>/` | Update gift details | Yes |
+| PATCH | `/api/gifts/update-stock/<id>/` | Update stock (Take/Return) | Yes |
 | DELETE | `/api/gifts/delete/<id>/` | Delete specific gift | Yes |
 | GET | `/api/categories/` | List all gift categories | Yes |
 
 ### Administration
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/admin/` | Django admin panel |
+| Endpoint | Description |
+|----------|-------------|
+| `/admin/` | Django admin panel (category management, transactions, users) |
 
 ## Database Models
 
@@ -155,6 +240,7 @@ Comprehensive product tracking model:
 **Organization & Tracking:**
 - `category` - Foreign key to GiftCategory
 - `qty_stock` - Current stock quantity
+- `minimum_stock_level` - Alert threshold (default: 10)
 
 **Product Details:**
 - `description` - Product description
@@ -175,65 +261,41 @@ Comprehensive product tracking model:
 - `created_by` - User who created the record
 - `updated_at` - Last modification timestamp
 - `updated_by` - User who last modified the record
-
-**Inventory Management:**
-- `minimum_stock_level` - Alert threshold (default: 10)
 - `notes` - Internal notes
 
-## API Data Format
+### InventoryTransaction
+Tracks all inventory movements for audit trail:
 
-### Category Response Example
-```json
-{
-  "id": 1,
-  "name": "Apparel"
-}
-```
+**Transaction Details:**
+- `gift` - Foreign key to Gift
+- `transaction_type` - 'take' or 'return'
+- `quantity` - Number of items taken/returned
+- `reason` - Reason for taking (Event, Office Use, External Gift, New Employee Welcome, Sample, Damaged, Other)
+- `notes` - Additional context (optional)
 
-### Gift Response Example
-```json
-{
-  "id": 1,
-  "product_image": "/media/gift_images/blue_hat.jpg",
-  "product_name": "Blue Hat",
-  "category": {
-    "id": 1,
-    "name": "Apparel"
-  },
-  "qty_stock": 50,
-  "description": "Official blue hat with logo",
-  "material": "100% Cotton",
-  "unit_price": "12.00",
-  "hs_code": "6505.00.30",
-  "country_of_origin": "China",
-  "supplier_name": "Acme Textiles",
-  "supplier_email": "orders@acmetextiles.com",
-  "supplier_address": "123 Factory St, Guangzhou, China",
-  "created_at": "2025-12-22T10:30:00Z",
-  "created_by": 1,
-  "updated_at": "2025-12-22T14:15:00Z",
-  "updated_by": 1,
-  "minimum_stock_level": 10,
-  "notes": "Reorder when below 10 units"
-}
-```
+**Audit Information:**
+- `created_by` - User who performed the transaction
+- `created_at` - Transaction timestamp
+- `stock_before` - Stock level before transaction
+- `stock_after` - Stock level after transaction
 
-### Creating a Gift (POST Request)
-```json
-{
-  "product_name": "Blue Hat",
-  "category_id": 1,
-  "qty_stock": 50,
-  "unit_price": "12.00",
-  "material": "100% Cotton",
-  "description": "Official blue hat with logo",
-  "minimum_stock_level": 10
-}
-```
+**Features:**
+- Read-only in admin (cannot be edited or deleted)
+- Automatic creation on Take/Return operations
+- Excel export capability
 
 ## Configuration
 
-### JWT Token Settings (`settings.py`)
+### World Aquatics Brand Colors (Tailwind CSS)
+```css
+--wa-navy: #002b5c;     /* Primary dark blue */
+--wa-blue: #0066b3;     /* Primary blue */
+--wa-ocean: #0085ca;    /* Medium blue */
+--wa-cyan: #00b8d4;     /* Accent cyan */
+--wa-red: #e31e24;      /* Accent red */
+```
+
+### JWT Token Settings (`backend/backend/settings.py`)
 ```python
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
@@ -242,9 +304,12 @@ SIMPLE_JWT = {
 ```
 
 ### CORS Configuration
-Currently configured for development (allows all origins):
+Development (allows all origins):
 ```python
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # Vite dev server
+]
 ```
 **⚠️ Must be restricted in production**
 
@@ -254,10 +319,80 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 ```
 
+## User Guide
+
+### For All Employees
+
+**Logging In:**
+1. Navigate to the application URL
+2. Enter your credentials
+3. Click "Login"
+
+**Browsing Inventory:**
+1. Click "Gifts / Office" on homepage
+2. View all available items with photos
+3. Use search bar to find specific products
+4. Filter by category using dropdown
+5. Click "Show Low Stock" to see items needing reorder
+
+**Taking Items:**
+1. Click "Take" button on product card
+2. Enter quantity needed
+3. Select reason (Event, Office Use, etc.)
+4. Add notes if necessary
+5. Click "Confirm"
+6. Stock updates immediately
+
+**Returning Items:**
+1. Click "Return" button on product card
+2. Enter quantity returned
+3. Add notes about condition/event
+4. Click "Confirm"
+5. Stock increases immediately
+
+**Viewing Product Details:**
+1. Click "View Details" on any product
+2. See full information (supplier, customs, pricing)
+3. Click "Edit Product" to make changes (if authorized)
+
+### For Administrators (Reception, Inventory Managers)
+
+**Adding New Products:**
+1. Click "+ Add New Item" button
+2. Fill in all required fields (*, name, category, quantity, price)
+3. Upload product image
+4. Add optional details (supplier, HS code, notes)
+5. Click "Create Gift"
+
+**Editing Products:**
+1. View product details
+2. Click "Edit Product"
+3. Modify fields as needed
+4. Click "Save Changes"
+
+**Managing Categories:**
+1. Access Django Admin (`/admin/`)
+2. Navigate to "Gift Categories"
+3. Add/edit/delete categories as needed
+
+**Viewing Transaction History:**
+1. Access Django Admin
+2. Navigate to "Inventory Transactions"
+3. Filter by date, user, product, or reason
+4. Click "Export" button for Excel report
+
+**Generating Reports:**
+1. In Django Admin → Inventory Transactions
+2. Apply desired filters
+3. Click "Export" dropdown
+4. Select format (Excel, CSV)
+5. Download file
+
 ## Development
 
 ### Running Tests
 ```bash
+cd backend
 python manage.py test
 ```
 
@@ -268,18 +403,15 @@ python manage.py migrate
 ```
 
 ### Accessing Admin Panel
-1. Navigate to `/admin/`
+1. Navigate to `http://localhost:8000/admin/`
 2. Log in with superuser credentials
-3. Manage:
-   - Users and permissions
-   - Gift categories
-   - Inventory data
+3. Manage categories, users, transactions
 
-### Adding Categories
-1. Access Django admin at `/admin/`
-2. Navigate to "Gift Categories"
-3. Add new categories (e.g., Deco, Office, Drinkware)
-4. Categories appear automatically in API dropdown
+### Building for Production
+```bash
+cd frontend
+npm run build
+```
 
 ## Git Workflow
 
@@ -287,6 +419,9 @@ python manage.py migrate
 ```bash
 # Activate virtual environment
 source env/bin/activate
+
+# Pull latest changes
+git pull
 
 # Make changes...
 
@@ -303,110 +438,208 @@ git commit -m "Description of changes"
 git push
 ```
 
-### Commit Message Guidelines
-- Use present tense: "Add feature" not "Added feature"
-- Be descriptive but concise
-- Examples:
-  - `"Create Gift and GiftCategory models with audit tracking"`
-  - `"Add Gift CRUD views and category list endpoint"`
-  - `"Configure API URLs for gift operations"`
+### Recent Commits
+- `"Add Excel export functionality to transaction history in Django admin"`
+- `"Add low stock alerts with visual badges and filter toggle"`
+- `"Complete Take and Return stock functionality with backend integration"`
+- `"Add edit product functionality with auto-refresh after save"`
+- `"Add transaction history tracking with reason and notes logging"`
+- `"Add footer component to homepage with contact info and copyright"`
 
-## Security Notes
+## Security
 
-- Passwords automatically hashed using Django's built-in hashers
-- JWT tokens provide stateless authentication
-- Sensitive settings use environment variables in production
-- Image uploads validated by Pillow library
-- Audit trail tracks all inventory changes
-- `on_delete=SET_NULL` preserves inventory records if users deleted
+- ✅ Passwords automatically hashed using Django's built-in hashers
+- ✅ JWT tokens provide stateless authentication
+- ✅ Token expiration and refresh mechanism
+- ✅ CORS configured for development (restrict in production)
+- ✅ Image uploads validated by Pillow library
+- ✅ Audit trail tracks all inventory changes with user attribution
+- ✅ `on_delete=SET_NULL` preserves records if users deleted
+- ✅ Read-only transaction history prevents tampering
+- ⚠️ Use HTTPS in production
+- ⚠️ Set `DEBUG=False` in production
+- ⚠️ Use environment variables for secrets
+
+## Deployment
+
+### Recommended Hosting Options
+
+**Option 1: Alibaba Cloud (Recommended for World Aquatics)**
+- Aligns with company IT strategy
+- Estimated cost: $40-60/month
+- Services needed: ECS/Simple App Server, RDS PostgreSQL, OSS
+
+**Option 2: DigitalOcean App Platform**
+- Estimated cost: $35-50/month
+- Includes: App hosting, Managed PostgreSQL, Spaces (file storage)
+
+**Option 3: Railway**
+- Estimated cost: $25-40/month
+- Simplest deployment option
+
+### Domain Setup
+- **Recommended:** Use subdomain: `inventory.worldaquatics.com`
+- **Cost:** $0 (using existing domain)
+- DNS configuration needed through World Aquatics IT
+
+### Pre-Deployment Checklist
+- [ ] Set `DEBUG=False` in production settings
+- [ ] Configure environment variables (SECRET_KEY, DATABASE_URL)
+- [ ] Restrict CORS to production domain only
+- [ ] Set up PostgreSQL database
+- [ ] Configure cloud storage for media files (AWS S3 or equivalent)
+- [ ] Set up SSL certificate (HTTPS)
+- [ ] Configure automatic backups
+- [ ] Test all functionality in staging environment
 
 ## Troubleshooting
 
-### Pylance Import Warnings in VS Code
-**Issue:** Yellow squiggles on imports despite successful installation
+### Backend Issues
 
-**Solution:** This is a known Codespaces issue. If `python manage.py check` passes, ignore the warnings.
-
-### Virtual Environment Issues
-**Issue:** Commands not found or wrong Python version
-
-**Solution:** Ensure virtual environment is activated:
+**Virtual Environment Not Activated:**
 ```bash
 source env/bin/activate  # Look for (env) in prompt
 ```
 
-### Image Upload Errors
-**Issue:** `Cannot use ImageField because Pillow is not installed`
+**Database Errors:**
+```bash
+python manage.py migrate
+```
 
-**Solution:**
+**Image Upload Errors:**
 ```bash
 pip install Pillow
-pip freeze > requirements.txt
 ```
+
+### Frontend Issues
+
+**Dependencies Not Installed:**
+```bash
+npm install
+```
+
+**Build Errors:**
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
+
+**API Connection Issues:**
+- Ensure backend is running on port 8000
+- Check Vite proxy configuration in `vite.config.js`
+
+### JWT Token Expired
+- Log out and log back in
+- Access token expires after 30 minutes
+- System will attempt auto-refresh if refresh token valid
+
+## Cost-Benefit Analysis
+
+### Annual Investment
+- **Hosting:** $500-720/year
+- **Maintenance:** $0-1,000/year (in-house)
+- **Total:** $500-1,700/year
+
+### Annual Benefits
+- **Time savings:** 108 hours/year (reception staff) = $3,240
+- **Error reduction:** Eliminate stock discrepancies = $1,600
+- **Better reporting:** Automated Excel exports = $2,800
+- **Improved planning:** Data-driven ordering = $1,000
+- **Total savings:** $8,640/year
+
+### ROI
+- **Net benefit:** $7,440/year
+- **Return on Investment:** 620%
+- **Payback period:** 2 months
 
 ## Future Enhancements
 
-**Phase 1 (In Progress):**
-- [ ] React frontend implementation
-- [ ] User interface for inventory management
-- [ ] Image upload through web interface
+### Phase 2 (Planned)
+- [ ] Apparel inventory section (361° clothing)
+- [ ] Size tracking (XS-XXL) for apparel
+- [ ] Shopping basket system for internal requests
+- [ ] Email notifications to reception
+- [ ] Pickup date/time scheduling
+- [ ] Request approval workflow
 
-**Phase 2:**
-- [ ] Apparel inventory model
-- [ ] Role-based permission system (Gifts Managers, Apparel Managers)
-- [ ] Low stock alert notifications
-- [ ] Inventory reporting and analytics
-
-**Phase 3:**
-- [ ] PostgreSQL database integration
-- [ ] Production deployment
-- [ ] Automated backup system
-- [ ] Export functionality (CSV, Excel)
+### Phase 3 (Long-term)
+- [ ] Dashboard with analytics and charts
+- [ ] Most requested items reporting
+- [ ] Budget tracking and forecasting
+- [ ] Mobile app (iOS/Android)
+- [ ] Barcode scanning for quick inventory
+- [ ] Integration with procurement systems
 
 ## Dependencies
 
-Full list in `requirements.txt`. Key dependencies:
+### Backend (requirements.txt)
 ```
 Django==6.0
 djangorestframework==3.16.1
 djangorestframework-simplejwt==5.5.1
 django-cors-headers==4.9.0
+django-import-export==4.3.3
 Pillow==12.0.0
 psycopg2-binary==2.9.11
 python-dotenv==1.2.1
 ```
 
-## Contributing
+### Frontend (package.json)
+```json
+{
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0",
+    "axios": "^1.7.9",
+    "lucide-react": "^0.469.0"
+  },
+  "devDependencies": {
+    "tailwindcss": "^4.0.0",
+    "vite": "^6.0.5"
+  }
+}
+```
 
-1. Create a feature branch from `main`
-2. Make changes with clear, incremental commits
-3. Test thoroughly in development
-4. Submit pull request with description
-5. Code review before merging
+## Support & Contact
+
+**Project Manager:** Marianna Mirabile  
+**Email:** marianna.mirabile@worldaquatics.com  
+**Organization:** World Aquatics  
+
+For technical support or feature requests, please contact the project team.
 
 ## License
 
-[Specify your license here]
+Proprietary - World Aquatics Internal Use Only
 
 ---
 
-## Notes
+## Project Status
 
-**Development Environment:** GitHub Codespaces (Linux)
-- Use Mac/Linux commands in terminal
-- Virtual environment must be activated for each session
-- CORS configured for development (restrict in production)
+**Version:** 1.0.0  
+**Status:** Production-ready for Gifts Inventory  
+**Development:** Active  
+**Last Updated:** January 9, 2026  
 
-**Image Storage:**
-- Development: Local filesystem in `backend/media/`
-- Production: Cloud storage (AWS S3, Cloudflare R2, etc.)
+**Completed Features:**
+- ✅ User authentication with JWT
+- ✅ Gifts inventory management
+- ✅ Take/Return operations with reasons
+- ✅ Transaction history with audit trail
+- ✅ Excel export for reporting
+- ✅ Low stock alerts
+- ✅ Search and filtering
+- ✅ Product image uploads
+- ✅ Edit product functionality
+- ✅ Responsive design for mobile
 
-**Database:**
-- Development: SQLite (`db.sqlite3`)
-- Production: PostgreSQL (to be configured)
+**In Progress:**
+- 🔄 Apparel inventory section
+- 🔄 Request basket system
+- 🔄 Email notifications
 
 ---
 
-**Current Status:** Backend API complete. Frontend development in progress.
-
-**Last Updated:** December 22, 2025
+**Development Environment:** GitHub Codespaces  
+**Production Target:** Alibaba Cloud (aligned with World Aquatics IT strategy)

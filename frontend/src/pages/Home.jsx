@@ -102,7 +102,7 @@ function Home() {
         </button>
       </div>
 
-      {/* Footer - Always at bottom of page */}
+      {/* Footer */}
       <Footer />
     </div>
   );
