@@ -149,7 +149,7 @@ function EditGiftForm({ gift, onClose, onSuccess }) {
                 required
                 value={productName}
                 onChange={(e) => setProductName(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+                className="form_input"
               />
             </div>
 
@@ -166,7 +166,7 @@ function EditGiftForm({ gift, onClose, onSuccess }) {
                 required
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+                className="form_input"
               >
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>
@@ -190,7 +190,7 @@ function EditGiftForm({ gift, onClose, onSuccess }) {
                 required
                 value={qtyStock}
                 onChange={(e) => setQtyStock(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+                className="form_input"
               />
             </div>
 
@@ -209,7 +209,7 @@ function EditGiftForm({ gift, onClose, onSuccess }) {
                 required
                 value={unitPrice}
                 onChange={(e) => setUnitPrice(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+                className="form_input"
               />
             </div>
 
@@ -226,7 +226,7 @@ function EditGiftForm({ gift, onClose, onSuccess }) {
                 id="material"
                 value={material}
                 onChange={(e) => setMaterial(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+                className="form_input"
               />
             </div>
 
@@ -243,7 +243,7 @@ function EditGiftForm({ gift, onClose, onSuccess }) {
                 id="minimumStockLevel"
                 value={minimumStockLevel}
                 onChange={(e) => setMinimumStockLevel(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+                className="form_input"
               />
             </div>
 
@@ -259,7 +259,7 @@ function EditGiftForm({ gift, onClose, onSuccess }) {
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md min-h-25 resize-y focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+                className="form_input min-h-25"
               />
             </div>
 
@@ -283,7 +283,7 @@ function EditGiftForm({ gift, onClose, onSuccess }) {
                 id="hsCode"
                 value={hsCode}
                 onChange={(e) => setHsCode(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+                className="form_input"
               />
             </div>
 
@@ -300,7 +300,7 @@ function EditGiftForm({ gift, onClose, onSuccess }) {
                 id="countryOfOrigin"
                 value={countryOfOrigin}
                 onChange={(e) => setCountryOfOrigin(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+                className="form_input"
               />
             </div>
 
@@ -324,7 +324,7 @@ function EditGiftForm({ gift, onClose, onSuccess }) {
                 id="supplierName"
                 value={supplierName}
                 onChange={(e) => setSupplierName(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+                className="form_input"
               />
             </div>
 
@@ -341,7 +341,7 @@ function EditGiftForm({ gift, onClose, onSuccess }) {
                 id="supplierEmail"
                 value={supplierEmail}
                 onChange={(e) => setSupplierEmail(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+                className="form_input"
               />
             </div>
 
@@ -357,7 +357,7 @@ function EditGiftForm({ gift, onClose, onSuccess }) {
                 id="supplierAddress"
                 value={supplierAddress}
                 onChange={(e) => setSupplierAddress(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md min-h-20 resize-y focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+                className="form_input min-h-20"
               />
             </div>
 
@@ -380,23 +380,16 @@ function EditGiftForm({ gift, onClose, onSuccess }) {
                 id="notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md min-h-20 resize-y focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+                className="form_input min-h-20"
               />
             </div>
 
             {/* Action Buttons */}
             <div className="md:col-span-2 mt-4 flex gap-3">
-              <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 bg-gray-200 text-gray-800 py-2 rounded-md hover:bg-gray-300 cursor-pointer transition-all font-medium"
-              >
+              <button type="button" onClick={onClose} className="btn_cancel">
                 Cancel
               </button>
-              <button
-                type="submit"
-                className="flex-1 bg-wa-blue text-white py-2 rounded-md hover:bg-wa-ocean cursor-pointer transition-all font-medium"
-              >
+              <button type="submit" className="btn_confirm">
                 Save Changes
               </button>
             </div>

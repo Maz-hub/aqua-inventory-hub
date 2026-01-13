@@ -78,7 +78,7 @@ function Home() {
             </div>
           </div>
 
-          {/* Apparel Inventory Box - Coming soon, not yet functional */}
+          {/* Apparel Inventory Box */}
           <div className="bg-gray-200 rounded-lg shadow-lg p-8 cursor-not-allowed opacity-75">
             <div className="text-center">
               <div className="text-6xl mb-4">👕</div>
@@ -94,10 +94,7 @@ function Home() {
 
       {/* Logout Button - Centered below inventory sections */}
       <div className="text-center mt-12 mb-8">
-        <button
-          onClick={handleLogout}
-          className="bg-wa-red text-white px-8 py-3 rounded-md font-medium hover:bg-red-700 cursor-pointer transition-all duration-200"
-        >
+        <button onClick={handleLogout} className="btn_logout">
           Logout
         </button>
       </div>

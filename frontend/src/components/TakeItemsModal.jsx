@@ -109,7 +109,7 @@ function TakeItemsModal({ gift, onClose, onSuccess }) {
                 max={gift.qty_stock}
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+                className="form_input"
                 placeholder="Enter quantity"
                 required
               />
@@ -127,7 +127,7 @@ function TakeItemsModal({ gift, onClose, onSuccess }) {
                 id="reason"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+                className="form_input"
                 required
               >
                 <option value="">Select a reason</option>
@@ -155,24 +155,17 @@ function TakeItemsModal({ gift, onClose, onSuccess }) {
                 id="notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md min-h-20 resize-y focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+                className="form_input min-h-20"
                 placeholder="Additional details..."
               />
             </div>
 
             {/* Action Buttons */}
             <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 bg-gray-200 text-gray-800 py-2 rounded-md hover:bg-gray-300 cursor-pointer transition-all font-medium"
-              >
+              <button type="button" onClick={onClose} className="btn_cancel">
                 Cancel
               </button>
-              <button
-                type="submit"
-                className="flex-1 bg-wa-ocean text-white py-2 rounded-md hover:bg-wa-blue cursor-pointer transition-all font-medium"
-              >
+              <button type="submit" className="btn_confirm">
                 Confirm
               </button>
             </div>

@@ -75,9 +75,9 @@ function Gifts() {
           ← Back to Home
         </button>
 
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-center items-center mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-wa-navy mb-2">
+            <h1 className="text-4xl font-bold text-wa-navy mb-2 text-center">
               Gifts Inventory
             </h1>
             <p className="text-gray-600">
@@ -96,7 +96,7 @@ function Gifts() {
                 placeholder="Search gifts by name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+                className="form_input"
               />
             </div>
 
@@ -105,7 +105,7 @@ function Gifts() {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+                className="form_input"
               >
                 <option value="">All Categories</option>
                 {categories.map((cat) => (
@@ -144,7 +144,7 @@ function Gifts() {
           <div>
             <button
               onClick={() => setShowAddForm(false)}
-              className="mb-4 text-gray-600 hover:text-gray-800 flex items-center gap-2 cursor-pointer font-medium transition-colors"
+              className="btn_cancel mb-4 py-3 px-5"
             >
               ← Cancel
             </button>
@@ -211,9 +211,7 @@ function Gifts() {
                       </span>
                       {/* Low Stock Badge */}
                       {gift.qty_stock <= gift.minimum_stock_level && (
-                        <span className="bg-wa-red text-white text-xs px-2 py-1 rounded-full font-light">
-                          LOW
-                        </span>
+                        <span className="badge_low">LOW</span>
                       )}
                     </div>
                     <span className="text-sm text-wa-blue">
@@ -225,7 +223,7 @@ function Gifts() {
                   <div className="space-y-2">
                     <button
                       onClick={() => setSelectedGift(gift)}
-                      className="w-full bg-wa-blue text-white py-2 rounded-md hover:bg-wa-ocean text-sm font-medium cursor-pointer transition-all"
+                      className="btn_main"
                     >
                       View Details
                     </button>
@@ -236,7 +234,7 @@ function Gifts() {
                           setSelectedGiftForAction(gift);
                           setShowTakeModal(true);
                         }}
-                        className="flex-1 bg-wa-ocean text-white py-2 rounded-md hover:bg-wa-navy text-sm font-medium cursor-pointer transition-all"
+                        className="btn_take"
                       >
                         Take
                       </button>
@@ -246,7 +244,7 @@ function Gifts() {
                           setSelectedGiftForAction(gift);
                           setShowReturnModal(true);
                         }}
-                        className="flex-1 bg-wa-cyan text-white py-2 rounded-md hover:bg-wa-navy text-sm font-medium cursor-pointer transition-all"
+                        className="btn_return"
                       >
                         Return
                       </button>

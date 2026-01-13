@@ -124,7 +124,7 @@ function GiftForm({ onSuccess }) {
             required
             value={productName}
             onChange={(e) => setProductName(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+            className="form_input"
             placeholder="Enter product name (e.g., Aqua Blue Cap)"
           />
         </div>
@@ -141,7 +141,7 @@ function GiftForm({ onSuccess }) {
             required
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+            className="form_input"
           >
             <option value="">Select a category</option>
             {categories.map((cat) => (
@@ -165,7 +165,7 @@ function GiftForm({ onSuccess }) {
             required
             value={qtyStock}
             onChange={(e) => setQtyStock(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+            className="form_input"
             placeholder="Enter quantity (e.g., 50)"
           />
         </div>
@@ -184,7 +184,7 @@ function GiftForm({ onSuccess }) {
             required
             value={unitPrice}
             onChange={(e) => setUnitPrice(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+            className="form_input"
             placeholder="Enter price (e.g., 12.99)"
           />
         </div>
@@ -201,7 +201,7 @@ function GiftForm({ onSuccess }) {
             id="material"
             value={material}
             onChange={(e) => setMaterial(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+            className="form_input"
             placeholder="Enter material (e.g., 87% Nylon 13% Spandex)"
           />
         </div>
@@ -218,7 +218,7 @@ function GiftForm({ onSuccess }) {
             id="minimumStockLevel"
             value={minimumStockLevel}
             onChange={(e) => setMinimumStockLevel(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+            className="form_input"
             placeholder="Alert threshold (e.g., 10)"
           />
         </div>
@@ -234,7 +234,7 @@ function GiftForm({ onSuccess }) {
             id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md min-h-25 resize-y focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+            className="form_input"
             placeholder="Enter detailed product description (weight, color, etc.)"
           />
         </div>
@@ -278,7 +278,7 @@ function GiftForm({ onSuccess }) {
             id="hsCode"
             value={hsCode}
             onChange={(e) => setHsCode(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+            className="form_input"
             placeholder="Enter HS code (e.g., 6505.00.30)"
           />
         </div>
@@ -295,7 +295,7 @@ function GiftForm({ onSuccess }) {
             id="countryOfOrigin"
             value={countryOfOrigin}
             onChange={(e) => setCountryOfOrigin(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+            className="form_input"
             placeholder="Enter country (e.g., China, USA, Italy)"
           />
         </div>
@@ -319,7 +319,7 @@ function GiftForm({ onSuccess }) {
             id="supplierName"
             value={supplierName}
             onChange={(e) => setSupplierName(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+            className="form_input"
             placeholder="Enter supplier name or company"
           />
         </div>
@@ -336,7 +336,7 @@ function GiftForm({ onSuccess }) {
             id="supplierEmail"
             value={supplierEmail}
             onChange={(e) => setSupplierEmail(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+            className="form_input"
             placeholder="Enter supplier email (e.g., orders@supplier.com)"
           />
         </div>
@@ -352,7 +352,7 @@ function GiftForm({ onSuccess }) {
             id="supplierAddress"
             value={supplierAddress}
             onChange={(e) => setSupplierAddress(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md min-h-20 resize-y focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+            className="form_input"
             placeholder="Enter full supplier address with city and country"
           />
         </div>
@@ -375,17 +375,14 @@ function GiftForm({ onSuccess }) {
             id="notes"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md min-h-20 resize-y focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+            className="form_input"
             placeholder="Enter any internal notes or special instructions..."
           />
         </div>
 
         {/* Submit Button */}
         <div className="md:col-span-2 mt-4">
-          <button
-            type="submit"
-            className="bg-wa-blue text-white px-6 py-3 rounded-md font-medium hover:bg-wa-ocean cursor-pointer transition-all duration-200"
-          >
+          <button type="submit" className="btn_add">
             Add Item to Inventory
           </button>
         </div>

@@ -22,7 +22,7 @@ function GiftDetailsModal({ gift, onClose, onSuccess }) {
         onSuccess={() => {
           setShowEditForm(false);
           onSuccess();
-          onClose(); // Close details modal too
+          onClose();
         }}
       />
     );
@@ -182,15 +182,12 @@ function GiftDetailsModal({ gift, onClose, onSuccess }) {
 
           {/* Action Buttons */}
           <div className="mt-6 flex gap-3">
-            <button
-              onClick={onClose}
-              className="flex-1 bg-gray-200 text-gray-800 py-2 rounded-md hover:bg-gray-300 cursor-pointer transition-all font-medium"
-            >
+            <button onClick={onClose} className="btn_cancel">
               Close
             </button>
             <button
               onClick={() => setShowEditForm(true)}
-              className="flex-1 bg-wa-blue text-white py-2 rounded-md hover:bg-wa-ocean cursor-pointer transition-all font-medium"
+              className="btn_confirm"
             >
               Edit Product
             </button>
