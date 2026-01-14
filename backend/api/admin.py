@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Gift, GiftCategory, InventoryTransaction, ApparelSize, ApparelColor
+from .models import Gift, GiftCategory, InventoryTransaction, ApparelSize, ApparelColor, TakeReason
 from import_export import resources
 from import_export.admin import ExportMixin
 
@@ -100,3 +100,18 @@ class ApparelColorAdmin(admin.ModelAdmin):
     list_display = ['color_name', 'hex_code', 'created_at']
     search_fields = ['color_name']
     ordering = ['color_name']
+
+# ============================================
+# TAKE REASON
+# ============================================
+
+@admin.register(TakeReason)
+class TakeReasonAdmin(admin.ModelAdmin):
+    """
+    Admin interface for managing inventory transaction reasons.
+    Shared between Gifts and Apparel inventories with filtering by applicability.
+    """
+    list_display = ['reason_name', 'applies_to', 'created_at']
+    list_filter = ['applies_to']
+    search_fields = ['reason_name']
+    ordering = ['reason_name']    
