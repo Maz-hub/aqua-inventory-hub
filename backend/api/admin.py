@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Gift, GiftCategory, InventoryTransaction
+from .models import Gift, GiftCategory, InventoryTransaction, ApparelSize
 from import_export import resources
 from import_export.admin import ExportMixin
 
@@ -70,3 +70,18 @@ class InventoryTransactionAdmin(ExportMixin, admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         # Disable deletion - preserve complete audit trail
         return False
+    
+# ============================================
+# APPAREL SIZE
+# ============================================
+
+@admin.register(ApparelSize)
+class ApparelSizeAdmin(admin.ModelAdmin):
+    """
+    Admin interface for managing standardized apparel sizes.
+    Supports clothing sizes (S, M, L), footwear sizes (9.5, 42), and accessory sizes.
+    """
+    list_display = ['size_value', 'size_type', 'display_order', 'created_at']
+    list_filter = ['size_type']
+    search_fields = ['size_value']
+    ordering = ['size_type', 'display_order']
