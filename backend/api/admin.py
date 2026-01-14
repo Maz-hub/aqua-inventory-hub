@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Gift, GiftCategory, InventoryTransaction, ApparelSize
+from .models import Gift, GiftCategory, InventoryTransaction, ApparelSize, ApparelColor
 from import_export import resources
 from import_export.admin import ExportMixin
 
@@ -85,3 +85,18 @@ class ApparelSizeAdmin(admin.ModelAdmin):
     list_filter = ['size_type']
     search_fields = ['size_value']
     ordering = ['size_type', 'display_order']
+
+
+# ============================================
+# APPAREL COLOR
+# ============================================
+
+@admin.register(ApparelColor)
+class ApparelColorAdmin(admin.ModelAdmin):
+    """
+    Admin interface for managing standardized apparel colors.
+    Displays color swatches alongside names for easy visual identification.
+    """
+    list_display = ['color_name', 'hex_code', 'created_at']
+    search_fields = ['color_name']
+    ordering = ['color_name']

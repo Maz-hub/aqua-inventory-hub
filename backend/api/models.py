@@ -157,4 +157,38 @@ class ApparelSize(models.Model):
     
     def __str__(self):
         return f"{self.size_value} ({self.get_size_type_display()})"
+    
+# Colors
+
+class ApparelColor(models.Model):
+    """
+    Standardized color reference for apparel inventory.
+    
+    Prevents color naming inconsistencies across multi-cultural teams by
+    providing visual color swatches alongside standardized names.
+    
+    Examples: Navy Blue (#001f3f), Black (#000000), White (#FFFFFF)
+    """
+    
+    color_name = models.CharField(
+        max_length=50,
+        unique=True,
+        help_text="Standardized color name (e.g., 'Navy Blue', 'Black')"
+    )
+    
+    hex_code = models.CharField(
+        max_length=7,
+        blank=True,
+        help_text="Optional hex color code for visual display (e.g., '#001f3f')"
+    )
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['color_name']
+        verbose_name = "Apparel Color"
+        verbose_name_plural = "Apparel Colors"
+    
+    def __str__(self):
+        return self.color_name
 
