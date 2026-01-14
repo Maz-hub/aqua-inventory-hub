@@ -28,9 +28,9 @@ function Footer() {
             </p>
             <a
               href="mailto:marianna.mirabile@worldaquatics.com"
-              className="text-wa-cyan hover:text-white transition-colors"
+              className="text-wa-cyan hover:text-wa-ocean transition-colors"
             >
-              marianna.mirabile@worldaquatics.com
+              Marianna
             </a>
           </div>
 

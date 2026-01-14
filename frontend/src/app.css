@@ -61,27 +61,27 @@
   }
 
   .btn_main {
-    @apply w-full bg-wa-blue text-white py-2 rounded-md hover:bg-wa-ocean text-sm font-medium cursor-pointer transition-all
+    @apply w-full bg-wa-blue text-white px-8 py-3 rounded-md hover:bg-wa-ocean text-sm font-medium cursor-pointer transition-all
   }
 
   .btn_confirm {
-    @apply flex-1 bg-wa-ocean text-white rounded-md hover:bg-wa-blue cursor-pointer transition-all font-medium text-sm py-3
+    @apply flex-1 bg-wa-ocean text-white rounded-md hover:bg-wa-blue cursor-pointer transition-all font-medium text-sm px-8 py-3
   }
 
   .btn_add {
-    @apply bg-wa-blue text-white px-6 py-3 rounded-md font-medium hover:bg-wa-ocean cursor-pointer transition-all duration-200
+    @apply bg-wa-blue text-white px-8 py-3 rounded-md font-medium hover:bg-wa-ocean cursor-pointer transition-all duration-200
   }
 
   .btn_take {
-    @apply flex-1 bg-wa-ocean text-white py-2 rounded-md hover:bg-wa-navy text-sm font-medium cursor-pointer transition-all
+    @apply flex-1 bg-wa-ocean text-white px-8 py-3 rounded-md hover:bg-wa-navy text-sm font-medium cursor-pointer transition-all
   }
 
   .btn_return {
-    @apply flex-1 bg-wa-cyan text-white py-2 rounded-md hover:bg-wa-navy text-sm font-medium cursor-pointer transition-all
+    @apply flex-1 bg-wa-cyan text-white px-8 py-3 rounded-md hover:bg-wa-navy text-sm font-medium cursor-pointer transition-all
   }
 
   .btn_cancel {
-    @apply flex-1 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-300 text-sm cursor-pointer font-medium transition-all py-3
+    @apply flex-1 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 hover:text-gray-100 text-sm cursor-pointer font-medium transition-all px-8 py-3
   }
 
   .badge_low {

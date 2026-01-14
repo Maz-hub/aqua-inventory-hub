@@ -111,3 +111,50 @@ class InventoryTransaction(models.Model):
         verbose_name = "Inventory Transaction"
         verbose_name_plural = "Inventory Transactions"
 
+# --- APPAREL ---
+
+class ApparelSize(models.Model):
+    """
+    Standardized size reference for apparel inventory.
+    
+    Prevents size inconsistencies across multi-cultural team by providing
+    a single source of truth for all valid sizes.
+    
+    Examples:
+        Clothing: XS, S, M, L, XL, 2XL, 3XL
+        Footwear: 36, 37, 38, 39, 40, 41, 42
+    """
+    
+    SIZE_TYPE_CHOICES = [
+    ('clothing', 'Clothing'),      # Shirts, Polos, Jackets, Pants
+    ('footwear', 'Footwear'),      # Shoes
+    ('accessory', 'Accessories'),  # Backpacks, Bags, Belts, Hats
+]
+    
+    size_value = models.CharField(
+        max_length=10,
+        help_text="Size identifier (e.g., 'M', 'XL', '42')"
+    )
+    
+    size_type = models.CharField(
+        max_length=20,
+        choices=SIZE_TYPE_CHOICES,
+        help_text="Category of size: clothing or footwear"
+    )
+    
+    display_order = models.IntegerField(
+        default=0,
+        help_text="Order for dropdown display (smaller numbers appear first)"
+    )
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['size_type', 'display_order']
+        unique_together = ['size_value', 'size_type']
+        verbose_name = "Apparel Size"
+        verbose_name_plural = "Apparel Sizes"
+    
+    def __str__(self):
+        return f"{self.size_value} ({self.get_size_type_display()})"
+
