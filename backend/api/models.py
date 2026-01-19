@@ -440,3 +440,75 @@ class ApparelVariant(models.Model):
     
     def __str__(self):
         return f"{self.product.product_name} - {self.size.size_value} - {self.color.color_name}"
+    
+
+class ApparelTransaction(models.Model):
+    """
+    Tracks all apparel inventory movements for audit trail.
+    Records who took/returned items, when, how many, and why.
+    
+    Transactions are immutable after creation to maintain data integrity.
+    """
+    
+    TRANSACTION_TYPES = [
+        ('take', 'Take'),
+        ('return', 'Return'),
+    ]
+    
+    variant = models.ForeignKey(
+        ApparelVariant,
+        on_delete=models.CASCADE,
+        related_name='transactions',
+        help_text="Specific size/color variant that was taken or returned"
+    )
+    
+    transaction_type = models.CharField(
+        max_length=10,
+        choices=TRANSACTION_TYPES,
+        help_text="Whether items were taken out or returned to stock"
+    )
+    
+    quantity = models.IntegerField(
+        help_text="Number of items taken or returned"
+    )
+    
+    reason = models.ForeignKey(
+        TakeReason,
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+        help_text="Reason for transaction (from standardized list)"
+    )
+    
+    notes = models.TextField(
+        blank=True,
+        help_text="Additional context or details about this transaction"
+    )
+    
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        help_text="User who performed this transaction"
+    )
+    
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        help_text="When this transaction occurred"
+    )
+    
+    stock_before = models.IntegerField(
+        help_text="Stock quantity before this transaction"
+    )
+    
+    stock_after = models.IntegerField(
+        help_text="Stock quantity after this transaction"
+    )
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Apparel Transaction"
+        verbose_name_plural = "Apparel Transactions"
+    
+    def __str__(self):
+        return f"{self.transaction_type.upper()}: {self.quantity}x {self.variant} by {self.created_by}"

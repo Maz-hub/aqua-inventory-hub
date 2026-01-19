@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Gift, GiftCategory, InventoryTransaction, ApparelSize, ApparelColor, TakeReason, ApparelCategory, ApparelProduct, ApparelVariant
+from .models import Gift, GiftCategory, InventoryTransaction, ApparelSize, ApparelColor, TakeReason, ApparelCategory, ApparelProduct, ApparelVariant, ApparelTransaction
 from import_export import resources
 from import_export.admin import ExportMixin
 
@@ -200,3 +200,39 @@ class ApparelVariantAdmin(admin.ModelAdmin):
     )
     
     readonly_fields = ['created_at', 'created_by', 'updated_at', 'updated_by']
+
+
+# ============================================
+# APPAREL TRANSACTION
+# ============================================
+
+@admin.register(ApparelTransaction)
+class ApparelTransactionAdmin(admin.ModelAdmin):
+    """
+    Admin interface for viewing apparel inventory transaction history.
+    Transactions are read-only to maintain audit trail integrity.
+    """
+    list_display = ['variant', 'transaction_type', 'quantity', 'reason', 'created_by', 'created_at', 'stock_before', 'stock_after']
+    list_filter = ['transaction_type', 'reason', 'created_at']
+    search_fields = ['variant__product__product_name', 'notes', 'created_by__username']
+    ordering = ['-created_at']
+    
+    fieldsets = (
+        ('Transaction Details', {
+            'fields': ('variant', 'transaction_type', 'quantity', 'reason', 'notes')
+        }),
+        ('Stock Information', {
+            'fields': ('stock_before', 'stock_after')
+        }),
+        ('Audit Information', {
+            'fields': ('created_by', 'created_at')
+        }),
+    )
+    
+    readonly_fields = ['variant', 'transaction_type', 'quantity', 'reason', 'notes', 'stock_before', 'stock_after', 'created_by', 'created_at']
+    
+    def has_add_permission(self, request):
+        return False
+    
+    def has_delete_permission(self, request, obj=None):
+        return False
