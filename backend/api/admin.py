@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Gift, GiftCategory, InventoryTransaction, ApparelSize, ApparelColor, TakeReason, ApparelCategory, ApparelProduct
+from .models import Gift, GiftCategory, InventoryTransaction, ApparelSize, ApparelColor, TakeReason, ApparelCategory, ApparelProduct, ApparelVariant
 from import_export import resources
 from import_export.admin import ExportMixin
 
@@ -158,6 +158,40 @@ class ApparelProductAdmin(admin.ModelAdmin):
         }),
         ('Internal', {
             'fields': ('notes',)
+        }),
+        ('Audit Trail', {
+            'fields': ('created_at', 'created_by', 'updated_at', 'updated_by'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    readonly_fields = ['created_at', 'created_by', 'updated_at', 'updated_by']
+
+
+# ============================================
+# APPAREL VARIANT
+# ============================================
+
+@admin.register(ApparelVariant)
+class ApparelVariantAdmin(admin.ModelAdmin):
+    """
+    Admin interface for managing size/color variants with stock tracking.
+    Each variant represents a specific size/color combination of a product.
+    """
+    list_display = ['product', 'size', 'color', 'qty_stock', 'minimum_stock_level', 'created_at']
+    list_filter = ['product__category', 'size__size_type', 'color']
+    search_fields = ['product__product_name', 'sku']
+    ordering = ['product', 'size__display_order']
+    
+    fieldsets = (
+        ('Variant Information', {
+            'fields': ('product', 'size', 'color')
+        }),
+        ('Stock Management', {
+            'fields': ('qty_stock', 'minimum_stock_level')
+        }),
+        ('Additional Details', {
+            'fields': ('weight', 'sku')
         }),
         ('Audit Trail', {
             'fields': ('created_at', 'created_by', 'updated_at', 'updated_by'),

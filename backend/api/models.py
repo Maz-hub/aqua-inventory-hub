@@ -362,3 +362,81 @@ class ApparelProduct(models.Model):
     def __str__(self):
         return self.product_name
 
+
+class ApparelVariant(models.Model):
+    """
+    Specific size/color combination of an apparel product with stock tracking.
+    
+    Each variant represents countable inventory units.
+    Example: "361° Staff Polo Blue - Size M - Color Blue" with 35 units in stock.
+    
+    Foreign keys to Size and Color ensure data consistency across multi-cultural team.
+    """
+    
+    product = models.ForeignKey(
+        ApparelProduct,
+        on_delete=models.CASCADE,
+        related_name='variants',
+        help_text="Base product this variant belongs to"
+    )
+    
+    size = models.ForeignKey(
+        ApparelSize,
+        on_delete=models.PROTECT,
+        help_text="Standardized size from predefined list"
+    )
+    
+    color = models.ForeignKey(
+        ApparelColor,
+        on_delete=models.PROTECT,
+        help_text="Standardized color from predefined list"
+    )
+    
+    qty_stock = models.IntegerField(
+        default=0,
+        help_text="Current quantity in stock for this specific size/color"
+    )
+    
+    minimum_stock_level = models.IntegerField(
+        default=5,
+        help_text="Alert threshold for low stock warnings"
+    )
+    
+    weight = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        help_text="Weight in grams (optional, for shipping calculations)"
+    )
+    
+    sku = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Full SKU from 361° if provided"
+    )
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='apparel_variants_created'
+    )
+    
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='apparel_variants_updated'
+    )
+    
+    class Meta:
+        ordering = ['product', 'size__display_order']
+        unique_together = ['product', 'size', 'color']
+        verbose_name = "Apparel Variant"
+        verbose_name_plural = "Apparel Variants"
+    
+    def __str__(self):
+        return f"{self.product.product_name} - {self.size.size_value} - {self.color.color_name}"
