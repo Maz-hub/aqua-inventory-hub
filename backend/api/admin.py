@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Gift, GiftCategory, InventoryTransaction, ApparelSize, ApparelColor, TakeReason, ApparelCategory
+from .models import Gift, GiftCategory, InventoryTransaction, ApparelSize, ApparelColor, TakeReason, ApparelCategory, ApparelProduct
 from import_export import resources
 from import_export.admin import ExportMixin
 
@@ -129,3 +129,40 @@ class ApparelCategoryAdmin(admin.ModelAdmin):
     list_display = ['name', 'created_at']
     search_fields = ['name']
     ordering = ['name']
+
+
+# ============================================
+# APPAREL PRODUCT
+# ============================================
+
+@admin.register(ApparelProduct)
+class ApparelProductAdmin(admin.ModelAdmin):
+    """
+    Admin interface for managing base apparel products.
+    Each product can have multiple size/color variants managed separately.
+    """
+    list_display = ['product_name', 'category', 'gender', 'unit_price', 'item_id', 'created_at']
+    list_filter = ['category', 'gender', 'country_of_origin']
+    search_fields = ['product_name', 'item_id', 'material']
+    ordering = ['product_name']
+    
+    fieldsets = (
+        ('Product Information', {
+            'fields': ('product_name', 'category', 'item_id', 'gender', 'product_image')
+        }),
+        ('Details', {
+            'fields': ('description', 'material')
+        }),
+        ('Pricing & Customs', {
+            'fields': ('unit_price', 'hs_code', 'country_of_origin')
+        }),
+        ('Internal', {
+            'fields': ('notes',)
+        }),
+        ('Audit Trail', {
+            'fields': ('created_at', 'created_by', 'updated_at', 'updated_by'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    readonly_fields = ['created_at', 'created_by', 'updated_at', 'updated_by']

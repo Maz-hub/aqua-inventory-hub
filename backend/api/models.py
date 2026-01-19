@@ -252,3 +252,113 @@ class ApparelCategory(models.Model):
     def __str__(self):
         return self.name
 
+
+  # Apparel Product  
+
+class ApparelProduct(models.Model):
+    """
+    Base apparel product from 361°.
+    Represents the product concept before size/color variations.
+    
+    Example: "361° Staff Polo Blue" is one product with multiple size variants.
+    Stores shared information (price, HS code, photo) that applies to all variants.
+    """
+    
+    GENDER_CHOICES = [
+        ('M', 'Men'),
+        ('W', 'Women'),
+        ('U', 'Unisex'),
+        ('Y', 'Youth'),
+    ]
+    
+    product_name = models.CharField(
+        max_length=200,
+        help_text="Full product name (e.g., '361° Staff Polo Blue')"
+    )
+    
+    category = models.ForeignKey(
+        ApparelCategory,
+        on_delete=models.PROTECT,
+        related_name='products',
+        help_text="Product category for organization and filtering"
+    )
+    
+    item_id = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="361° product code (e.g., 'ZW1050601-2')"
+    )
+    
+    gender = models.CharField(
+        max_length=1,
+        choices=GENDER_CHOICES,
+        default='U',
+        help_text="Target gender for this product"
+    )
+    
+    material = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Fabric composition (e.g., '100% Polyester')"
+    )
+    
+    description = models.TextField(
+        blank=True,
+        help_text="Detailed product description"
+    )
+    
+    hs_code = models.CharField(
+        max_length=20,
+        blank=True,
+        help_text="Harmonized System code for customs"
+    )
+    
+    unit_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0.00,
+        help_text="Price per unit (same for all sizes of this product)"
+    )
+    
+    country_of_origin = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Manufacturing country"
+    )
+    
+    product_image = models.ImageField(
+        upload_to='apparel_images/',
+        blank=True,
+        null=True,
+        help_text="Product photo for visual identification"
+    )
+    
+    notes = models.TextField(
+        blank=True,
+        help_text="Internal notes for staff reference"
+    )
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='apparel_products_created'
+    )
+    
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='apparel_products_updated'
+    )
+    
+    class Meta:
+        ordering = ['product_name']
+        verbose_name = "Apparel Product"
+        verbose_name_plural = "Apparel Products"
+    
+    def __str__(self):
+        return self.product_name
+
