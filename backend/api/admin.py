@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Gift, GiftCategory, InventoryTransaction, ApparelSize, ApparelColor, TakeReason
+from .models import Gift, GiftCategory, InventoryTransaction, ApparelSize, ApparelColor, TakeReason, ApparelCategory
 from import_export import resources
 from import_export.admin import ExportMixin
 
@@ -114,4 +114,18 @@ class TakeReasonAdmin(admin.ModelAdmin):
     list_display = ['reason_name', 'applies_to', 'created_at']
     list_filter = ['applies_to']
     search_fields = ['reason_name']
-    ordering = ['reason_name']    
+    ordering = ['reason_name']
+
+# ============================================
+# APPAREL CATEGORY
+# ============================================
+
+@admin.register(ApparelCategory)
+class ApparelCategoryAdmin(admin.ModelAdmin):
+    """
+    Admin interface for managing apparel product categories.
+    Enables organization and filtering of 361° inventory.
+    """
+    list_display = ['name', 'created_at']
+    search_fields = ['name']
+    ordering = ['name']

@@ -232,5 +232,23 @@ class TakeReason(models.Model):
         verbose_name_plural = "Take Reasons"
     
     def __str__(self):
-        return f"{self.reason_name} ({self.get_applies_to_display()})"    
+        return f"{self.reason_name} ({self.get_applies_to_display()})"
+    
+# Apparel Categories
+
+class ApparelCategory(models.Model):
+    """
+    Categories for apparel inventory organization.
+    Enables filtering and grouping of 361° products by type.
+    """
+    name = models.CharField(max_length=100, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['name']
+        verbose_name = "Apparel Category"
+        verbose_name_plural = "Apparel Categories"
+    
+    def __str__(self):
+        return self.name
 
