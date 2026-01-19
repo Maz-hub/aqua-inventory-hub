@@ -7,13 +7,13 @@ from django.contrib.auth.models import User
 from rest_framework import generics
 # Provides ready-made view classes for common CRUD operations (Create, Read, Update, Delete)
 
-from .serializers import UserSerializer, GiftSerializer, GiftCategorySerializer
+from .serializers import UserSerializer, GiftSerializer, GiftCategorySerializer, TakeReasonSerializer
 # Converts data between Python objects and JSON format for API responses
 
 from rest_framework.permissions import IsAuthenticated, AllowAny
 # Controls API endpoint access: IsAuthenticated requires login, AllowAny allows public access
 
-from .models import Gift, GiftCategory, InventoryTransaction
+from .models import Gift, GiftCategory, InventoryTransaction, TakeReason
 # Import our Gift and GiftCategory models
 
 from rest_framework.decorators import api_view, permission_classes
@@ -97,7 +97,7 @@ def update_gift_stock(request, pk):
     # Get action, quantity, reason, and notes from request
     action = request.data.get('action')  # 'take' or 'return'
     quantity = request.data.get('quantity')
-    reason = request.data.get('reason', '')  # Optional for returns
+    reason_id = request.data.get('reason')  # Now expects TakeReason ID
     notes = request.data.get('notes', '')  # Optional notes
     
     # Validate required fields
@@ -149,11 +149,20 @@ def update_gift_stock(request, pk):
     gift.save()
     
     # Create transaction record for audit trail
+    # Get TakeReason object if reason_id provided
+    take_reason = None
+    if action == 'take' and reason_id:
+        try:
+            from .models import TakeReason
+            take_reason = TakeReason.objects.get(id=reason_id)
+        except TakeReason.DoesNotExist:
+            pass  # Will save transaction with None reason if invalid ID
+    
     InventoryTransaction.objects.create(
         gift=gift,
         transaction_type=action,
         quantity=quantity,
-        reason=reason if action == 'take' else None,  # Only save reason for takes
+        reason=take_reason,  # Now uses TakeReason object
         notes=notes,
         created_by=request.user,
         stock_before=stock_before,
@@ -245,3 +254,19 @@ class CreateUserView(generics.CreateAPIView):
     
     permission_classes = [AllowAny]
     # Allows unauthenticated access - anyone can register without being logged in
+
+
+# ============================================
+# TAKE REASON VIEWS
+# ============================================
+
+class TakeReasonList(generics.ListAPIView):
+    """
+    API endpoint to fetch all available take reasons
+    GET /api/reasons/
+    Used to populate reason dropdowns in Gifts and Apparel forms
+    """
+    
+    serializer_class = TakeReasonSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = TakeReason.objects.all()

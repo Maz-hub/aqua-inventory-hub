@@ -4,7 +4,7 @@ from django.urls import path
 from . import views
 # Import all views from current app (api/views.py)
 
-from .views import update_gift_stock, update_gift
+from .views import update_gift_stock, update_gift, TakeReasonList
 # Explicit imports for function-based views (needed for better IDE support)
 
 
@@ -32,6 +32,8 @@ urlpatterns = [
     # PATCH /api/gifts/update/{id}/ - Update gift product information
     # Used by: EditGiftForm to modify product details, prices, supplier info
     # Handles both file uploads (images) and regular field updates
+
+    path("reasons/", TakeReasonList.as_view(), name="reason-list"),
     
     # ============================================
     # CATEGORY ENDPOINTS

@@ -5,13 +5,33 @@
  * Records who took items, when, how many, and why.
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import api from "../api";
 
 function TakeItemsModal({ gift, onClose, onSuccess }) {
   const [quantity, setQuantity] = useState("");
   const [reason, setReason] = useState("");
   const [notes, setNotes] = useState("");
+  const [reasons, setReasons] = useState([]);
+  const [loadingReasons, setLoadingReasons] = useState(true);
+
+  // Fetch available reasons from backend when modal opens
+  useEffect(() => {
+    api
+      .get("/api/reasons/")
+      .then((res) => {
+        // Filter to show only reasons that apply to Gifts or Both
+        const giftReasons = res.data.filter(
+          (r) => r.applies_to === "gifts" || r.applies_to === "both"
+        );
+        setReasons(giftReasons);
+        setLoadingReasons(false);
+      })
+      .catch((err) => {
+        console.error("Failed to load reasons:", err);
+        setLoadingReasons(false);
+      });
+  }, []);
 
   const handleSubmit = (e) => {
     // Prevent default form submission (stops page reload)
@@ -45,12 +65,10 @@ function TakeItemsModal({ gift, onClose, onSuccess }) {
 
     api
       .patch(`/api/gifts/update-stock/${gift.id}/`, {
-        // PATCH request to update stock endpoint
-        // Sends gift ID in URL and data in request body
-        action: "take", // Tell backend we're taking items (reduces stock)
+        action: "take",
         quantity: parseInt(quantity),
-        reason: reason,
-        notes: notes, // Convert string to number
+        reason: parseInt(reason), // Send reason ID (not string)
+        notes: notes,
       })
       .then((res) => {
         // Success handler - runs if API call succeeds
@@ -66,7 +84,6 @@ function TakeItemsModal({ gift, onClose, onSuccess }) {
       })
       .catch((err) => {
         // Error handler - runs if API call fails
-        // Shows backend error message or generic fallback
         alert(err.response?.data?.error || "Failed to update stock");
       });
   };
@@ -123,24 +140,24 @@ function TakeItemsModal({ gift, onClose, onSuccess }) {
               >
                 Reason *
               </label>
-              <select
-                id="reason"
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                className="form_input"
-                required
-              >
-                <option value="">Select a reason</option>
-                <option value="event">Event</option>
-                <option value="office_use">Office Use</option>
-                <option value="external_gift">
-                  External Gift (e.g. Visitors)
-                </option>
-                <option value="new_employee">New Employee Welcome</option>
-                <option value="damaged">Damaged/Defective</option>
-                <option value="sample">Sample</option>
-                <option value="other">Other</option>
-              </select>
+              {loadingReasons ? (
+                <p className="text-sm text-gray-500">Loading reasons...</p>
+              ) : (
+                <select
+                  id="reason"
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  className="form_input"
+                  required
+                >
+                  <option value="">Select a reason</option>
+                  {reasons.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.reason_name}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
 
             {/* Notes */}

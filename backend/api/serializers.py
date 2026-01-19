@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 # Provides tools to convert complex data types to/from JSON for API communication
 
-from .models import GiftCategory, Gift
+from .models import GiftCategory, Gift, TakeReason
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -95,4 +95,14 @@ class GiftSerializer(serializers.ModelSerializer):
             "updated_by": {"read_only": True},
             # User automatically captured from request on updates
         }
+
+
+class TakeReasonSerializer(serializers.ModelSerializer):
+    """
+    Serializer for TakeReason model.
+    Returns reason data for dropdown population in frontend.
+    """
+    class Meta:
+        model = TakeReason
+        fields = ['id', 'reason_name', 'applies_to']
     
