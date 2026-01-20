@@ -1,6 +1,6 @@
 /**
  * Apparel Inventory Page
- * 
+ *
  * Displays 361° apparel products with size/color variant management.
  * Shows available stock for each size/color combination.
  */
@@ -8,6 +8,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
+import AddApparelProductForm from "../components/AddApparelProductForm";
 import Footer from "../components/Footer";
 
 function Apparel() {
@@ -107,7 +108,7 @@ function Apparel() {
       !selectedClothingSize ||
       (product.variants &&
         product.variants.some(
-          (v) => v.size.id === parseInt(selectedClothingSize)
+          (v) => v.size.id === parseInt(selectedClothingSize),
         ));
 
     // Footwear size filter
@@ -115,7 +116,7 @@ function Apparel() {
       !selectedFootwearSize ||
       (product.variants &&
         product.variants.some(
-          (v) => v.size.id === parseInt(selectedFootwearSize)
+          (v) => v.size.id === parseInt(selectedFootwearSize),
         ));
 
     return (
@@ -251,9 +252,12 @@ function Apparel() {
               ← Cancel
             </button>
             {/* AddApparelProductForm component will go here */}
-            <p className="text-center text-gray-500">
-              Product form coming soon...
-            </p>
+            <AddApparelProductForm
+              onSuccess={() => {
+                fetchProducts();
+                setShowAddForm(false);
+              }}
+            />
           </div>
         )}
       </div>
@@ -278,15 +282,15 @@ function Apparel() {
                 className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden"
               >
                 {/* Product Image */}
-                <div className="h-48 bg-gray-200 flex items-center justify-center">
+                <div className="h-48 bg-white flex items-center justify-center overflow-hidden">
                   {product.product_image ? (
                     <img
                       src={product.product_image.replace(
                         "http://localhost:8000",
-                        ""
+                        "",
                       )}
                       alt={product.product_name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain p-2"
                       onError={(e) => {
                         e.target.style.display = "none";
                       }}
@@ -309,10 +313,10 @@ function Apparel() {
                       {product.gender === "M"
                         ? "Men"
                         : product.gender === "W"
-                        ? "Women"
-                        : product.gender === "U"
-                        ? "Unisex"
-                        : "Youth"}
+                          ? "Women"
+                          : product.gender === "U"
+                            ? "Unisex"
+                            : "Youth"}
                     </span>
                   </div>
 

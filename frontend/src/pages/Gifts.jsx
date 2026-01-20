@@ -173,22 +173,16 @@ function Gifts() {
                 key={gift.id}
                 className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden"
               >
-                <div className="h-48 bg-gray-200 flex items-center justify-center">
+                <div className="h-48 bg-white flex items-center justify-center overflow-hidden">
                   {gift.product_image ? (
                     <>
-                      {/* Remove the temporary console.log once confirmed */}
-                      {console.log(
-                        "Full image URL from API:",
-                        gift.product_image
-                      )}
-
                       <img
                         src={gift.product_image.replace(
                           "http://localhost:8000",
-                          ""
+                          "",
                         )}
                         alt={gift.product_name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain"
                         onError={(e) => {
                           e.target.style.display = "none";
                         }}
