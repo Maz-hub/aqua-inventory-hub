@@ -79,14 +79,17 @@ function Home() {
           </div>
 
           {/* Apparel Inventory Box */}
-          <div className="bg-gray-200 rounded-lg shadow-lg p-8 cursor-not-allowed opacity-75">
+          <div
+            onClick={() => navigate("/apparel")}
+            className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow cursor-pointer border-2 border-transparent hover:border-wa-blue"
+          >
             <div className="text-center">
               <div className="text-6xl mb-4">👕</div>
-              <h2 className="text-2xl font-bold text-gray-600 mb-3">Apparel</h2>
-              <p className="text-gray-500 mb-4">
+              <h2 className="text-2xl font-bold text-wa-navy mb-3">Apparel</h2>
+              <p className="text-gray-600 mb-4">
                 361° clothing for staff and events
               </p>
-              <div className="text-gray-500 font-semibold">Coming Soon</div>
+              <div className="text-wa-blue font-semibold">Manage Inventory</div>
             </div>
           </div>
         </div>
