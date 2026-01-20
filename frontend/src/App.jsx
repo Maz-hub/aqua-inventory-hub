@@ -22,6 +22,7 @@ import Register from "./pages/Register";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import Gifts from "./pages/Gifts";
+import Apparel from "./pages/Apparel";
 // Page components
 
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -71,6 +72,15 @@ function App() {
               {/* Gifts inventory page requires authentication */}
               {/* Displays all promotional items with add/edit/delete functionality */}
               <Gifts />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/apparel"
+          element={
+            <ProtectedRoute>
+              <Apparel />
             </ProtectedRoute>
           }
         />
