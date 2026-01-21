@@ -41,6 +41,7 @@ function Apparel() {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedProductForDetails, setSelectedProductForDetails] =
     useState(null);
+  const [selectedGender, setSelectedGender] = useState("");
 
   // Fetch data on component mount
   useEffect(() => {
@@ -113,6 +114,9 @@ function Apparel() {
     const matchesCategory =
       !selectedCategory || product.category.id === parseInt(selectedCategory);
 
+    // Gender filter
+    const matchesGender = !selectedGender || product.gender === selectedGender;
+
     // Color filter - check if product has any variant with selected color
     const matchesColor =
       !selectedColor ||
@@ -138,6 +142,7 @@ function Apparel() {
     return (
       matchesSearch &&
       matchesCategory &&
+      matchesGender &&
       matchesColor &&
       matchesClothingSize &&
       matchesFootwearSize
@@ -167,10 +172,10 @@ function Apparel() {
 
         {/* Search and Filter Bar - Two Rows */}
         <div className="bg-white p-4 rounded-lg shadow mb-6">
-          {/* Row 1: Search and Category */}
+          {/* Row 1: Search, Category, and Gender */}
           <div className="flex flex-col md:flex-row gap-4 mb-4">
             {/* Search Bar */}
-            <div className="flex-1">
+            <div className="md:flex-1">
               <input
                 type="text"
                 placeholder="Search products..."
@@ -181,7 +186,7 @@ function Apparel() {
             </div>
 
             {/* Category Filter */}
-            <div className="md:w-64">
+            <div className="md:w-48">
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
@@ -195,9 +200,24 @@ function Apparel() {
                 ))}
               </select>
             </div>
+
+            {/* Gender Filter */}
+            <div className="md:w-48">
+              <select
+                value={selectedGender}
+                onChange={(e) => setSelectedGender(e.target.value)}
+                className="form_input"
+              >
+                <option value="">All Genders</option>
+                <option value="U">Unisex</option>
+                <option value="M">Men</option>
+                <option value="W">Women</option>
+                <option value="Y">Youth</option>
+              </select>
+            </div>
           </div>
 
-          {/* Row 2: Color and Size Filters */}
+          {/* Row 2: Color, Size Filters, and Clear Button */}
           <div className="flex flex-col md:flex-row gap-4">
             {/* Color Filter */}
             <div className="md:flex-1">
@@ -245,6 +265,23 @@ function Apparel() {
                   </option>
                 ))}
               </select>
+            </div>
+
+            {/* Clear Filters Button */}
+            <div className="md:w-32">
+              <button
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedCategory("");
+                  setSelectedGender("");
+                  setSelectedColor("");
+                  setSelectedClothingSize("");
+                  setSelectedFootwearSize("");
+                }}
+                className="w-full px-4 py-2 bg-gray-500 text-white rounded-md font-medium hover:bg-gray-600 transition-colors h-full"
+              >
+                Clear
+              </button>
             </div>
           </div>
         </div>
@@ -342,38 +379,56 @@ function Apparel() {
                     </p>
                     {product.variants && product.variants.length > 0 ? (
                       <div className="flex flex-wrap gap-1">
-                        {product.variants.map((variant) => (
-                          <span
-                            key={variant.id}
-                            className={`px-2 py-1 rounded text-xs ${
-                              variant.qty_stock <= variant.minimum_stock_level
-                                ? "bg-red-100 text-red-700 border-2 border-red-400"
-                                : ""
-                            }`}
-                            style={{
-                              backgroundColor:
-                                variant.qty_stock > variant.minimum_stock_level
-                                  ? `${variant.color.hex_code}40`
-                                  : undefined,
-                              color:
-                                variant.qty_stock > variant.minimum_stock_level
-                                  ? "#1f2937"
-                                  : undefined,
-                              border:
-                                variant.qty_stock > variant.minimum_stock_level
-                                  ? `1px solid ${variant.color.hex_code}`
-                                  : undefined,
-                            }}
-                          >
-                            {variant.color.color_name} -{" "}
-                            {variant.size.size_value} - (
-                            <span className="font-bold">
-                              {variant.qty_stock}
+                        {product.variants
+                          .sort((a, b) => {
+                            // First sort by color name
+                            const colorCompare =
+                              a.color.color_name.localeCompare(
+                                b.color.color_name,
+                              );
+                            if (colorCompare !== 0) return colorCompare;
+                            // Then sort by size display order within same color
+                            return a.size.display_order - b.size.display_order;
+                          })
+                          .map((variant) => (
+                            <span
+                              key={variant.id}
+                              className={`px-2 py-1 rounded text-xs ${
+                                variant.qty_stock <= variant.minimum_stock_level
+                                  ? "bg-red-100 text-red-700 border-2 border-red-400"
+                                  : ""
+                              }`}
+                              style={{
+                                backgroundColor:
+                                  variant.qty_stock >
+                                  variant.minimum_stock_level
+                                    ? `${variant.color.hex_code}40`
+                                    : undefined,
+                                color:
+                                  variant.qty_stock >
+                                  variant.minimum_stock_level
+                                    ? "#1f2937"
+                                    : undefined,
+                                border:
+                                  variant.qty_stock >
+                                  variant.minimum_stock_level
+                                    ? variant.color.hex_code.toLowerCase() ===
+                                        "#ffffff" ||
+                                      variant.color.hex_code.toLowerCase() ===
+                                        "#fff"
+                                      ? "1px solid #9ca3af"
+                                      : `1px solid ${variant.color.hex_code}`
+                                    : undefined,
+                              }}
+                            >
+                              {variant.color.color_name} -{" "}
+                              {variant.size.size_value} - (
+                              <span className="font-bold">
+                                {variant.qty_stock}
+                              </span>
+                              )
                             </span>
-                            )
-                          </span>
-                        ))}
-                        {/* ← TO HERE */}
+                          ))}
                       </div>
                     ) : (
                       <p className="text-xs text-gray-500">No variants yet</p>
