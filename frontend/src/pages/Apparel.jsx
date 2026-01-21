@@ -42,6 +42,7 @@ function Apparel() {
   const [selectedProductForDetails, setSelectedProductForDetails] =
     useState(null);
   const [selectedGender, setSelectedGender] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
 
   // Fetch data on component mount
   useEffect(() => {
@@ -172,116 +173,130 @@ function Apparel() {
 
         {/* Search and Filter Bar - Two Rows */}
         <div className="bg-white p-4 rounded-lg shadow mb-6">
-          {/* Row 1: Search, Category, and Gender */}
-          <div className="flex flex-col md:flex-row gap-4 mb-4">
-            {/* Search Bar */}
-            <div className="md:flex-1">
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="form_input"
-              />
+          {/* Mobile: Show Filters Button */}
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="md:hidden w-full flex items-center justify-between px-4 py-2 bg-wa-navy text-white rounded-md font-medium mb-4"
+          >
+            <span>Filters</span>
+            <span className="text-xl">{showFilters ? "−" : "+"}</span>
+          </button>
+
+          {/* Filter Controls - Hidden on mobile unless showFilters is true */}
+          <div
+            className={`${showFilters ? "block" : "hidden"} md:block space-y-4`}
+          >
+            {/* Row 1: Search, Category, and Gender */}
+            <div className="flex flex-col md:flex-row gap-4">
+              {/* Search Bar */}
+              <div className="md:flex-1">
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="form_input"
+                />
+              </div>
+
+              {/* Category Filter */}
+              <div className="md:w-48">
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="form_input"
+                >
+                  <option value="">All Categories</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Gender Filter */}
+              <div className="md:w-48">
+                <select
+                  value={selectedGender}
+                  onChange={(e) => setSelectedGender(e.target.value)}
+                  className="form_input"
+                >
+                  <option value="">All Genders</option>
+                  <option value="U">Unisex</option>
+                  <option value="M">Men</option>
+                  <option value="W">Women</option>
+                  <option value="Y">Youth</option>
+                </select>
+              </div>
             </div>
 
-            {/* Category Filter */}
-            <div className="md:w-48">
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="form_input"
-              >
-                <option value="">All Categories</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* Row 2: Color, Size Filters, and Clear Button */}
+            <div className="flex flex-col md:flex-row gap-4">
+              {/* Color Filter */}
+              <div className="md:flex-1">
+                <select
+                  value={selectedColor}
+                  onChange={(e) => setSelectedColor(e.target.value)}
+                  className="form_input"
+                >
+                  <option value="">All Colors</option>
+                  {colors.map((color) => (
+                    <option key={color.id} value={color.id}>
+                      {color.color_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            {/* Gender Filter */}
-            <div className="md:w-48">
-              <select
-                value={selectedGender}
-                onChange={(e) => setSelectedGender(e.target.value)}
-                className="form_input"
-              >
-                <option value="">All Genders</option>
-                <option value="U">Unisex</option>
-                <option value="M">Men</option>
-                <option value="W">Women</option>
-                <option value="Y">Youth</option>
-              </select>
-            </div>
-          </div>
+              {/* Clothing Size Filter */}
+              <div className="md:flex-1">
+                <select
+                  value={selectedClothingSize}
+                  onChange={(e) => setSelectedClothingSize(e.target.value)}
+                  className="form_input"
+                >
+                  <option value="">All Clothing Sizes</option>
+                  {clothingSizes.map((size) => (
+                    <option key={size.id} value={size.id}>
+                      {size.size_value}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-          {/* Row 2: Color, Size Filters, and Clear Button */}
-          <div className="flex flex-col md:flex-row gap-4">
-            {/* Color Filter */}
-            <div className="md:flex-1">
-              <select
-                value={selectedColor}
-                onChange={(e) => setSelectedColor(e.target.value)}
-                className="form_input"
-              >
-                <option value="">All Colors</option>
-                {colors.map((color) => (
-                  <option key={color.id} value={color.id}>
-                    {color.color_name}
-                  </option>
-                ))}
-              </select>
-            </div>
+              {/* Footwear Size Filter */}
+              <div className="md:flex-1">
+                <select
+                  value={selectedFootwearSize}
+                  onChange={(e) => setSelectedFootwearSize(e.target.value)}
+                  className="form_input"
+                >
+                  <option value="">All Footwear Sizes</option>
+                  {footwearSizes.map((size) => (
+                    <option key={size.id} value={size.id}>
+                      {size.size_value}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            {/* Clothing Size Filter */}
-            <div className="md:flex-1">
-              <select
-                value={selectedClothingSize}
-                onChange={(e) => setSelectedClothingSize(e.target.value)}
-                className="form_input"
-              >
-                <option value="">All Clothing Sizes</option>
-                {clothingSizes.map((size) => (
-                  <option key={size.id} value={size.id}>
-                    {size.size_value}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Footwear Size Filter */}
-            <div className="md:flex-1">
-              <select
-                value={selectedFootwearSize}
-                onChange={(e) => setSelectedFootwearSize(e.target.value)}
-                className="form_input"
-              >
-                <option value="">All Footwear Sizes</option>
-                {footwearSizes.map((size) => (
-                  <option key={size.id} value={size.id}>
-                    {size.size_value}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Clear Filters Button */}
-            <div className="md:w-32">
-              <button
-                onClick={() => {
-                  setSearchTerm("");
-                  setSelectedCategory("");
-                  setSelectedGender("");
-                  setSelectedColor("");
-                  setSelectedClothingSize("");
-                  setSelectedFootwearSize("");
-                }}
-                className="w-full px-4 py-2 bg-gray-500 text-white rounded-md font-medium hover:bg-gray-600 transition-colors h-full"
-              >
-                Clear
-              </button>
+              {/* Clear Filters Button */}
+              <div className="md:w-32">
+                <button
+                  onClick={() => {
+                    setSearchTerm("");
+                    setSelectedCategory("");
+                    setSelectedGender("");
+                    setSelectedColor("");
+                    setSelectedClothingSize("");
+                    setSelectedFootwearSize("");
+                  }}
+                  className="w-full px-4 py-2 bg-gray-500 text-white rounded-md font-medium hover:bg-gray-600 transition-colors h-full"
+                >
+                  Clear
+                </button>
+              </div>
             </div>
           </div>
         </div>
