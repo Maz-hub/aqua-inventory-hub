@@ -11,6 +11,7 @@ import api from "../api";
 import AddApparelProductForm from "../components/AddApparelProductForm";
 import AddVariantModal from "../components/AddVariantModal";
 import TakeApparelModal from "../components/TakeApparelModal";
+import ReturnApparelModal from "../components/ReturnApparelModal";
 
 import Footer from "../components/Footer";
 
@@ -33,6 +34,9 @@ function Apparel() {
     useState(null);
   const [showTakeModal, setShowTakeModal] = useState(false);
   const [selectedProductForTake, setSelectedProductForTake] = useState(null);
+  const [showReturnModal, setShowReturnModal] = useState(false);
+  const [selectedProductForReturn, setSelectedProductForReturn] =
+    useState(null);
 
   // Fetch data on component mount
   useEffect(() => {
@@ -396,7 +400,15 @@ function Apparel() {
                       >
                         Take
                       </button>
-                      <button className="btn_return">Return</button>
+                      <button
+                        onClick={() => {
+                          setSelectedProductForReturn(product);
+                          setShowReturnModal(true);
+                        }}
+                        className="btn_return"
+                      >
+                        Return
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -417,18 +429,6 @@ function Apparel() {
         />
       )}
 
-      {/* Add Variant Modal */}
-      {showAddVariantModal && selectedProductForVariant && (
-        <AddVariantModal
-          product={selectedProductForVariant}
-          onClose={() => {
-            setShowAddVariantModal(false);
-            setSelectedProductForVariant(null);
-          }}
-          onSuccess={fetchProducts}
-        />
-      )}
-
       {/* Take Apparel Modal */}
       {showTakeModal && selectedProductForTake && (
         <TakeApparelModal
@@ -436,6 +436,17 @@ function Apparel() {
           onClose={() => {
             setShowTakeModal(false);
             setSelectedProductForTake(null);
+          }}
+          onSuccess={fetchProducts}
+        />
+      )}
+      {/* Return Apparel Modal */}
+      {showReturnModal && selectedProductForReturn && (
+        <ReturnApparelModal
+          product={selectedProductForReturn}
+          onClose={() => {
+            setShowReturnModal(false);
+            setSelectedProductForReturn(null);
           }}
           onSuccess={fetchProducts}
         />
