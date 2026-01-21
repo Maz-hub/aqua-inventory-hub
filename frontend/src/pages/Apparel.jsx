@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../api";
 import AddApparelProductForm from "../components/AddApparelProductForm";
 import AddVariantModal from "../components/AddVariantModal";
+import TakeApparelModal from "../components/TakeApparelModal";
 
 import Footer from "../components/Footer";
 
@@ -30,6 +31,8 @@ function Apparel() {
   const [showAddVariantModal, setShowAddVariantModal] = useState(false);
   const [selectedProductForVariant, setSelectedProductForVariant] =
     useState(null);
+  const [showTakeModal, setShowTakeModal] = useState(false);
+  const [selectedProductForTake, setSelectedProductForTake] = useState(null);
 
   // Fetch data on component mount
   useEffect(() => {
@@ -384,7 +387,15 @@ function Apparel() {
                     </button>
 
                     <div className="flex gap-2">
-                      <button className="btn_take">Take</button>
+                      <button
+                        onClick={() => {
+                          setSelectedProductForTake(product);
+                          setShowTakeModal(true);
+                        }}
+                        className="btn_take"
+                      >
+                        Take
+                      </button>
                       <button className="btn_return">Return</button>
                     </div>
                   </div>
@@ -401,6 +412,30 @@ function Apparel() {
           onClose={() => {
             setShowAddVariantModal(false);
             setSelectedProductForVariant(null);
+          }}
+          onSuccess={fetchProducts}
+        />
+      )}
+
+      {/* Add Variant Modal */}
+      {showAddVariantModal && selectedProductForVariant && (
+        <AddVariantModal
+          product={selectedProductForVariant}
+          onClose={() => {
+            setShowAddVariantModal(false);
+            setSelectedProductForVariant(null);
+          }}
+          onSuccess={fetchProducts}
+        />
+      )}
+
+      {/* Take Apparel Modal */}
+      {showTakeModal && selectedProductForTake && (
+        <TakeApparelModal
+          product={selectedProductForTake}
+          onClose={() => {
+            setShowTakeModal(false);
+            setSelectedProductForTake(null);
           }}
           onSuccess={fetchProducts}
         />
