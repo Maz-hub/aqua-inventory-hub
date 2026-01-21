@@ -128,7 +128,7 @@ function AddApparelProductForm({ onSuccess }) {
             value={productName}
             onChange={(e) => setProductName(e.target.value)}
             className="form_input"
-            placeholder="e.g., 361° Staff Polo Blue"
+            placeholder="e.g., 361° Staff Polo Green"
           />
         </div>
 

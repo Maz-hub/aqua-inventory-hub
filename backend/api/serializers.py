@@ -145,12 +145,8 @@ class ApparelCategorySerializer(serializers.ModelSerializer):
 
 
 class ApparelVariantSerializer(serializers.ModelSerializer):
-    """
-    Serializer for apparel variants (size/color combinations).
-    Includes nested size and color details for display.
-    """
-    size = ApparelSizeSerializer(read_only=True) # For GET requests (reading)
-    color = ApparelColorSerializer(read_only=True) # For POST (creating)
+    size = ApparelSizeSerializer(read_only=True)
+    color = ApparelColorSerializer(read_only=True)
     size_id = serializers.PrimaryKeyRelatedField(
         queryset=ApparelSize.objects.all(),
         source='size',
@@ -161,11 +157,16 @@ class ApparelVariantSerializer(serializers.ModelSerializer):
         source='color',
         write_only=True
     )
+    product_id = serializers.PrimaryKeyRelatedField(  
+        queryset=ApparelProduct.objects.all(),
+        source='product',
+        write_only=True
+    )
     
     class Meta:
         model = ApparelVariant
         fields = [
-            'id', 'size', 'color', 'size_id', 'color_id',
+            'id', 'size', 'color', 'size_id', 'color_id', 'product_id',
             'qty_stock', 'minimum_stock_level', 'weight', 'sku',
             'created_at'
         ]

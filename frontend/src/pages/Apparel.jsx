@@ -9,6 +9,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
 import AddApparelProductForm from "../components/AddApparelProductForm";
+import AddVariantModal from "../components/AddVariantModal";
+
 import Footer from "../components/Footer";
 
 function Apparel() {
@@ -25,6 +27,9 @@ function Apparel() {
   const [footwearSizes, setFootwearSizes] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const navigate = useNavigate();
+  const [showAddVariantModal, setShowAddVariantModal] = useState(false);
+  const [selectedProductForVariant, setSelectedProductForVariant] =
+    useState(null);
 
   // Fetch data on component mount
   useEffect(() => {
@@ -251,7 +256,6 @@ function Apparel() {
             >
               ← Cancel
             </button>
-            {/* AddApparelProductForm component will go here */}
             <AddApparelProductForm
               onSuccess={() => {
                 fetchProducts();
@@ -275,7 +279,7 @@ function Apparel() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
             {filteredProducts.map((product) => (
               <div
                 key={product.id}
@@ -332,13 +336,33 @@ function Apparel() {
                             key={variant.id}
                             className={`px-2 py-1 rounded text-xs ${
                               variant.qty_stock <= variant.minimum_stock_level
-                                ? "bg-red-100 text-red-700"
-                                : "bg-gray-100 text-gray-700"
+                                ? "bg-red-100 text-red-700 border-2 border-red-400"
+                                : ""
                             }`}
+                            style={{
+                              backgroundColor:
+                                variant.qty_stock > variant.minimum_stock_level
+                                  ? `${variant.color.hex_code}40`
+                                  : undefined,
+                              color:
+                                variant.qty_stock > variant.minimum_stock_level
+                                  ? "#1f2937"
+                                  : undefined,
+                              border:
+                                variant.qty_stock > variant.minimum_stock_level
+                                  ? `1px solid ${variant.color.hex_code}`
+                                  : undefined,
+                            }}
                           >
-                            {variant.size.size_value} ({variant.qty_stock})
+                            {variant.color.color_name} -{" "}
+                            {variant.size.size_value} - (
+                            <span className="font-bold">
+                              {variant.qty_stock}
+                            </span>
+                            )
                           </span>
                         ))}
+                        {/* ← TO HERE */}
                       </div>
                     ) : (
                       <p className="text-xs text-gray-500">No variants yet</p>
@@ -348,6 +372,16 @@ function Apparel() {
                   {/* Action Buttons */}
                   <div className="space-y-2 mt-4">
                     <button className="btn_main">View Details</button>
+
+                    <button
+                      onClick={() => {
+                        setSelectedProductForVariant(product);
+                        setShowAddVariantModal(true);
+                      }}
+                      className="w-full bg-wa-cyan text-white px-4 py-2 rounded-md font-medium hover:bg-cyan-600 transition-colors"
+                    >
+                      + Add Size/Color
+                    </button>
 
                     <div className="flex gap-2">
                       <button className="btn_take">Take</button>
@@ -360,6 +394,17 @@ function Apparel() {
           </div>
         )}
       </div>
+      {/* Add Variant Modal */}
+      {showAddVariantModal && selectedProductForVariant && (
+        <AddVariantModal
+          product={selectedProductForVariant}
+          onClose={() => {
+            setShowAddVariantModal(false);
+            setSelectedProductForVariant(null);
+          }}
+          onSuccess={fetchProducts}
+        />
+      )}
     </div>
   );
 }
