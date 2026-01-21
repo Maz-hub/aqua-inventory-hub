@@ -101,7 +101,7 @@ function Gifts() {
             </div>
 
             {/* Category Filter */}
-            <div className="md:w-64">
+            <div>
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
@@ -127,6 +127,20 @@ function Gifts() {
             >
               {showLowStockOnly ? "✓ Low Stock Only" : "Show Low Stock"}
             </button>
+
+            {/* Clear Filters Button */}
+            <div className="md:w-32">
+              <button
+                onClick={() => {
+                  setSearchQuery("");
+                  setSelectedCategory("");
+                  setShowLowStockOnly(false);
+                }}
+                className="w-full px-4 py-2 bg-gray-500 text-white rounded-md font-medium hover:bg-gray-600 transition-colors h-full"
+              >
+                Clear
+              </button>
+            </div>
           </div>
         </div>
 
