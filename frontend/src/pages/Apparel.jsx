@@ -12,6 +12,7 @@ import AddApparelProductForm from "../components/AddApparelProductForm";
 import AddVariantModal from "../components/AddVariantModal";
 import TakeApparelModal from "../components/TakeApparelModal";
 import ReturnApparelModal from "../components/ReturnApparelModal";
+import ApparelDetailsModal from "../components/ApparelDetailsModal";
 
 import Footer from "../components/Footer";
 
@@ -36,6 +37,9 @@ function Apparel() {
   const [selectedProductForTake, setSelectedProductForTake] = useState(null);
   const [showReturnModal, setShowReturnModal] = useState(false);
   const [selectedProductForReturn, setSelectedProductForReturn] =
+    useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedProductForDetails, setSelectedProductForDetails] =
     useState(null);
 
   // Fetch data on component mount
@@ -378,7 +382,15 @@ function Apparel() {
 
                   {/* Action Buttons */}
                   <div className="space-y-2 mt-4">
-                    <button className="btn_main">View Details</button>
+                    <button
+                      onClick={() => {
+                        setSelectedProductForDetails(product);
+                        setShowDetailsModal(true);
+                      }}
+                      className="btn_main"
+                    >
+                      View Details
+                    </button>
 
                     <button
                       onClick={() => {
@@ -447,6 +459,17 @@ function Apparel() {
           onClose={() => {
             setShowReturnModal(false);
             setSelectedProductForReturn(null);
+          }}
+          onSuccess={fetchProducts}
+        />
+      )}
+      {/* Apparel Details Modal */}
+      {showDetailsModal && selectedProductForDetails && (
+        <ApparelDetailsModal
+          product={selectedProductForDetails}
+          onClose={() => {
+            setShowDetailsModal(false);
+            setSelectedProductForDetails(null);
           }}
           onSuccess={fetchProducts}
         />
