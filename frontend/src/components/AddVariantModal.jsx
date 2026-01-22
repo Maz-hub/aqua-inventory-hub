@@ -10,19 +10,15 @@ import api from "../api";
 
 function AddVariantModal({ product, onClose, onSuccess }) {
   const [sizeId, setSizeId] = useState("");
-  const [colorId, setColorId] = useState("");
   const [gender, setGender] = useState("U");
   const [qtyStock, setQtyStock] = useState("");
   const [minimumStockLevel, setMinimumStockLevel] = useState("5");
   const [sizes, setSizes] = useState([]);
-  const [colors, setColors] = useState([]);
   const [loadingSizes, setLoadingSizes] = useState(true);
-  const [loadingColors, setLoadingColors] = useState(true);
 
-  // Fetch sizes and colors when modal opens
+  // Fetch sizes  when modal opens
   useEffect(() => {
     fetchSizes();
-    fetchColors();
   }, []);
 
   const fetchSizes = () => {
@@ -39,26 +35,12 @@ function AddVariantModal({ product, onClose, onSuccess }) {
       });
   };
 
-  const fetchColors = () => {
-    api
-      .get("/api/apparel/colors/")
-      .then((res) => {
-        setColors(res.data);
-        setLoadingColors(false);
-      })
-      .catch((err) => {
-        console.error("Failed to load colors:", err);
-        alert("Failed to load colors");
-        setLoadingColors(false);
-      });
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
 
     // Validation
-    if (!sizeId || !colorId) {
-      alert("Please select both size and color");
+    if (!sizeId) {
+      alert("Please select a size");
       return;
     }
 
@@ -72,7 +54,7 @@ function AddVariantModal({ product, onClose, onSuccess }) {
       .post("/api/apparel/variants/", {
         product_id: product.id,
         size_id: parseInt(sizeId),
-        color_id: parseInt(colorId),
+        color_id: product.primary_color.id,
         gender: gender,
         qty_stock: parseInt(qtyStock),
         minimum_stock_level: parseInt(minimumStockLevel),
@@ -192,32 +174,17 @@ function AddVariantModal({ product, onClose, onSuccess }) {
               )}
             </div>
 
-            {/* Color Selection */}
-            <div>
-              <label
-                htmlFor="color"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Color *
-              </label>
-              {loadingColors ? (
-                <p className="text-sm text-gray-500">Loading colors...</p>
-              ) : (
-                <select
-                  id="color"
-                  value={colorId}
-                  onChange={(e) => setColorId(e.target.value)}
-                  className="form_input"
-                  required
-                >
-                  <option value="">Select a color</option>
-                  {colors.map((color) => (
-                    <option key={color.id} value={color.id}>
-                      {color.color_name}
-                    </option>
-                  ))}
-                </select>
-              )}
+            {/* Color Display (from product) */}
+            <div className="bg-gray-50 p-3 rounded border">
+              <p className="text-sm text-gray-600 mb-1">Color</p>
+              <p className="font-semibold text-wa-navy">
+                {product.primary_color
+                  ? product.primary_color.color_name
+                  : "No color set"}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                (Inherited from product)
+              </p>
             </div>
 
             {/* Gender Selection */}

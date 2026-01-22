@@ -382,77 +382,98 @@ function Apparel() {
                       : "Not Set"}
                   </div>
 
-                  {/* Variants Display */}
+                  {/* Variants Display - Grouped by Gender */}
                   <div className="border-t pt-3 mt-3">
                     <p className="text-xs font-semibold text-gray-700 mb-2">
                       Available Sizes:
                     </p>
                     {product.variants && product.variants.length > 0 ? (
-                      <div className="flex flex-wrap gap-1">
-                        {product.variants
-                          .sort((a, b) => {
-                            // First sort by color name
-                            const colorCompare =
-                              a.color.color_name.localeCompare(
-                                b.color.color_name,
-                              );
-                            if (colorCompare !== 0) return colorCompare;
+                      <div className="space-y-3">
+                        {/* Group variants by gender */}
+                        {["U", "M", "W", "Y"].map((genderCode) => {
+                          const genderVariants = product.variants
+                            .filter((v) => v.gender === genderCode)
+                            .sort(
+                              (a, b) =>
+                                a.size.display_order - b.size.display_order,
+                            );
 
-                            return a.size.display_order - b.size.display_order;
-                          })
-                          .map((variant) => (
-                            <span
-                              key={variant.id}
-                              className={`px-2 py-1 rounded text-xs ${
-                                variant.qty_stock <= variant.minimum_stock_level
-                                  ? "bg-red-100 text-red-700 border-2 border-red-400"
-                                  : ""
-                              }`}
-                              style={{
-                                backgroundColor:
-                                  variant.qty_stock >
-                                    variant.minimum_stock_level &&
-                                  product.primary_color
-                                    ? `${product.primary_color.hex_code}40`
-                                    : variant.qty_stock >
-                                        variant.minimum_stock_level
-                                      ? "#e5e7eb40"
-                                      : undefined,
-                                color:
-                                  variant.qty_stock >
-                                  variant.minimum_stock_level
-                                    ? "#1f2937"
-                                    : undefined,
-                                border:
-                                  variant.qty_stock >
-                                    variant.minimum_stock_level &&
-                                  product.primary_color
-                                    ? product.primary_color.hex_code.toLowerCase() ===
-                                        "#ffffff" ||
-                                      product.primary_color.hex_code.toLowerCase() ===
-                                        "#fff"
-                                      ? "1px solid #9ca3af"
-                                      : `1px solid ${product.primary_color.hex_code}`
-                                    : variant.qty_stock >
-                                        variant.minimum_stock_level
-                                      ? "1px solid #d1d5db"
-                                      : undefined,
-                              }}
-                            >
-                              {variant.gender === "M"
+                          if (genderVariants.length === 0) return null;
+
+                          const genderLabel =
+                            genderCode === "U"
+                              ? "Unisex"
+                              : genderCode === "M"
                                 ? "Men"
-                                : variant.gender === "W"
+                                : genderCode === "W"
                                   ? "Women"
-                                  : variant.gender === "U"
-                                    ? "Unisex"
-                                    : "Youth"}{" "}
-                              - {variant.size.size_value} - (
-                              <span className="font-bold">
-                                {variant.qty_stock}
-                              </span>
-                              )
-                            </span>
-                          ))}
+                                  : "Youth";
+
+                          return (
+                            <div key={genderCode}>
+                              {/* Gender Label */}
+                              <p className="text-xs font-medium text-gray-500 mb-1">
+                                {genderLabel}:
+                              </p>
+
+                              {/* Size Badges */}
+                              <div className="flex flex-wrap gap-1">
+                                {genderVariants.map((variant) => (
+                                  <span
+                                    key={variant.id}
+                                    className={`px-2 py-1 rounded text-xs ${
+                                      variant.qty_stock <=
+                                      variant.minimum_stock_level
+                                        ? "bg-red-100 text-red-700 border-2 border-red-400"
+                                        : ""
+                                    }`}
+                                    style={{
+                                      backgroundColor:
+                                        variant.qty_stock >
+                                          variant.minimum_stock_level &&
+                                        product.primary_color
+                                          ? `${product.primary_color.hex_code}40`
+                                          : variant.qty_stock >
+                                              variant.minimum_stock_level
+                                            ? "#e5e7eb40"
+                                            : undefined,
+                                      color:
+                                        variant.qty_stock >
+                                        variant.minimum_stock_level
+                                          ? "#1f2937"
+                                          : undefined,
+                                      border:
+                                        variant.qty_stock >
+                                          variant.minimum_stock_level &&
+                                        product.primary_color
+                                          ? product.primary_color.hex_code.toLowerCase() ===
+                                              "#ffffff" ||
+                                            product.primary_color.hex_code.toLowerCase() ===
+                                              "#fff"
+                                            ? "1px solid #9ca3af"
+                                            : `1px solid ${product.primary_color.hex_code}`
+                                          : variant.qty_stock >
+                                              variant.minimum_stock_level
+                                            ? "1px solid #d1d5db"
+                                            : undefined,
+                                    }}
+                                  >
+                                    {variant.size.size_value} - (
+                                    <span className="font-bold">
+                                      {variant.qty_stock}
+                                    </span>
+                                    )
+                                  </span>
+                                ))}
+                              </div>
+
+                              {/* Visual Separator (except for last group) */}
+                              {genderCode !== "Y" && (
+                                <div className="border-b border-gray-200 mt-2"></div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     ) : (
                       <p className="text-xs text-gray-500">No variants yet</p>
