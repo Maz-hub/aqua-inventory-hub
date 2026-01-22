@@ -148,7 +148,7 @@ class ApparelProductAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('Product Information', {
-            'fields': ('product_name', 'category', 'item_id', 'gender', 'product_image')
+            'fields': ('product_name', 'category', 'item_id', 'product_image')
         }),
         ('Details', {
             'fields': ('description', 'material')
