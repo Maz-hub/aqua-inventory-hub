@@ -11,6 +11,7 @@ import api from "../api";
 function AddVariantModal({ product, onClose, onSuccess }) {
   const [sizeId, setSizeId] = useState("");
   const [colorId, setColorId] = useState("");
+  const [gender, setGender] = useState("U");
   const [qtyStock, setQtyStock] = useState("");
   const [minimumStockLevel, setMinimumStockLevel] = useState("5");
   const [sizes, setSizes] = useState([]);
@@ -72,6 +73,7 @@ function AddVariantModal({ product, onClose, onSuccess }) {
         product_id: product.id,
         size_id: parseInt(sizeId),
         color_id: parseInt(colorId),
+        gender: gender,
         qty_stock: parseInt(qtyStock),
         minimum_stock_level: parseInt(minimumStockLevel),
       })
@@ -109,7 +111,7 @@ function AddVariantModal({ product, onClose, onSuccess }) {
           <div className="flex justify-between items-start mb-4">
             <div>
               <h2 className="text-2xl font-bold text-wa-navy">
-                Add Size/Color Variant
+                Add Size/Color/Gender Variant
               </h2>
               <p className="text-sm text-gray-600 mt-1">
                 {product.product_name}
@@ -216,6 +218,31 @@ function AddVariantModal({ product, onClose, onSuccess }) {
                   ))}
                 </select>
               )}
+            </div>
+
+            {/* Gender Selection */}
+            <div>
+              <label
+                htmlFor="gender"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Gender Fit *
+              </label>
+              <select
+                id="gender"
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+                className="form_input"
+                required
+              >
+                <option value="U">Unisex</option>
+                <option value="M">Men</option>
+                <option value="W">Women</option>
+                <option value="Y">Youth</option>
+              </select>
+              <p className="text-sm text-gray-500 mt-1">
+                Physical fit type (Men's M vs Women's M sizing)
+              </p>
             </div>
 
             {/* Initial Stock Quantity */}

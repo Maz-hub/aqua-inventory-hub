@@ -10,10 +10,13 @@ import api from "../api";
 
 function EditApparelProductForm({ product, onSuccess, onCancel }) {
   const [categories, setCategories] = useState([]);
+  const [colors, setColors] = useState([]);
   const [productName, setProductName] = useState(product.product_name);
   const [categoryId, setCategoryId] = useState(product.category.id);
   const [itemId, setItemId] = useState(product.item_id || "");
-  const [gender, setGender] = useState(product.gender);
+  const [primaryColorId, setPrimaryColorId] = useState(
+    product.primary_color?.id || "",
+  );
   const [material, setMaterial] = useState(product.material || "");
   const [description, setDescription] = useState(product.description || "");
   const [hsCode, setHsCode] = useState(product.hs_code || "");
@@ -26,6 +29,7 @@ function EditApparelProductForm({ product, onSuccess, onCancel }) {
 
   useEffect(() => {
     getCategories();
+    getColors();
   }, []);
 
   const getCategories = () => {
@@ -38,6 +42,16 @@ function EditApparelProductForm({ product, onSuccess, onCancel }) {
       });
   };
 
+  const getColors = () => {
+    api
+      .get("/api/apparel/colors/")
+      .then((res) => setColors(res.data))
+      .catch((err) => {
+        console.error("Failed to load colors:", err);
+        alert("Failed to load colors");
+      });
+  };
+
   const updateProduct = (e) => {
     e.preventDefault();
 
@@ -46,7 +60,9 @@ function EditApparelProductForm({ product, onSuccess, onCancel }) {
     formData.append("product_name", productName);
     formData.append("category_id", categoryId);
     formData.append("item_id", itemId);
-    formData.append("gender", gender);
+    if (primaryColorId) {
+      formData.append("primary_color_id", primaryColorId);
+    }
     formData.append("material", material);
     formData.append("description", description);
     formData.append("hs_code", hsCode);
@@ -152,24 +168,30 @@ function EditApparelProductForm({ product, onSuccess, onCancel }) {
 
         <div>
           <label
-            htmlFor="gender"
+            htmlFor="primaryColor"
             className="block text-sm font-medium text-gray-700 mb-2"
           >
-            Gender *
+            Primary Color
           </label>
           <select
-            id="gender"
-            required
-            value={gender}
-            onChange={(e) => setGender(e.target.value)}
+            id="primaryColor"
+            value={primaryColorId}
+            onChange={(e) => setPrimaryColorId(e.target.value)}
             className="form_input"
           >
-            <option value="U">Unisex</option>
-            <option value="M">Men</option>
-            <option value="W">Women</option>
-            <option value="Y">Youth</option>
+            <option value="">Select primary color (optional)</option>
+            {colors.map((color) => (
+              <option key={color.id} value={color.id}>
+                {color.color_name}
+              </option>
+            ))}
           </select>
+          <p className="text-sm text-gray-500 mt-1">
+            The main color shown in the product image (determines badge
+            background)
+          </p>
         </div>
+        {/* ← END NEW BLOCK */}
 
         <div>
           <label

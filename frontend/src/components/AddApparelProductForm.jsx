@@ -14,7 +14,6 @@ function AddApparelProductForm({ onSuccess }) {
   const [productName, setProductName] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [itemId, setItemId] = useState("");
-  const [gender, setGender] = useState("U");
   const [material, setMaterial] = useState("");
   const [description, setDescription] = useState("");
   const [hsCode, setHsCode] = useState("");
@@ -22,18 +21,30 @@ function AddApparelProductForm({ onSuccess }) {
   const [countryOfOrigin, setCountryOfOrigin] = useState("");
   const [productImage, setProductImage] = useState(null);
   const [notes, setNotes] = useState("");
+  const [colors, setColors] = useState([]);
+  const [primaryColorId, setPrimaryColorId] = useState("");
 
   useEffect(() => {
     getCategories();
+    getColors();
   }, []);
 
   const getCategories = () => {
     api
       .get("/api/apparel/categories/")
-      .then((res) => setCategories(res.data))
+      .then((res) => res.data)
+      .then((data) => setCategories(data))
+      .catch((err) => alert(err));
+  };
+
+  const getColors = () => {
+    api
+      .get("/api/apparel/colors/")
+      .then((res) => res.data)
+      .then((data) => setColors(data))
       .catch((err) => {
-        console.error("Failed to load categories:", err);
-        alert("Failed to load categories");
+        console.error("Failed to load colors:", err);
+        alert("Failed to load colors");
       });
   };
 
@@ -45,7 +56,9 @@ function AddApparelProductForm({ onSuccess }) {
     formData.append("product_name", productName);
     formData.append("category_id", categoryId);
     formData.append("item_id", itemId);
-    formData.append("gender", gender);
+    if (primaryColorId) {
+      formData.append("primary_color_id", primaryColorId);
+    }
     formData.append("material", material);
     formData.append("description", description);
     formData.append("hs_code", hsCode);
@@ -73,7 +86,7 @@ function AddApparelProductForm({ onSuccess }) {
           setProductName("");
           setCategoryId("");
           setItemId("");
-          setGender("U");
+          setPrimaryColorId("");
           setMaterial("");
           setDescription("");
           setHsCode("");
@@ -174,23 +187,27 @@ function AddApparelProductForm({ onSuccess }) {
 
         <div>
           <label
-            htmlFor="gender"
+            htmlFor="primaryColor"
             className="block text-sm font-medium text-gray-700 mb-2"
           >
-            Gender *
+            Primary Color
           </label>
           <select
-            id="gender"
-            required
-            value={gender}
-            onChange={(e) => setGender(e.target.value)}
+            id="primaryColor"
+            value={primaryColorId}
+            onChange={(e) => setPrimaryColorId(e.target.value)}
             className="form_input"
           >
-            <option value="U">Unisex</option>
-            <option value="M">Men</option>
-            <option value="W">Women</option>
-            <option value="Y">Youth</option>
+            <option value="">Select primary color (optional)</option>
+            {colors.map((color) => (
+              <option key={color.id} value={color.id}>
+                {color.color_name}
+              </option>
+            ))}
           </select>
+          <p className="text-sm text-gray-500 mt-1">
+            The main color shown in the product image.
+          </p>
         </div>
 
         <div>

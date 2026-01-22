@@ -376,15 +376,10 @@ function Apparel() {
                     <span className="text-sm text-wa-blue">
                       {product.category.name}
                     </span>
-                    <span className="text-sm text-gray-600">
-                      {product.gender === "M"
-                        ? "Men"
-                        : product.gender === "W"
-                          ? "Women"
-                          : product.gender === "U"
-                            ? "Unisex"
-                            : "Youth"}
-                    </span>
+                    Color:{" "}
+                    {product.primary_color
+                      ? product.primary_color.color_name
+                      : "Not Set"}
                   </div>
 
                   {/* Variants Display */}
@@ -402,7 +397,7 @@ function Apparel() {
                                 b.color.color_name,
                               );
                             if (colorCompare !== 0) return colorCompare;
-                            // Then sort by size display order within same color
+
                             return a.size.display_order - b.size.display_order;
                           })
                           .map((variant) => (
@@ -416,9 +411,13 @@ function Apparel() {
                               style={{
                                 backgroundColor:
                                   variant.qty_stock >
-                                  variant.minimum_stock_level
-                                    ? `${variant.color.hex_code}40`
-                                    : undefined,
+                                    variant.minimum_stock_level &&
+                                  product.primary_color
+                                    ? `${product.primary_color.hex_code}40`
+                                    : variant.qty_stock >
+                                        variant.minimum_stock_level
+                                      ? "#e5e7eb40"
+                                      : undefined,
                                 color:
                                   variant.qty_stock >
                                   variant.minimum_stock_level
@@ -426,18 +425,28 @@ function Apparel() {
                                     : undefined,
                                 border:
                                   variant.qty_stock >
-                                  variant.minimum_stock_level
-                                    ? variant.color.hex_code.toLowerCase() ===
+                                    variant.minimum_stock_level &&
+                                  product.primary_color
+                                    ? product.primary_color.hex_code.toLowerCase() ===
                                         "#ffffff" ||
-                                      variant.color.hex_code.toLowerCase() ===
+                                      product.primary_color.hex_code.toLowerCase() ===
                                         "#fff"
                                       ? "1px solid #9ca3af"
-                                      : `1px solid ${variant.color.hex_code}`
-                                    : undefined,
+                                      : `1px solid ${product.primary_color.hex_code}`
+                                    : variant.qty_stock >
+                                        variant.minimum_stock_level
+                                      ? "1px solid #d1d5db"
+                                      : undefined,
                               }}
                             >
-                              {variant.color.color_name} -{" "}
-                              {variant.size.size_value} - (
+                              {variant.gender === "M"
+                                ? "Men"
+                                : variant.gender === "W"
+                                  ? "Women"
+                                  : variant.gender === "U"
+                                    ? "Unisex"
+                                    : "Youth"}{" "}
+                              - {variant.size.size_value} - (
                               <span className="font-bold">
                                 {variant.qty_stock}
                               </span>
@@ -469,7 +478,7 @@ function Apparel() {
                       }}
                       className="w-full bg-wa-cyan text-white px-4 py-2 rounded-md font-medium hover:bg-cyan-600 transition-colors"
                     >
-                      + Add Size/Color
+                      + Add Variant
                     </button>
 
                     <div className="flex gap-2">

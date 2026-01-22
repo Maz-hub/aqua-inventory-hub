@@ -253,13 +253,6 @@ class ApparelProduct(models.Model):
     Stores shared information (price, HS code, photo) that applies to all variants.
     """
     
-    GENDER_CHOICES = [
-        ('M', 'Men'),
-        ('W', 'Women'),
-        ('U', 'Unisex'),
-        ('Y', 'Youth'),
-    ]
-    
     product_name = models.CharField(
         max_length=200,
         help_text="Full product name (e.g., '361° Staff Polo Blue')"
@@ -278,11 +271,13 @@ class ApparelProduct(models.Model):
         help_text="361° product code (e.g., 'ZW1050601-2')"
     )
     
-    gender = models.CharField(
-        max_length=1,
-        choices=GENDER_CHOICES,
-        default='U',
-        help_text="Target gender for this product"
+    primary_color = models.ForeignKey(
+    'ApparelColor',
+    on_delete=models.SET_NULL,
+    null=True,
+    blank=True,
+    related_name='products_of_this_color',
+    help_text="Main color of this product (determines badge background)"
     )
     
     material = models.CharField(
@@ -380,6 +375,20 @@ class ApparelVariant(models.Model):
         on_delete=models.PROTECT,
         help_text="Standardized color from predefined list"
     )
+
+    VARIANT_GENDER_CHOICES = [
+    ('U', 'Unisex'),
+    ('M', 'Men'),
+    ('W', 'Women'),
+    ('Y', 'Youth'),
+    ]
+
+    gender = models.CharField(
+    max_length=1,
+    choices=VARIANT_GENDER_CHOICES,
+    default='U',
+    help_text="Gender fit for this specific variant (Women's M vs Men's M)"
+    )
     
     qty_stock = models.IntegerField(
         default=0,
@@ -423,7 +432,7 @@ class ApparelVariant(models.Model):
     
     class Meta:
         ordering = ['product', 'size__display_order']
-        unique_together = ['product', 'size', 'color']
+        unique_together = ['product', 'size', 'color', 'gender']
         verbose_name = "Apparel Variant"
         verbose_name_plural = "Apparel Variants"
     

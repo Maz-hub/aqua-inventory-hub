@@ -141,8 +141,8 @@ class ApparelProductAdmin(admin.ModelAdmin):
     Admin interface for managing base apparel products.
     Each product can have multiple size/color variants managed separately.
     """
-    list_display = ['product_name', 'category', 'gender', 'unit_price', 'item_id', 'created_at']
-    list_filter = ['category', 'gender', 'country_of_origin']
+    list_display = ['product_name', 'category', 'unit_price', 'item_id', 'created_at']
+    list_filter = ['category', 'country_of_origin']
     search_fields = ['product_name', 'item_id', 'material']
     ordering = ['product_name']
     

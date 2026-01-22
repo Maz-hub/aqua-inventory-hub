@@ -166,7 +166,7 @@ class ApparelVariantSerializer(serializers.ModelSerializer):
     class Meta:
         model = ApparelVariant
         fields = [
-            'id', 'size', 'color', 'size_id', 'color_id', 'product_id',
+            'id', 'size', 'color', 'size_id', 'color_id', 'product_id', 'gender',
             'qty_stock', 'minimum_stock_level', 'weight', 'sku',
             'created_at'
         ]
@@ -184,13 +184,22 @@ class ApparelProductSerializer(serializers.ModelSerializer):
         source='category',
         write_only=True
     )
+
+    primary_color = ApparelColorSerializer(read_only=True)
+    primary_color_id = serializers.PrimaryKeyRelatedField(
+        queryset=ApparelColor.objects.all(),
+        source='primary_color',
+        write_only=True,
+        required=False
+    )
+
     variants = ApparelVariantSerializer(many=True, read_only=True)
     
     class Meta:
         model = ApparelProduct
         fields = [
-            'id', 'product_name', 'category', 'category_id', 'item_id',
-            'gender', 'material', 'description', 'hs_code', 'unit_price',
+            'id', 'product_name', 'category', 'category_id', 'item_id', 'primary_color', 'primary_color_id',
+            'material', 'description', 'hs_code', 'unit_price',
             'country_of_origin', 'product_image', 'notes', 'variants',
             'created_at', 'updated_at'
         ]
