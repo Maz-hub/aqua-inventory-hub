@@ -42,7 +42,7 @@ function Gifts() {
 
   const getCategories = () => {
     api
-      .get("/api/categories/")
+      .get("/api/gifts/categories/")
       .then((res) => res.data)
       .then((data) => setCategories(data))
       .catch((err) => alert(err));

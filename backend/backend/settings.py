@@ -152,10 +152,13 @@ STATIC_URL = "static/"
 
 CORS_ALLOWED_ORIGINS = [
     "https://musical-eureka-7xpwjjgv7jp2xrp7-5173.app.github.dev",
+    "http://localhost:5173",
 ]
 CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
     "https://musical-eureka-7xpwjjgv7jp2xrp7-5173.app.github.dev",
     "https://musical-eureka-7xpwjjgv7jp2xrp7-8000.app.github.dev",
+    "http://localhost:5173",
+    "http://localhost:8000",
 ]

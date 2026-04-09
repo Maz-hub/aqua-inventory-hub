@@ -40,7 +40,7 @@ function EditGiftForm({ gift, onClose, onSuccess }) {
   const getCategories = () => {
     // Fetches all categories from backend
     api
-      .get("/api/categories/")
+      .get("/api/gifts/categories/")
       .then((res) => res.data)
       .then((data) => setCategories(data))
       .catch((err) => alert(err));
