@@ -17,7 +17,7 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
-from api.views import CreateUserView
+from core.views import CreateUserView
 # Imports the user registration endpoint we just created in views.py
 
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
@@ -49,7 +49,9 @@ urlpatterns = [
     # Adds login/logout views for Django REST Framework's browsable API interface
     # GET /admin/ → Django admin panel (in browser)
 
-    path("api/", include("api.urls")),
+    path("api/", include("core.urls")),
+    path("api/gifts/", include("gifts.urls")),
+    path("api/apparel/", include("apparel.urls")),
     # Routes all /api/ requests to the api app's URL configuration
 ]
 
