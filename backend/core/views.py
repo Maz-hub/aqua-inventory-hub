@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
-from api.serializers import UserSerializer, TakeReasonSerializer
+from core.serializers import UserSerializer, TakeReasonSerializer
 
 from core.models import TakeReason
 
