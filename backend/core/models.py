@@ -38,3 +38,28 @@ class TakeReason(models.Model):
 
     def __str__(self):
         return f"{self.reason_name} ({self.get_applies_to_display()})"
+
+
+class Department(models.Model):
+    """
+    World Aquatics internal departments.
+    Used to track which department an Item Request belongs to,
+    enabling budget tracking and cost reporting per department.
+
+    Managed by Admin via Django Admin — no hardcoding.
+    Examples: Development, Marketing, Events, Communications
+    """
+    name = models.CharField(
+        max_length=100,
+        unique=True,
+        help_text="Department name (e.g. 'Development', 'Marketing')"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = "Department"
+        verbose_name_plural = "Departments"
+
+    def __str__(self):
+        return self.name
