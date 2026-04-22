@@ -1,203 +1,272 @@
-# Aqua Inventory Hub - Project Structure & Requirements
+# Aqua Inventory Hub - Project Notes
 
-## Homepage Design
+**Last Updated:** April 2026
 
-After login, users see two main sections:
+---
+
+## 🎯 Project Overview
+
+Internal web application for World Aquatics to replace manual spreadsheet-based inventory tracking.
+
+**Tech Stack:**
+
+- Backend: Django 6.0 + Django REST Framework
+- Frontend: React + Vite
+- Database: SQLite (development) → PostgreSQL (production)
+- Authentication: JWT via djangorestframework-simplejwt
+- Hosting: Microsoft Azure (pending final confirmation from EVOK)
+- SSO: Microsoft Entra (planned — after hosting confirmed)
+
+---
+
+## ✅ Completed
+
+### Structure & Setup
+
+- [x] Django + React project initialised
+- [x] GitHub repository: github.com/Maz-hub/aqua-inventory-hub
+- [x] JWT authentication (access token 30min, refresh 1 day)
+- [x] Django REST Framework configured
+- [x] React frontend connected to Django backend via Axios
+- [x] World Aquatics branding (Termina font, navy/blue colours, logo)
+- [x] Protected routes (login required)
+
+### App Refactor (April 2026)
+
+- [x] Refactored from single `api/` app into domain-separated apps:
+    - `core/` → TakeReason model, user registration, CurrentUserView
+    - `gifts/` → all gifts models, views, serializers, urls
+    - `apparel/` → all apparel models, views, serializers, urls
+    - `accounts/` → user profiles, permissions, groups
+    - `api/` → kept as backwards-compatible bridge only
+
+### Gifts Inventory
+
+- [x] GiftCategory model
+- [x] Gift model (name, price, stock, HS code, supplier, images)
+- [x] InventoryTransaction model (immutable audit trail)
+- [x] List / Add / Edit / Delete gifts
+- [x] Take / Return stock with transaction record
+- [x] Category dropdown from database
+- [x] Image upload
+
+### Apparel Inventory (361°)
+
+- [x] ApparelSize model (XS→3XL, shoe sizes, accessories)
+- [x] ApparelColor model (with hex codes)
+- [x] ApparelCategory model
+- [x] ApparelProduct model (base product)
+- [x] ApparelVariant model (size + colour + gender + stock)
+- [x] ApparelTransaction model (immutable audit trail)
+- [x] Full CRUD for products and variants
+- [x] Take / Return stock per variant
+
+### Shared
+
+- [x] TakeReason model in core/ (shared across all inventory types)
+- [x] applies_to field: gifts / apparel / both
+
+### Permissions & Access Control (April 2026)
+
+- [x] UserProfile model (extends User with department field)
+- [x] 5 permission groups created via management command:
+    - `gifts_access` → Gifts inventory
+    - `apparel_access` → Apparel inventory
+    - `executive_access` → Executive Office (future)
+    - `it_access` → IT Assets (future)
+    - `admin` → full access to everything
+- [x] Custom permission classes (HasGiftsAccess, HasApparelAccess, etc.)
+- [x] Applied permissions to gifts/ and apparel/ views
+- [x] CurrentUserView endpoint: GET /api/user/me/
+- [x] UserContext in React (stores groups, hasAccess helper)
+- [x] Home page: categories gray out if user lacks access
+- [x] Tested and working ✅
+
+---
+
+## 🚧 Next Steps (In Order)
+
+### 1. UserProfile Auto-Creation (small, quick)
+
+- [ ] Create accounts/signals.py
+- [ ] Auto-create UserProfile when new User is created
+- [ ] Prevents errors when Microsoft SSO creates users automatically
+
+### 2. Item Request Portal
+
+- [ ] Department model (dropdown for budget tracking)
+- [ ] ItemRequest model (who, what, when, reason, department, status)
+- [ ] ItemRequestItem model (items + quantities per request)
+- [ ] Request statuses: Draft → Pending → In Preparation → Ready → Completed / Cancelled
+- [ ] Email notifications (submission + ready for collection)
+- [ ] Selection (basket) UI in React
+- [ ] Submit request form (reason, department, date, notes)
+- [ ] My Requests page (track own requests)
+- [ ] Admin dashboard (manage all requests)
+- [ ] Budget tracking per department
+
+### 3. Executive Office Inventory
+
+- [ ] Waiting for colleague input on data structure
+- [ ] High-value items (watches, premium gifts, apparel)
+- [ ] Restricted access (executive_access group)
+- [ ] Possible: serial numbers, insurance values, brand tracking
+
+### 4. IT Assets Inventory
+
+- [ ] Laptops, mice, keyboards, USB keys, etc.
+- [ ] Serial number tracking
+- [ ] Employee assignment table (who has what)
+- [ ] Spare stock tracking
+
+### 5. Microsoft SSO
+
+- [ ] Waiting for hosting to be confirmed first
+- [ ] Work with EVOK (Alexandre) to configure Microsoft Entra
+- [ ] Django side: django-allauth or python-social-auth
+- [ ] Staff log in with World Aquatics Microsoft accounts
+
+### 6. Dashboard & Reporting
+
+- [ ] Transaction history with date range filtering
+- [ ] Budget reporting per department
+- [ ] Most requested items
+- [ ] Low stock alerts
+- [ ] Export to CSV/Excel
+
+### 7. Custom Admin Interface
+
+- [ ] Inventory manager role
+- [ ] Add/edit categories, departments, reasons
+- [ ] Manage item requests
+- [ ] Without needing Django Admin access
+
+---
+
+## 🌐 Hosting & Infrastructure
+
+- Platform: Microsoft Azure
+- OS: Linux
+- Option chosen: Option 2 (~CHF 16/month) — scalable if needed
+- Subdomain: inventoryhub.worldaquatics.com (or new domain TBC)
+- Database: PostgreSQL Flexible Server
+- Image storage: Azure Blob Storage (~1-2GB for ~1000 items)
+- Status: ⏳ Waiting for formal quote from EVOK (Alexandre)
+- Anthony: approved budget in principle
+
+### Azure Access Plan
+
+- Marianna → Owner/Contributor
+- Anthony → Owner (business continuity)
+- EVOK → Contributor (technical support)
+
+---
+
+## 🔐 Permission System
+
 ```
-┌─────────────────────────────────────┐
-│        AQUA INVENTORY HUB           │
-├─────────────────────────────────────┤
-│                                     │
-│  ┌─────────────┐  ┌─────────────┐   │
-│  │   📦 GIFTS  │  │ 👕 APPAREL │   │
-│  │  INVENTORY  │  │  INVENTORY  │   │
-│  └─────────────┘  └─────────────┘   │
-│                                     │
-└─────────────────────────────────────┘
+groups:
+├── gifts_access       → Gifts inventory (everyone)
+├── apparel_access     → Apparel inventory
+├── executive_access   → Executive Office
+├── it_access          → IT Assets
+└── admin              → everything + dashboard
+
+Managed via: Django Admin (/admin/)
+No coding needed to add/remove access
 ```
 
 ---
 
-## Gifts Inventory Section
+## 📁 App Structure
 
-### Access Rules:
-- **Visible to:** All authenticated users
-- **Permissions:** All users can VIEW / ADD / EDIT / DELETE
-
-### Features:
-- Click on Gifts box → Navigate to Gifts Inventory page
-- Display all gifts/items in grid/list view (ecommerce-style)
-- **Category filter** at top of page
-- Each item shows:
-  - Product image
-  - Product name
-  - Category
-  - Quantity in stock
-  - Quick actions (edit/delete buttons)
-
-### Data Structure:
-- Product image
-- Product name
-- Category (filterable dropdown)
-- Quantity stock
-- Description
-- Material
-- Unit price
-- HS code
-- Country of origin
-- Supplier information (name, email, address)
-- System tracking (created_at, created_by, updated_at, updated_by)
-- Minimum stock level
-- Internal notes
+```
+aqua-inventory-hub/
+├── backend/
+│   ├── core/          → TakeReason, user registration, CurrentUserView
+│   ├── gifts/         → Gifts inventory domain
+│   ├── apparel/       → Apparel inventory domain
+│   ├── accounts/      → UserProfile, permissions, groups
+│   ├── api/           → backwards-compatible bridge only
+│   └── backend/       → project configuration (settings, urls)
+└── frontend/
+    └── src/
+        ├── context/   → UserContext (groups, hasAccess)
+        ├── pages/     → Home, Gifts, Apparel, Login
+        └── components → Forms, Modals, ProtectedRoute
+```
 
 ---
 
-## Apparel Inventory Section
+## 🌐 API Endpoints
 
-### Access Rules:
-- **Visible to:** All authenticated users (box appears on homepage)
-- **Click access:** Only users with special permissions (managed via Django admin panel)
-- **Permissions:** Authorized users can VIEW / ADD / EDIT / DELETE
+### Authentication
 
-### Features:
-- Click on Apparel box → Check permissions:
-  - ✅ Has permission → Navigate to Apparel Inventory page
-  - ❌ No permission → Show "Access Denied" message
-- Display 361 brand clothing items
-- Includes full customs/shipping data for international shipments
+- `POST /api/token/` → login, returns JWT tokens
+- `POST /api/token/refresh/` → refresh access token
+- `POST /api/user/register/` → new user registration
+- `GET /api/user/me/` → current user info + groups
 
-### Data Structure:
-- Similar to Gifts, but tailored for apparel
-- Additional fields for clothing (sizes, colors, brand specifics)
-- Enhanced customs/shipping information
+### Gifts
 
----
+- `GET/POST /api/gifts/` → list / create gifts
+- `PATCH /api/gifts/update-stock/<id>/` → take or return
+- `PATCH /api/gifts/update/<id>/` → edit gift details
+- `DELETE /api/gifts/delete/<id>/` → delete gift
+- `GET /api/gifts/categories/` → list categories
 
-## Permission System
+### Apparel
 
-### Implementation:
-- Use Django's built-in Groups and Permissions system
-- Create groups via Django admin panel:
-  - `Gifts Managers` (currently not needed - all have access)
-  - `Apparel Managers` (Jamie + 2-3 designated people)
+- `GET/POST /api/apparel/products/` → list / create products
+- `GET/PATCH/DELETE /api/apparel/products/<id>/` → product detail
+- `GET/POST /api/apparel/variants/` → list / create variants
+- `PATCH /api/apparel/variants/update-stock/<id>/` → take or return
+- `GET /api/apparel/transactions/` → transaction history
 
-### Configuration:
-- Assign users to groups through Django admin (`/admin/`)
-- Frontend checks user permissions before allowing access
-- Backend enforces permissions on API endpoints
+### Shared
+
+- `GET /api/reasons/` → list TakeReasons
 
 ---
 
-## Current Status
+## 🎨 World Aquatics Branding
 
-### ✅ Completed:
-- Backend API for Gifts inventory
-- User authentication (registration/login)
-- JWT token management
-- Protected routes
-- World Aquatics branding (colors, fonts, logo)
-- Form components with brand styling
+### Colours
 
-### 🚧 In Progress:
-- Homepage layout with two sections
-- Gifts inventory list/detail pages
+- Navy: `#023E73`
+- Blue: `#055BA6`
+- Ocean: `#048ABF`
+- Cyan: `#0DB3D9`
+- Black: `#0D0D0D`
 
-### ⏳ To Do:
-- Gifts inventory CRUD interface
-- Category filtering system
-- Apparel backend models
-- Apparel inventory interface
-- Permission-based access control
-- Image upload functionality
+### Font
+
+- Termina (Regular, Medium, Bold, Black)
 
 ---
 
-## Technical Stack
+## 📝 Key Decisions Log
 
-### Backend:
-- Django 6.0
-- Django REST Framework
-- JWT Authentication (SimpleJWT)
-- PostgreSQL (production) / SQLite (development)
-
-### Frontend:
-- React (Vite)
-- React Router DOM
-- Axios (API calls)
-- Tailwind CSS v4
-- World Aquatics brand assets
-
-### Development:
-- GitHub Codespaces (Linux environment)
-- Git version control
-- Environment variables for configuration
+| Date     | Decision                    | Reason                                 |
+| -------- | --------------------------- | -------------------------------------- |
+| Feb 2026 | Django + React chosen       | Robust, scalable, industry standard    |
+| Feb 2026 | SQLite for dev              | Simple, no setup needed locally        |
+| Feb 2026 | JWT authentication          | Stateless, works well with React       |
+| Apr 2026 | Refactored to multiple apps | Scalability, permissions per module    |
+| Apr 2026 | Category-based permissions  | Flexible, manageable without coding    |
+| Apr 2026 | Azure Option 2 chosen       | Sufficient for current needs, scalable |
+| Apr 2026 | TypeScript deferred         | Finish app in JavaScript first         |
+| Apr 2026 | "Item Request" naming       | Covers gifts, apparel, all categories  |
+| Apr 2026 | One unified Selection       | Staff can request across categories    |
 
 ---
 
-## World Aquatics Branding
+## ⚠️ Dev Environment Notes
 
-### Colors:
-- Navy: `#023E73` (primary dark)
-- Blue: `#055BA6` (primary)
-- Ocean: `#048ABF` (bright blue)
-- Cyan: `#0DB3D9` (accent)
-- Black: `#0D0D0D` (text)
-
-### Font:
-- Termina (all weights: Regular, Medium, Bold, Black)
-
-### Logo:
-- Located: `frontend/src/assets/images/`
-- Usage: Header, login/register forms
-
----
-
-## API Endpoints
-
-### Authentication:
-- `POST /api/user/register/` - User registration
-- `POST /api/token/` - Login (get tokens)
-- `POST /api/token/refresh/` - Refresh access token
-
-### Gifts Inventory:
-- `GET /api/gifts/` - List all gifts
-- `POST /api/gifts/` - Create new gift
-- `DELETE /api/gifts/delete/<id>/` - Delete gift
-- `GET /api/categories/` - List all categories
-
-### Admin:
-- `/admin/` - Django admin panel
-
----
-
-## Future Enhancements
-
-### Phase 1:
-- Complete Gifts inventory interface
-- Add pagination for large inventories
-- Implement search functionality
-
-### Phase 2:
-- Build Apparel inventory backend
-- Implement permission-based access
-- Add role management UI
-
-### Phase 3:
-- Low stock alerts
-- Inventory reports/analytics
-- Export functionality (CSV/Excel)
-- Batch operations (bulk delete/update)
-
----
-
-## Notes & Reminders
-
-- **Codespaces URLs change** - Update `.env` when restarting Codespace
-- **Ports must be public** - Set port 5173 and 8000 to public visibility
-- **Virtual environment** - Must activate before running Django: `source env/bin/activate`
-- **Git workflow** - Commit frequently with clear messages
-- **Image storage** - Images stored in filesystem, paths in database
-
----
-
-**Last Updated:** January 7, 2026
+- Always activate venv before running Django: `venv\Scripts\python`
+- Frontend runs on: `http://localhost:5173`
+- Backend runs on: `http://localhost:8000`
+- Django Admin: `http://localhost:8000/admin/`
+- `.env` file must point to `http://localhost:8000` for local dev
+- `db.sqlite3` is NOT in GitHub (in .gitignore) — run migrations on fresh clone
+- After fresh clone: `pip install -r requirements.txt` then `manage.py migrate`
