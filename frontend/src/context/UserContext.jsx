@@ -33,8 +33,14 @@ export function UserProvider({ children }) {
     };
 
     useEffect(() => {
-        fetchUser();
-        // Fetch user info when app loads
+        // Only fetch user info if a token exists in localStorage
+        // Prevents 401 errors on initial load before authentication is confirmed
+        const token = localStorage.getItem('access');
+        if (token) {
+            fetchUser();
+        } else {
+            setLoadingUser(false);
+        }
     }, []);
 
     const hasAccess = (group) => {

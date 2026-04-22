@@ -23,6 +23,8 @@ import { useNavigate } from "react-router-dom";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
 // localStorage key names for JWT tokens
 
+import { useUser } from "../context/UserContext";
+
 function Form({ route, method }) {
   // Receives route (API endpoint) and method (login/register) as props
 
@@ -37,6 +39,8 @@ function Form({ route, method }) {
 
   const navigate = useNavigate();
   // Router navigation function
+
+  const { fetchUser } = useUser();
 
   const name = method === "login" ? "Login" : "Register";
   // Dynamic label based on form purpose
@@ -58,8 +62,9 @@ function Form({ route, method }) {
         // Login successful - store JWT tokens
         localStorage.setItem(ACCESS_TOKEN, res.data.access);
         localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
+        await fetchUser();
+        // Refresh user context with new login's groups before navigating
         navigate("/");
-        // Redirect to home page (protected route)
       } else {
         // Registration successful - redirect to login page
         navigate("/login");
