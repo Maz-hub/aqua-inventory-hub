@@ -2,13 +2,12 @@
  * Main App Component
  *
  * Defines the application's routing structure using React Router.
- * Handles navigation between public pages (login, register) and protected pages (home/inventory).
+ * Handles navigation between public pages (login) and protected pages (home/inventory).
  *
  * Routes:
  * - / (home) - Protected route requiring authentication
  * - /login - Public login page
  * - /logout - Clears tokens and redirects to login
- * - /register - Public registration page (clears any existing tokens first)
  * - * (catch-all) - 404 not found page
  */
 
@@ -18,7 +17,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 // React Router components for client-side routing
 
 import Login from "./pages/Login";
-import Register from "./pages/Register";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import Gifts from "./pages/Gifts";
@@ -39,14 +37,6 @@ function Logout() {
   // Redirects user to login page
 }
 
-function RegisterAndLogout() {
-  // Ensures clean registration by clearing any existing authentication tokens
-  // Prevents conflicts if user was previously logged in
-  localStorage.clear();
-
-  return <Register />;
-  // Renders the registration page
-}
 
 function App() {
   return (
@@ -94,8 +84,8 @@ function App() {
         <Route path="/logout" element={<Logout />} />
         {/* Logout route - clears tokens and redirects to login */}
 
-        <Route path="/register" element={<RegisterAndLogout />} />
-        {/* Public registration page - clears any existing tokens first */}
+        <Route path="/register" element={<Navigate to="/login" />} />
+        {/* Registration disabled — accounts created by Admin via Django Admin */}
 
         <Route path="*" element={<NotFound />} />
         {/* Catch-all route for undefined paths (404 page) */}

@@ -9,6 +9,8 @@ from core.serializers import UserSerializer, TakeReasonSerializer
 
 from core.models import TakeReason
 
+from accounts.permissions import IsAdminUser
+
 
 # ============================================
 # USER REGISTRATION VIEW
@@ -27,8 +29,8 @@ class CreateUserView(generics.CreateAPIView):
     serializer_class = UserSerializer
     # Specifies which serializer to use for validating and saving user data
 
-    permission_classes = [AllowAny]
-    # Allows unauthenticated access - anyone can register without being logged in
+    permission_classes = [IsAdminUser]
+    # Only admins can create user accounts via the API
 
 
 # ============================================
