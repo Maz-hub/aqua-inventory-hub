@@ -28,6 +28,8 @@ import Apparel from "./pages/Apparel";
 import ProtectedRoute from "./components/ProtectedRoute";
 // Wrapper component that enforces authentication
 
+import { UserProvider } from "./context/UserContext";
+
 function Logout() {
   // Logout functionality: clears all stored tokens and redirects to login
   localStorage.clear();
@@ -48,6 +50,7 @@ function RegisterAndLogout() {
 
 function App() {
   return (
+    <UserProvider>
     <BrowserRouter>
       {/* Enables client-side routing throughout the app */}
 
@@ -99,6 +102,7 @@ function App() {
         {/* Must be last route - matches anything not caught by routes above */}
       </Routes>
     </BrowserRouter>
+    </UserProvider>
   );
 }
 
