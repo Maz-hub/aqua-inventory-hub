@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
+from accounts.permissions import HasGiftsAccess
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
@@ -26,7 +27,7 @@ class GiftListCreate(generics.ListCreateAPIView):
     serializer_class = GiftSerializer
     # Specifies which serializer to use for data validation and conversion
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [HasGiftsAccess]
     # Requires users to be logged in to view or create gifts
 
     queryset = Gift.objects.all()
@@ -54,7 +55,7 @@ class GiftDelete(generics.DestroyAPIView):
     serializer_class = GiftSerializer
     # Specifies which serializer to use
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [HasGiftsAccess]
     # Requires users to be logged in to delete gifts
 
     queryset = Gift.objects.all()
@@ -62,7 +63,7 @@ class GiftDelete(generics.DestroyAPIView):
 
 
 @api_view(['PATCH'])
-@permission_classes([IsAuthenticated])
+@permission_classes([HasGiftsAccess])
 def update_gift_stock(request, pk):
     """
     Updates gift stock quantity for Take/Return actions
@@ -161,7 +162,7 @@ def update_gift_stock(request, pk):
 
 
 @api_view(['PATCH'])
-@permission_classes([IsAuthenticated])
+@permission_classes([HasGiftsAccess])
 def update_gift(request, pk):
     """
     Updates gift product information
@@ -213,7 +214,7 @@ class GiftCategoryList(generics.ListAPIView):
     serializer_class = GiftCategorySerializer
     # Uses GiftCategorySerializer to convert categories to JSON
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [HasGiftsAccess]
     # Users must be logged in to see categories
 
     queryset = GiftCategory.objects.all()

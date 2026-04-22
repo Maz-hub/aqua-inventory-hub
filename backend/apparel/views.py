@@ -1,5 +1,6 @@
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
+from accounts.permissions import HasApparelAccess
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
@@ -27,7 +28,7 @@ class ApparelSizeList(generics.ListAPIView):
     Used to populate size dropdowns when creating variants
     """
     serializer_class = ApparelSizeSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [HasApparelAccess]
     queryset = ApparelSize.objects.all()
 
 
@@ -38,7 +39,7 @@ class ApparelColorList(generics.ListAPIView):
     Used to populate color dropdowns when creating variants
     """
     serializer_class = ApparelColorSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [HasApparelAccess]
     queryset = ApparelColor.objects.all()
 
 
@@ -49,7 +50,7 @@ class ApparelCategoryList(generics.ListAPIView):
     Used to populate category dropdowns and filtering
     """
     serializer_class = ApparelCategorySerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [HasApparelAccess]
     queryset = ApparelCategory.objects.all()
 
 
@@ -60,7 +61,7 @@ class ApparelProductListCreate(generics.ListCreateAPIView):
     - POST: Create a new apparel product
     """
     serializer_class = ApparelProductSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [HasApparelAccess]
     queryset = ApparelProduct.objects.all()
 
     def perform_create(self, serializer):
@@ -81,7 +82,7 @@ class ApparelProductDetail(generics.RetrieveUpdateDestroyAPIView):
     - DELETE: Delete product (and all its variants via CASCADE)
     """
     serializer_class = ApparelProductSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [HasApparelAccess]
     queryset = ApparelProduct.objects.all()
 
     def perform_update(self, serializer):
@@ -98,7 +99,7 @@ class ApparelVariantListCreate(generics.ListCreateAPIView):
     - POST: Create a new size/color variant for a product
     """
     serializer_class = ApparelVariantSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [HasApparelAccess]
 
     def get_queryset(self):
         """
@@ -129,7 +130,7 @@ class ApparelVariantDetail(generics.RetrieveUpdateDestroyAPIView):
     - DELETE: Delete variant
     """
     serializer_class = ApparelVariantSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [HasApparelAccess]
     queryset = ApparelVariant.objects.all()
 
     def perform_update(self, serializer):
@@ -140,7 +141,7 @@ class ApparelVariantDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 @api_view(['PATCH'])
-@permission_classes([IsAuthenticated])
+@permission_classes([HasApparelAccess])
 def update_apparel_stock(request, pk):
     """
     Updates apparel variant stock quantity for Take/Return actions
@@ -244,7 +245,7 @@ class ApparelTransactionList(generics.ListAPIView):
     Supports filtering by variant, product, or date range
     """
     serializer_class = ApparelTransactionSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [HasApparelAccess]
 
     def get_queryset(self):
         """
