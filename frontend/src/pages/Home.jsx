@@ -108,7 +108,7 @@ function Home() {
                 </div>
 
                 {/* Inventory Category Cards */}
-                <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-8">
+                <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-8">
                     <CategoryCard
                         emoji="🛍️"
                         title="Gifts"
@@ -128,6 +128,38 @@ function Home() {
                         subtext="Manage Inventory"
                         accessGroup="apparel_access"
                         route="/apparel"
+                    />
+                    <CategoryCard
+                        emoji="📋"
+                        title="Office & Events"
+                        description="Banners, name plates, roll-ups and event materials"
+                        subtext="Manage Inventory"
+                        accessGroup="office_access"
+                        route="/office"
+                    />
+                    <CategoryCard
+                        emoji="💼"
+                        title="Executive Office"
+                        description="Premium gifts and exclusive items"
+                        subtext="Manage Inventory"
+                        accessGroup="executive_access"
+                        route="/executive"
+                    />
+                    <CategoryCard
+                        emoji="💻"
+                        title="IT Assets"
+                        description="Laptops, peripherals and technical equipment"
+                        subtext="Manage Inventory"
+                        accessGroup="it_access"
+                        route="/it"
+                    />
+                    <CategoryCard
+                        emoji="📈"
+                        title="Dashboard"
+                        description="Reports, statistics and budget tracking"
+                        subtext="View Dashboard"
+                        accessGroup="admin"
+                        route="/dashboard"
                     />
                 </div>
             </div>

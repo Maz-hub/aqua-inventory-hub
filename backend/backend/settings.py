@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "gifts",
     "apparel",
     "accounts",
+    "item_requests",
     "rest_framework",
     'import_export',
     
