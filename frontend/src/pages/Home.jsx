@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../api";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
+import SelectionDrawer from "../components/SelectionDrawer";
 import { useUser } from "../context/UserContext";
 
 function Home() {
@@ -155,6 +156,10 @@ function Home() {
                 </div>
             </div>
             <Footer />
+            <SelectionDrawer
+                isOpen={selectionOpen}
+                onClose={() => setSelectionOpen(false)}
+            />
         </div>
     );
 }
