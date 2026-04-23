@@ -5,6 +5,8 @@ import GiftForm from "../components/GiftForm";
 import GiftDetailsModal from "../components/GiftDetailsModal";
 import TakeItemsModal from "../components/TakeItemsModal";
 import ReturnItemsModal from "../components/ReturnItemsModal";
+import { useSelection } from "../context/SelectionContext";
+import SelectionDrawer from "../components/SelectionDrawer";
 
 function Gifts() {
   const [gifts, setGifts] = useState([]);
@@ -20,6 +22,8 @@ function Gifts() {
   const [showLowStockOnly, setShowLowStockOnly] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const navigate = useNavigate();
+  const { addItem } = useSelection();
+  const [selectionOpen, setSelectionOpen] = useState(false);
 
   useEffect(() => {
     getGifts();
@@ -65,6 +69,19 @@ function Gifts() {
 
     return matchesSearch && matchesCategory && matchesLowStock;
   });
+
+  const handleAddToRequest = (gift) => {
+    addItem({
+      item_type: 'gift',
+      item_id: gift.id,
+      name: gift.product_name,
+      unit_price: parseFloat(gift.unit_price),
+      quantity: 1,
+      image: gift.product_image,
+      max_quantity: gift.qty_stock,
+    });
+    setSelectionOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -243,6 +260,18 @@ function Gifts() {
                   {/* Action Buttons */}
                   <div className="space-y-2">
                     <button
+                      onClick={() => handleAddToRequest(gift)}
+                      disabled={gift.qty_stock === 0}
+                      className={`w-full py-2 rounded-md font-medium transition-colors cursor-pointer
+                        ${gift.qty_stock === 0
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : 'bg-wa-cyan hover:bg-wa-ocean text-white'
+                        }`}
+                    >
+                      {gift.qty_stock === 0 ? 'Out of Stock' : '+ Add to Request'}
+                    </button>
+
+                    <button
                       onClick={() => setSelectedGift(gift)}
                       className="btn_main"
                     >
@@ -307,6 +336,10 @@ function Gifts() {
           />
         )}
       </div>
+      <SelectionDrawer
+        isOpen={selectionOpen}
+        onClose={() => setSelectionOpen(false)}
+      />
     </div>
   );
 }
