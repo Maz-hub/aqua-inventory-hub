@@ -13,6 +13,7 @@ import AddVariantModal from "../components/AddVariantModal";
 import TakeApparelModal from "../components/TakeApparelModal";
 import ReturnApparelModal from "../components/ReturnApparelModal";
 import ApparelDetailsModal from "../components/ApparelDetailsModal";
+import ApparelRequestModal from "../components/ApparelRequestModal";
 
 import Footer from "../components/Footer";
 import Header from "../components/Header";
@@ -44,6 +45,8 @@ function Apparel() {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedProductForDetails, setSelectedProductForDetails] =
     useState(null);
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [selectedProductForRequest, setSelectedProductForRequest] = useState(null);
   const [selectedGender, setSelectedGender] = useState("");
   const [showFilters, setShowFilters] = useState(false);
 
@@ -489,6 +492,24 @@ function Apparel() {
                   <div className="space-y-2 mt-4">
                     <button
                       onClick={() => {
+                        setSelectedProductForRequest(product);
+                        setShowRequestModal(true);
+                      }}
+                      disabled={!product.variants || product.variants.every(v => v.qty_stock === 0)}
+                      className={`w-full py-2 rounded-md font-medium transition-colors cursor-pointer
+                        ${!product.variants || product.variants.every(v => v.qty_stock === 0)
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : 'bg-wa-cyan hover:bg-wa-ocean text-white'
+                        }`}
+                    >
+                      {!product.variants || product.variants.every(v => v.qty_stock === 0)
+                        ? 'Out of Stock'
+                        : '+ Add to Request'
+                      }
+                    </button>
+
+                    <button
+                      onClick={() => {
                         setSelectedProductForDetails(product);
                         setShowDetailsModal(true);
                       }}
@@ -577,6 +598,17 @@ function Apparel() {
             setSelectedProductForDetails(null);
           }}
           onSuccess={fetchProducts}
+        />
+      )}
+      {/* Apparel Request Modal */}
+      {showRequestModal && selectedProductForRequest && (
+        <ApparelRequestModal
+          product={selectedProductForRequest}
+          onClose={() => {
+            setShowRequestModal(false);
+            setSelectedProductForRequest(null);
+            setSelectionOpen(true);
+          }}
         />
       )}
     </div>
