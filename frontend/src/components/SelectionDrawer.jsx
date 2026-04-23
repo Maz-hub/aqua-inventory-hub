@@ -1,20 +1,34 @@
 /**
  * SelectionDrawer Component
  *
- * Slide-out panel showing current item selection.
- * Opens from the right on desktop, bottom sheet on mobile.
- * Users can review, adjust quantities, remove items,
- * and proceed to submit their Item Request.
+ * Elegant slide-in panel for the current item selection.
+ * Desktop/tablet: slides in from the right.
+ * Mobile: slides up as a bottom sheet.
+ * No dark overlay — background stays fully visible.
  */
 
+import { useEffect, useState } from "react";
 import { useSelection } from "../context/SelectionContext";
 import { useNavigate } from "react-router-dom";
 
 function SelectionDrawer({ isOpen, onClose }) {
-    const { items, removeItem, updateQuantity, totalItems, totalCost } = useSelection();
+    const { items, removeItem, updateQuantity, totalItems, totalCost } =
+        useSelection();
     const navigate = useNavigate();
+    const [visible, setVisible] = useState(false);
+    const [mounted, setMounted] = useState(false);
 
-    if (!isOpen) return null;
+    useEffect(() => {
+        if (isOpen) {
+            setMounted(true);
+            setTimeout(() => setVisible(true), 10);
+        } else {
+            setVisible(false);
+            setTimeout(() => setMounted(false), 300);
+        }
+    }, [isOpen]);
+
+    if (!mounted) return null;
 
     const handleSubmitRequest = () => {
         onClose();
@@ -23,119 +37,240 @@ function SelectionDrawer({ isOpen, onClose }) {
 
     return (
         <>
-            {/* Backdrop — clicking outside closes drawer */}
+            {/* Subtle transparent backdrop — just catches clicks, no dark overlay */}
+            <div className="fixed inset-0 z-40" onClick={onClose} />
+
+            {/* DESKTOP / TABLET: right side drawer */}
             <div
-                className="fixed inset-0 bg-black bg-opacity-40 z-40"
-                onClick={onClose}
-            />
+                className={`
+                hidden md:flex
+                fixed top-0 right-0 h-full z-50
+                w-80 lg:w-96
+                flex-col
+                bg-white
+                border-l border-gray-100
+                shadow-[-8px_0_32px_rgba(0,0,0,0.08)]
+                transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]
+                ${visible ? "translate-x-0" : "translate-x-full"}
+            `}
+            >
+                <DrawerContent
+                    items={items}
+                    totalItems={totalItems}
+                    totalCost={totalCost}
+                    removeItem={removeItem}
+                    updateQuantity={updateQuantity}
+                    onClose={onClose}
+                    onSubmit={handleSubmitRequest}
+                />
+            </div>
 
-            {/* Drawer — right side on desktop, bottom on mobile */}
-            <div className="fixed bottom-0 left-0 right-0 md:bottom-auto md:top-0 md:right-0 md:left-auto md:h-full md:w-96 bg-white z-50 shadow-2xl flex flex-col rounded-t-2xl md:rounded-none">
+            {/* MOBILE: slides in from right, full screen */}
+            <div
+                className={`
+                flex md:hidden
+                fixed top-0 right-0 h-full w-full z-50
+                flex-col
+                bg-white
+                shadow-[-8px_0_32px_rgba(0,0,0,0.08)]
+                transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]
+                ${visible ? "translate-x-0" : "translate-x-full"}
+            `}
+            >
+                <DrawerContent
+                    items={items}
+                    totalItems={totalItems}
+                    totalCost={totalCost}
+                    removeItem={removeItem}
+                    updateQuantity={updateQuantity}
+                    onClose={onClose}
+                    onSubmit={handleSubmitRequest}
+                    isMobile
+                />
+            </div>
+        </>
+    );
+}
 
-                {/* Header */}
-                <div className="flex items-center justify-between px-4 py-4 border-b bg-wa-navy text-white md:rounded-none rounded-t-2xl">
-                    <h2 className="text-lg font-bold">
+// ─── Shared drawer content (used by both mobile and desktop) ───
+function DrawerContent({
+    items,
+    totalItems,
+    totalCost,
+    removeItem,
+    updateQuantity,
+    onClose,
+    onSubmit,
+    isMobile,
+}) {
+    return (
+        <>
+            {/* Header */}
+            <div
+                className={`flex items-center justify-between px-5 py-4 border-b border-gray-100 flex-shrink-0 ${isMobile ? "" : "bg-white"}`}
+            >
+                <div>
+                    <h2 className="text-base font-bold text-wa-navy">
                         My Selection
-                        {totalItems > 0 && (
-                            <span className="ml-2 text-sm font-normal text-wa-cyan">
-                                {totalItems} item{totalItems !== 1 ? "s" : ""}
-                            </span>
-                        )}
                     </h2>
-                    <button
-                        onClick={onClose}
-                        className="p-1 rounded-full hover:bg-wa-blue transition-colors cursor-pointer"
-                        title="Close"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-
-                {/* Items List */}
-                <div className="flex-1 overflow-y-auto px-4 py-4 max-h-64 md:max-h-full">
-                    {items.length === 0 ? (
-                        <div className="text-center text-gray-400 mt-12">
-                            <div className="text-5xl mb-4">🛒</div>
-                            <p className="text-sm">Your selection is empty.</p>
-                            <p className="text-sm mt-1">Browse categories and add items!</p>
-                        </div>
-                    ) : (
-                        <ul className="space-y-3">
-                            {items.map((item) => (
-                                <li
-                                    key={`${item.item_type}-${item.item_id}`}
-                                    className="flex items-start gap-3 bg-gray-50 rounded-lg p-3"
-                                >
-                                    {/* Item info */}
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-semibold text-wa-navy truncate">
-                                            {item.name}
-                                        </p>
-                                        <p className="text-xs text-gray-500 capitalize">
-                                            {item.item_type}
-                                        </p>
-                                        <p className="text-xs text-wa-blue font-medium mt-1">
-                                            CHF {(item.unit_price * item.quantity).toFixed(2)}
-                                        </p>
-                                    </div>
-
-                                    {/* Quantity controls */}
-                                    <div className="flex items-center gap-1">
-                                        <button
-                                            onClick={() => updateQuantity(item.item_type, item.item_id, item.quantity - 1)}
-                                            className="w-6 h-6 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-sm font-bold cursor-pointer transition-colors"
-                                        >
-                                            −
-                                        </button>
-                                        <span className="w-8 text-center text-sm font-semibold">
-                                            {item.quantity}
-                                        </span>
-                                        <button
-                                            onClick={() => updateQuantity(item.item_type, item.item_id, item.quantity + 1)}
-                                            className="w-6 h-6 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-sm font-bold cursor-pointer transition-colors"
-                                        >
-                                            +
-                                        </button>
-                                    </div>
-
-                                    {/* Remove button */}
-                                    <button
-                                        onClick={() => removeItem(item.item_type, item.item_id)}
-                                        className="text-red-400 hover:text-red-600 transition-colors cursor-pointer p-1"
-                                        title="Remove item"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
+                    {totalItems > 0 && (
+                        <p className="text-xs text-gray-400 mt-0.5">
+                            {totalItems} item{totalItems !== 1 ? "s" : ""} · CHF{" "}
+                            {totalCost.toFixed(2)}
+                        </p>
                     )}
                 </div>
+                <button
+                    onClick={onClose}
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+                    title="Close"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                        />
+                    </svg>
+                </button>
+            </div>
 
-                {/* Footer — Total + Submit */}
-                {items.length > 0 && (
-                    <div className="border-t px-4 py-4 bg-white">
-                        <div className="flex justify-between items-center mb-4">
-                            <span className="text-sm font-semibold text-gray-600">
-                                Estimated Total
-                            </span>
-                            <span className="text-lg font-bold text-wa-navy">
-                                CHF {totalCost.toFixed(2)}
-                            </span>
+            {/* Items list */}
+            <div className="flex-1 overflow-y-auto px-5 py-4">
+                {items.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-center py-12">
+                        <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mb-4">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-8 w-8 text-gray-300"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={1.5}
+                                    d="M3 3h2l.4 2M7 13h10l4-9H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                                />
+                            </svg>
                         </div>
-                        <button
-                            onClick={handleSubmitRequest}
-                            className="w-full bg-wa-blue text-white py-3 rounded-lg font-semibold hover:bg-wa-ocean transition-colors cursor-pointer"
-                        >
-                            Submit Request →
-                        </button>
+                        <p className="text-sm font-medium text-gray-500">
+                            Your selection is empty
+                        </p>
+                        <p className="text-xs text-gray-400 mt-1">
+                            Browse a category and add items
+                        </p>
                     </div>
+                ) : (
+                    <ul className="space-y-2">
+                        {items.map((item) => (
+                            <li
+                                key={`${item.item_type}-${item.item_id}`}
+                                className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
+                            >
+                                {/* Item info */}
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-semibold text-wa-navy truncate">
+                                        {item.name}
+                                    </p>
+                                    <p className="text-xs text-gray-400 capitalize mt-0.5">
+                                        {item.item_type}
+                                    </p>
+                                    <p className="text-xs font-medium text-wa-blue mt-0.5">
+                                        CHF{" "}
+                                        {(
+                                            item.unit_price * item.quantity
+                                        ).toFixed(2)}
+                                    </p>
+                                </div>
+
+                                {/* Quantity controls */}
+                                <div className="flex items-center gap-1.5 flex-shrink-0">
+                                    <button
+                                        onClick={() =>
+                                            updateQuantity(
+                                                item.item_type,
+                                                item.item_id,
+                                                item.quantity - 1,
+                                            )
+                                        }
+                                        className="w-6 h-6 rounded-full bg-white border border-gray-200 hover:border-gray-400 flex items-center justify-center text-xs font-bold text-gray-600 cursor-pointer transition-colors"
+                                    >
+                                        −
+                                    </button>
+                                    <span className="w-6 text-center text-sm font-semibold text-wa-navy">
+                                        {item.quantity}
+                                    </span>
+                                    <button
+                                        onClick={() =>
+                                            updateQuantity(
+                                                item.item_type,
+                                                item.item_id,
+                                                item.quantity + 1,
+                                            )
+                                        }
+                                        className="w-6 h-6 rounded-full bg-white border border-gray-200 hover:border-gray-400 flex items-center justify-center text-xs font-bold text-gray-600 cursor-pointer transition-colors"
+                                    >
+                                        +
+                                    </button>
+                                </div>
+
+                                {/* Remove */}
+                                <button
+                                    onClick={() =>
+                                        removeItem(item.item_type, item.item_id)
+                                    }
+                                    className="w-6 h-6 flex items-center justify-center text-gray-300 hover:text-red-400 cursor-pointer transition-colors flex-shrink-0"
+                                    title="Remove"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="h-4 w-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M6 18L18 6M6 6l12 12"
+                                        />
+                                    </svg>
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
                 )}
             </div>
+
+            {/* Footer */}
+            {items.length > 0 && (
+                <div className="flex-shrink-0 px-5 py-4 border-t border-gray-100 bg-white">
+                    <div className="flex justify-between items-center mb-3">
+                        <span className="text-sm text-gray-500">
+                            Estimated Total
+                        </span>
+                        <span className="text-lg font-bold text-wa-navy">
+                            CHF {totalCost.toFixed(2)}
+                        </span>
+                    </div>
+                    <button
+                        onClick={onSubmit}
+                        className="w-full bg-wa-blue hover:bg-wa-ocean text-white py-3 rounded-xl text-sm font-semibold transition-colors cursor-pointer"
+                    >
+                        Submit Request →
+                    </button>
+                </div>
+            )}
         </>
     );
 }
