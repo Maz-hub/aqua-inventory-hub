@@ -110,7 +110,7 @@ function DrawerContent({
         <>
             {/* Header */}
             <div
-                className={`flex items-center justify-between px-5 py-4 border-b border-gray-100 flex-shrink-0 ${isMobile ? "" : "bg-white"}`}
+                className={`flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0 ${isMobile ? "" : "bg-white"}`}
             >
                 <div>
                     <h2 className="text-base font-bold text-wa-navy">
@@ -196,7 +196,7 @@ function DrawerContent({
                                 </div>
 
                                 {/* Quantity controls */}
-                                <div className="flex items-center gap-1.5 flex-shrink-0">
+                                <div className="flex items-center gap-1.5 shrink-0">
                                     <button
                                         onClick={() =>
                                             updateQuantity(
@@ -261,7 +261,7 @@ function DrawerContent({
                                     onClick={() =>
                                         removeItem(item.item_type, item.item_id)
                                     }
-                                    className="w-6 h-6 flex items-center justify-center text-gray-300 hover:text-red-400 cursor-pointer transition-colors flex-shrink-0"
+                                    className="w-6 h-6 flex items-center justify-center text-gray-300 hover:text-red-400 cursor-pointer transition-colors shrink-0"
                                     title="Remove"
                                 >
                                     <svg
@@ -287,7 +287,7 @@ function DrawerContent({
 
             {/* Footer */}
             {items.length > 0 && (
-                <div className="flex-shrink-0 px-5 py-4 border-t border-gray-100 bg-white">
+                <div className="shrink-0 px-5 py-4 border-t border-gray-100 bg-white">
                     <div className="flex justify-between items-center mb-3">
                         <span className="text-sm text-gray-500">
                             Estimated Total
