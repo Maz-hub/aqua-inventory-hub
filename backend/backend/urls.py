@@ -52,6 +52,7 @@ urlpatterns = [
     path("api/", include("core.urls")),
     path("api/gifts/", include("gifts.urls")),
     path("api/apparel/", include("apparel.urls")),
+    path("api/requests/", include("item_requests.urls")),
     # Routes all /api/ requests to the api app's URL configuration
 ]
 
