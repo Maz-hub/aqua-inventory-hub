@@ -15,8 +15,11 @@ import ReturnApparelModal from "../components/ReturnApparelModal";
 import ApparelDetailsModal from "../components/ApparelDetailsModal";
 
 import Footer from "../components/Footer";
+import Header from "../components/Header";
+import SelectionDrawer from "../components/SelectionDrawer";
 
 function Apparel() {
+  const [selectionOpen, setSelectionOpen] = useState(false);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -151,7 +154,9 @@ function Apparel() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
+    <div className="min-h-screen bg-gray-100 flex flex-col">
+      <Header onSelectionOpen={() => setSelectionOpen(true)} />
+      <div className="p-4 md:p-8">
       <div className="max-w-7xl mx-auto mb-8">
         <button
           onClick={() => navigate("/")}
@@ -574,6 +579,11 @@ function Apparel() {
           onSuccess={fetchProducts}
         />
       )}
+    </div>
+    <SelectionDrawer
+      isOpen={selectionOpen}
+      onClose={() => setSelectionOpen(false)}
+    />
     </div>
   );
 }

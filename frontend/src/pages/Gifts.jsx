@@ -7,6 +7,7 @@ import TakeItemsModal from "../components/TakeItemsModal";
 import ReturnItemsModal from "../components/ReturnItemsModal";
 import { useSelection } from "../context/SelectionContext";
 import SelectionDrawer from "../components/SelectionDrawer";
+import Header from "../components/Header";
 
 function Gifts() {
   const [gifts, setGifts] = useState([]);
@@ -84,7 +85,9 @@ function Gifts() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
+    <div className="min-h-screen bg-gray-100 flex flex-col">
+      <Header onSelectionOpen={() => setSelectionOpen(true)} />
+      <div className="p-4 md:p-8">
       <div className="max-w-7xl mx-auto mb-8">
         <button
           onClick={() => navigate("/")}
@@ -336,10 +339,11 @@ function Gifts() {
           />
         )}
       </div>
-      <SelectionDrawer
-        isOpen={selectionOpen}
-        onClose={() => setSelectionOpen(false)}
-      />
+    </div>
+    <SelectionDrawer
+      isOpen={selectionOpen}
+      onClose={() => setSelectionOpen(false)}
+    />
     </div>
   );
 }

@@ -62,6 +62,7 @@ function SelectionDrawer({ isOpen, onClose }) {
                     updateQuantity={updateQuantity}
                     onClose={onClose}
                     onSubmit={handleSubmitRequest}
+                    onContinue={onClose}
                 />
             </div>
 
@@ -85,6 +86,7 @@ function SelectionDrawer({ isOpen, onClose }) {
                     updateQuantity={updateQuantity}
                     onClose={onClose}
                     onSubmit={handleSubmitRequest}
+                    onContinue={onClose}
                     isMobile
                 />
             </div>
@@ -101,6 +103,7 @@ function DrawerContent({
     updateQuantity,
     onClose,
     onSubmit,
+    onContinue,
     isMobile,
 }) {
     return (
@@ -170,21 +173,21 @@ function DrawerContent({
                         </p>
                     </div>
                 ) : (
-                    <ul className="space-y-2">
+                    <ul className="space-y-3">
                         {items.map((item) => (
                             <li
                                 key={`${item.item_type}-${item.item_id}`}
-                                className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
+                                className="flex items-center gap-1 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
                             >
                                 {/* Item info */}
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm font-semibold text-wa-navy truncate">
                                         {item.name}
                                     </p>
-                                    <p className="text-xs text-gray-400 capitalize mt-0.5">
+                                    <p className="text-xs text-gray-400 capitalize mt-1.5">
                                         {item.item_type}
                                     </p>
-                                    <p className="text-xs font-medium text-wa-blue mt-0.5">
+                                    <p className="text-xs font-medium text-wa-blue mt-1.5">
                                         CHF{" "}
                                         {(
                                             item.unit_price * item.quantity
@@ -206,18 +209,48 @@ function DrawerContent({
                                     >
                                         −
                                     </button>
-                                    <span className="w-6 text-center text-sm font-semibold text-wa-navy">
-                                        {item.quantity}
-                                    </span>
-                                    <button
-                                        onClick={() =>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        max={item.max_quantity}
+                                        value={item.quantity}
+                                        onChange={(e) => {
+                                            const val = Math.min(
+                                                Math.max(
+                                                    1,
+                                                    parseInt(e.target.value) ||
+                                                        1,
+                                                ),
+                                                item.max_quantity,
+                                            );
                                             updateQuantity(
                                                 item.item_type,
                                                 item.item_id,
-                                                item.quantity + 1,
-                                            )
-                                        }
-                                        className="w-6 h-6 rounded-full bg-white border border-gray-200 hover:border-gray-400 flex items-center justify-center text-xs font-bold text-gray-600 cursor-pointer transition-colors"
+                                                val,
+                                            );
+                                        }}
+                                        className="w-20 text-center text-sm text-wa-navy border border-gray-200 rounded-md py-0.5 focus:outline-none focus:border-wa-blue"
+                                    />
+                                    <button
+                                        onClick={() => {
+                                            if (
+                                                item.quantity <
+                                                item.max_quantity
+                                            ) {
+                                                updateQuantity(
+                                                    item.item_type,
+                                                    item.item_id,
+                                                    item.quantity + 1,
+                                                );
+                                            }
+                                        }}
+                                        className={`w-6 h-6 rounded-full bg-white border flex items-center justify-center text-xs font-bold transition-colors
+                                            ${
+                                                item.quantity >=
+                                                item.max_quantity
+                                                    ? "border-gray-100 text-gray-300 cursor-not-allowed"
+                                                    : "border-gray-200 hover:border-gray-400 text-gray-600 cursor-pointer"
+                                            }`}
                                     >
                                         +
                                     </button>
@@ -264,10 +297,16 @@ function DrawerContent({
                         </span>
                     </div>
                     <button
-                        onClick={onSubmit}
-                        className="w-full bg-wa-blue hover:bg-wa-ocean text-white py-3 rounded-xl text-sm font-semibold transition-colors cursor-pointer"
+                        onClick={onContinue}
+                        className="w-full py-3 rounded-xl text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors cursor-pointer"
                     >
-                        Submit Request →
+                        Continue Browsing
+                    </button>
+                    <button
+                        onClick={onSubmit}
+                        className="w-full mt-2 bg-wa-blue hover:bg-wa-ocean text-white py-3 rounded-xl text-sm font-semibold transition-colors cursor-pointer"
+                    >
+                        Submit Request
                     </button>
                 </div>
             )}
