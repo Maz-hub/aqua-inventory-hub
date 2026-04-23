@@ -18,7 +18,7 @@ function ApparelRequestModal({ product, onClose }) {
 
     // Get selected variant object from product variants
     const selectedVariant = product.variants.find(
-        (v) => v.id === parseInt(selectedVariantId)
+        (v) => v.id === parseInt(selectedVariantId),
     );
 
     const handleAdd = () => {
@@ -53,7 +53,6 @@ function ApparelRequestModal({ product, onClose }) {
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-xl max-w-md w-full">
                 <div className="p-6">
-
                     {/* Header */}
                     <div className="flex justify-between items-start mb-5">
                         <div>
@@ -88,13 +87,24 @@ function ApparelRequestModal({ product, onClose }) {
                             >
                                 <option value="">Select size and colour</option>
                                 {product.variants
-                                    .filter(v => v.qty_stock > 0)
+                                    .filter((v) => v.qty_stock > 0)
                                     .map((variant) => (
-                                        <option key={variant.id} value={variant.id}>
-                                            {variant.size.size_value} — {variant.color.color_name} — {variant.gender === "U" ? "Unisex" : variant.gender === "M" ? "Men" : variant.gender === "W" ? "Women" : "Youth"} ({variant.qty_stock} available)
+                                        <option
+                                            key={variant.id}
+                                            value={variant.id}
+                                        >
+                                            {variant.size.size_value} —{" "}
+                                            {variant.color.color_name} —{" "}
+                                            {variant.gender === "U"
+                                                ? "Unisex"
+                                                : variant.gender === "M"
+                                                  ? "Men"
+                                                  : variant.gender === "W"
+                                                    ? "Women"
+                                                    : "Youth"}{" "}
+                                            ({variant.qty_stock} available)
                                         </option>
-                                    ))
-                                }
+                                    ))}
                             </select>
                         </div>
 
@@ -102,7 +112,10 @@ function ApparelRequestModal({ product, onClose }) {
                         {selectedVariant && (
                             <div className="bg-blue-50 rounded-xl px-4 py-3">
                                 <p className="text-sm text-blue-800">
-                                    <span className="font-semibold">Available stock:</span> {selectedVariant.qty_stock} units
+                                    <span className="font-semibold">
+                                        Available stock:
+                                    </span>{" "}
+                                    {selectedVariant.qty_stock} units
                                 </p>
                             </div>
                         )}
@@ -117,12 +130,17 @@ function ApparelRequestModal({ product, onClose }) {
                                 min="1"
                                 max={selectedVariant?.qty_stock || 1}
                                 value={quantity}
-                                onChange={(e) => setQuantity(
-                                    Math.min(
-                                        Math.max(1, parseInt(e.target.value) || 1),
-                                        selectedVariant?.qty_stock || 1
+                                onChange={(e) =>
+                                    setQuantity(
+                                        Math.min(
+                                            Math.max(
+                                                1,
+                                                parseInt(e.target.value) || 1,
+                                            ),
+                                            selectedVariant?.qty_stock || 1,
+                                        ),
                                     )
-                                )}
+                                }
                                 className="form_input"
                                 disabled={!selectedVariantId}
                             />
@@ -132,7 +150,10 @@ function ApparelRequestModal({ product, onClose }) {
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1.5">
                                 Notes for preparation team
-                                <span className="text-gray-400 font-normal"> (optional)</span>
+                                <span className="text-gray-400 font-normal">
+                                    {" "}
+                                    (optional)
+                                </span>
                             </label>
                             <textarea
                                 value={notes}
@@ -146,7 +167,7 @@ function ApparelRequestModal({ product, onClose }) {
                         <div className="flex gap-3 pt-1">
                             <button
                                 onClick={onClose}
-                                className="btn_cancel"
+                                className="flex-none bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 hover:text-gray-100 text-sm cursor-pointer font-medium transition-all px-6 py-2"
                             >
                                 Cancel
                             </button>
@@ -154,9 +175,10 @@ function ApparelRequestModal({ product, onClose }) {
                                 onClick={handleAdd}
                                 disabled={!selectedVariantId}
                                 className={`flex-1 py-2 rounded-lg font-semibold transition-colors cursor-pointer
-                                    ${!selectedVariantId
-                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                        : 'bg-wa-blue hover:bg-wa-ocean text-white'
+                                    ${
+                                        !selectedVariantId
+                                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                            : "bg-wa-blue hover:bg-wa-ocean text-white"
                                     }`}
                             >
                                 Add to Selection

@@ -5,9 +5,9 @@ import GiftForm from "../components/GiftForm";
 import GiftDetailsModal from "../components/GiftDetailsModal";
 import TakeItemsModal from "../components/TakeItemsModal";
 import ReturnItemsModal from "../components/ReturnItemsModal";
-import { useSelection } from "../context/SelectionContext";
 import SelectionDrawer from "../components/SelectionDrawer";
 import Header from "../components/Header";
+import GiftRequestModal from "../components/GiftRequestModal";
 
 function Gifts() {
   const [gifts, setGifts] = useState([]);
@@ -23,8 +23,9 @@ function Gifts() {
   const [showLowStockOnly, setShowLowStockOnly] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const navigate = useNavigate();
-  const { addItem } = useSelection();
   const [selectionOpen, setSelectionOpen] = useState(false);
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [selectedGiftForRequest, setSelectedGiftForRequest] = useState(null);
 
   useEffect(() => {
     getGifts();
@@ -70,19 +71,6 @@ function Gifts() {
 
     return matchesSearch && matchesCategory && matchesLowStock;
   });
-
-  const handleAddToRequest = (gift) => {
-    addItem({
-      item_type: 'gift',
-      item_id: gift.id,
-      name: gift.product_name,
-      unit_price: parseFloat(gift.unit_price),
-      quantity: 1,
-      image: gift.product_image,
-      max_quantity: gift.qty_stock,
-    });
-    setSelectionOpen(true);
-  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -263,7 +251,10 @@ function Gifts() {
                   {/* Action Buttons */}
                   <div className="space-y-2">
                     <button
-                      onClick={() => handleAddToRequest(gift)}
+                      onClick={() => {
+                        setSelectedGiftForRequest(gift);
+                        setShowRequestModal(true);
+                      }}
                       disabled={gift.qty_stock === 0}
                       className={`w-full py-2 rounded-md font-medium transition-colors cursor-pointer
                         ${gift.qty_stock === 0
@@ -339,6 +330,16 @@ function Gifts() {
           />
         )}
       </div>
+      {showRequestModal && selectedGiftForRequest && (
+        <GiftRequestModal
+          gift={selectedGiftForRequest}
+          onClose={() => {
+            setShowRequestModal(false);
+            setSelectedGiftForRequest(null);
+            setSelectionOpen(true);
+          }}
+        />
+      )}
     </div>
     <SelectionDrawer
       isOpen={selectionOpen}
