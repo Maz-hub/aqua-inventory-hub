@@ -27,6 +27,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 // Wrapper component that enforces authentication
 
 import { UserProvider } from "./context/UserContext";
+import { SelectionProvider } from "./context/SelectionContext";
 
 function Logout() {
   // Logout functionality: clears all stored tokens and redirects to login
@@ -40,6 +41,7 @@ function Logout() {
 
 function App() {
   return (
+    <SelectionProvider>
     <UserProvider>
     <BrowserRouter>
       {/* Enables client-side routing throughout the app */}
@@ -93,6 +95,7 @@ function App() {
       </Routes>
     </BrowserRouter>
     </UserProvider>
+    </SelectionProvider>
   );
 }
 

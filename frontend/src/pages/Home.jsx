@@ -10,15 +10,15 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
 import Footer from "../components/Footer";
+import Header from "../components/Header";
 import { useUser } from "../context/UserContext";
 
 function Home() {
     const [gifts, setGifts] = useState([]);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    const { hasAccess, clearUser, loadingUser } = useUser();
-    // hasAccess checks if user belongs to a specific group
-    // clearUser clears user info from context on logout
+    const { hasAccess, loadingUser } = useUser();
+    const [selectionOpen, setSelectionOpen] = useState(false);
 
     useEffect(() => {
         // Only fetch gifts count if user has access
@@ -34,13 +34,6 @@ function Home() {
             .then((res) => setGifts(res.data))
             .catch((err) => console.error(err))
             .finally(() => setLoading(false));
-    };
-
-    const handleLogout = () => {
-        // Clear tokens and user context, then redirect to login
-        localStorage.clear();
-        clearUser();
-        navigate("/login");
     };
 
     // Reusable component for each inventory category card
@@ -99,25 +92,23 @@ function Home() {
 
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col">
-            <div className="flex-1 p-8">
+            <Header onSelectionOpen={() => setSelectionOpen(true)} />
+
+            <div className="flex-1 p-4 md:p-8">
                 {/* Header */}
-                <div className="max-w-7xl mx-auto mt-5 mb-12">
-                    <h1 className="text-4xl font-bold text-wa-navy mb-2 text-center">
+                <div className="max-w-7xl mx-auto mt-5 mb-8 md:mb-12">
+                    <h1 className="text-2xl md:text-4xl font-bold text-wa-navy mb-2 text-center">
                         Aqua Inventory Hub
                     </h1>
                 </div>
 
                 {/* Inventory Category Cards */}
-                <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-8">
+                <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
                     <CategoryCard
                         emoji="🛍️"
                         title="Gifts"
-                        description="Promotional items, branded gifts and giveaways"
-                        subtext={
-                            loading
-                                ? "Loading..."
-                                : `${gifts.length} items in stock`
-                        }
+                        description="Promotional gifts and branded merchandise for events and meetings"
+                        subtext={loading ? "Loading..." : `${gifts.length} items in stock`}
                         accessGroup="gifts_access"
                         route="/gifts"
                     />
@@ -146,7 +137,7 @@ function Home() {
                         route="/executive"
                     />
                     <CategoryCard
-                        emoji="💻"
+                        emoji="🖥️"
                         title="IT Assets"
                         description="Laptops, peripherals and technical equipment"
                         subtext="Manage Inventory"
@@ -163,14 +154,6 @@ function Home() {
                     />
                 </div>
             </div>
-
-            {/* Logout Button */}
-            <div className="text-center mt-12 mb-8">
-                <button onClick={handleLogout} className="btn_logout">
-                    Logout
-                </button>
-            </div>
-
             <Footer />
         </div>
     );
