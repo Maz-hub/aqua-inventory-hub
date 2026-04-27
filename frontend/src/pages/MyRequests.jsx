@@ -110,6 +110,9 @@ function MyRequests() {
                                             <p className="text-sm text-gray-600 mt-1">
                                                 <span className="font-medium">Date needed:</span> {new Date(request.date_needed).toLocaleDateString()}
                                             </p>
+                                            <p className="text-sm text-gray-600 mt-1">
+                                                <span className="font-medium">Submitted:</span> {new Date(request.created_at).toLocaleDateString()} {new Date(request.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </p>
                                         </div>
                                         <div className="text-right">
                                             <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${STATUS_STYLES[request.status]}`}>
@@ -135,7 +138,7 @@ function MyRequests() {
                                                     >
                                                         <div>
                                                             <span className="text-wa-navy font-medium">
-                                                                {item.item_name}
+                                                                {item.item_name || `${item.item_type} #${item.item_id}`}
                                                             </span>
                                                             {item.notes && (
                                                                 <p className="text-xs text-gray-400 italic mt-0.5">

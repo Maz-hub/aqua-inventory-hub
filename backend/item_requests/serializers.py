@@ -18,10 +18,28 @@ class DepartmentSerializer(serializers.ModelSerializer):
 class ItemRequestItemSerializer(serializers.ModelSerializer):
     """
     Serializer for individual line items within a request.
-    Includes estimated cost calculation for budget display.
+    Includes estimated cost and item name lookup.
     """
     estimated_cost = serializers.ReadOnlyField()
-    # Calculated property from model — read only
+    item_name = serializers.SerializerMethodField()
+    # Looks up the actual product name from the relevant model
+
+    def get_item_name(self, obj):
+        """
+        Fetches the product name from the correct model
+        based on item_type and item_id.
+        """
+        try:
+            if obj.item_type == 'gift':
+                from gifts.models import Gift
+                return Gift.objects.get(pk=obj.item_id).product_name
+            elif obj.item_type == 'apparel':
+                from apparel.models import ApparelVariant
+                variant = ApparelVariant.objects.get(pk=obj.item_id)
+                return f"{variant.product.product_name} — {variant.size.size_value} {variant.color.color_name}"
+            return f"{obj.get_item_type_display()} #{obj.item_id}"
+        except Exception:
+            return f"{obj.get_item_type_display()} #{obj.item_id}"
 
     class Meta:
         model = ItemRequestItem
@@ -29,6 +47,7 @@ class ItemRequestItemSerializer(serializers.ModelSerializer):
             'id',
             'item_type',
             'item_id',
+            'item_name',
             'quantity_requested',
             'quantity_confirmed',
             'unit_price',
