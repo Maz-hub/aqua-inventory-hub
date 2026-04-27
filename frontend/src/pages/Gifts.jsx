@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import api from "../api";
 import GiftForm from "../components/GiftForm";
 import GiftDetailsModal from "../components/GiftDetailsModal";
-import TakeItemsModal from "../components/TakeItemsModal";
-import ReturnItemsModal from "../components/ReturnItemsModal";
 import SelectionDrawer from "../components/SelectionDrawer";
 import Header from "../components/Header";
 import GiftRequestModal from "../components/GiftRequestModal";
@@ -13,9 +11,6 @@ function Gifts() {
   const [gifts, setGifts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedGift, setSelectedGift] = useState(null); // Tracks which gift is selected for viewing details
-  const [showTakeModal, setShowTakeModal] = useState(false);
-  const [selectedGiftForAction, setSelectedGiftForAction] = useState(null);
-  const [showReturnModal, setShowReturnModal] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -272,27 +267,6 @@ function Gifts() {
                       View Details
                     </button>
 
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          setSelectedGiftForAction(gift);
-                          setShowTakeModal(true);
-                        }}
-                        className="btn_take"
-                      >
-                        Take
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          setSelectedGiftForAction(gift);
-                          setShowReturnModal(true);
-                        }}
-                        className="btn_return"
-                      >
-                        Return
-                      </button>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -306,29 +280,6 @@ function Gifts() {
           onSuccess={getGifts}
         />
 
-        {/* Take Items Modal */}
-        {showTakeModal && selectedGiftForAction && (
-          <TakeItemsModal
-            gift={selectedGiftForAction}
-            onClose={() => {
-              setShowTakeModal(false);
-              setSelectedGiftForAction(null);
-            }}
-            onSuccess={getGifts}
-          />
-        )}
-
-        {/* Return Items Modal */}
-        {showReturnModal && selectedGiftForAction && (
-          <ReturnItemsModal
-            gift={selectedGiftForAction}
-            onClose={() => {
-              setShowReturnModal(false);
-              setSelectedGiftForAction(null);
-            }}
-            onSuccess={getGifts}
-          />
-        )}
       </div>
       {showRequestModal && selectedGiftForRequest && (
         <GiftRequestModal

@@ -107,7 +107,7 @@ function GiftRequestModal({ gift, onClose }) {
                                 value={notes}
                                 onChange={(e) => setNotes(e.target.value)}
                                 className="form_input min-h-20"
-                                placeholder="e.g. Gift wrapping preferred, include a card..."
+                                placeholder="e.g. No plastic wrap, urgent..."
                             />
                         </div>
 

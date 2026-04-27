@@ -45,7 +45,7 @@ function SelectionDrawer({ isOpen, onClose }) {
                 className={`
                 hidden md:flex
                 fixed top-0 right-0 h-full z-50
-                w-80 lg:w-96
+                w-96 lg:w-120
                 flex-col
                 bg-white
                 border-l border-gray-100
@@ -193,6 +193,11 @@ function DrawerContent({
                                             item.unit_price * item.quantity
                                         ).toFixed(2)}
                                     </p>
+                                    {item.notes && (
+                                        <p className="text-xs text-gray-400 italic mt-1">
+                                            📝 {item.notes}
+                                        </p>
+                                    )}
                                 </div>
 
                                 {/* Quantity controls */}
