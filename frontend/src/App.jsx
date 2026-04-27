@@ -24,6 +24,7 @@ import Apparel from "./pages/Apparel";
 import NewRequest from "./pages/NewRequest";
 import RequestConfirmation from "./pages/RequestConfirmation";
 import MyRequests from "./pages/MyRequests";
+import AdminPanel from "./pages/AdminPanel";
 // Page components
 
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -106,6 +107,15 @@ function App() {
           element={
             <ProtectedRoute>
               <MyRequests />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin-panel"
+          element={
+            <ProtectedRoute>
+              <AdminPanel />
             </ProtectedRoute>
           }
         />
