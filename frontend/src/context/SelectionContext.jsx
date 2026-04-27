@@ -1,4 +1,4 @@
-import { createContext, useState, useContext } from "react";
+import { createContext, useState, useContext, useEffect } from "react";
 
 // ============================================
 // SELECTION CONTEXT
@@ -10,8 +10,21 @@ import { createContext, useState, useContext } from "react";
 const SelectionContext = createContext(null);
 
 export function SelectionProvider({ children }) {
-    const [items, setItems] = useState([]);
+    const [items, setItems] = useState(() => {
+        // Load items from localStorage on initial render
+        try {
+            const saved = localStorage.getItem('selection_items');
+            return saved ? JSON.parse(saved) : [];
+        } catch {
+            return [];
+        }
+    });
     // Each item: { id, item_type, item_id, name, unit_price, quantity, image }
+
+    useEffect(() => {
+        // Save items to localStorage whenever selection changes
+        localStorage.setItem('selection_items', JSON.stringify(items));
+    }, [items]);
 
     const addItem = (item) => {
         // Check if item already exists in selection

@@ -141,6 +141,7 @@ function ApparelRequestModal({ product, onClose }) {
                                         ),
                                     )
                                 }
+                                onFocus={(e) => e.target.select()}
                                 className="form_input"
                                 disabled={!selectedVariantId}
                             />

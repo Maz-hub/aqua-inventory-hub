@@ -90,6 +90,7 @@ function GiftRequestModal({ gift, onClose }) {
                                         ),
                                     )
                                 }
+                                onFocus={(e) => e.target.select()}
                                 className="form_input"
                             />
                         </div>

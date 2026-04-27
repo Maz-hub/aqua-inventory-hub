@@ -21,6 +21,8 @@ import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import Gifts from "./pages/Gifts";
 import Apparel from "./pages/Apparel";
+import NewRequest from "./pages/NewRequest";
+import RequestConfirmation from "./pages/RequestConfirmation";
 // Page components
 
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -76,6 +78,24 @@ function App() {
           element={
             <ProtectedRoute>
               <Apparel />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/requests/new"
+          element={
+            <ProtectedRoute>
+              <NewRequest />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/requests/confirmation"
+          element={
+            <ProtectedRoute>
+              <RequestConfirmation />
             </ProtectedRoute>
           }
         />

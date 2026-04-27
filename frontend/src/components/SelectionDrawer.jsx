@@ -187,11 +187,15 @@ function DrawerContent({
                                     <p className="text-xs text-gray-400 capitalize mt-1.5">
                                         {item.item_type}
                                     </p>
-                                    <p className="text-xs font-medium text-wa-blue mt-1.5">
+                                    <p className="text-xs text-gray-400 mt-0.5">
+                                        CHF {item.unit_price.toFixed(2)} / unit
+                                    </p>
+                                    <p className="text-xs font-medium text-wa-blue mt-0.5">
                                         CHF{" "}
                                         {(
                                             item.unit_price * item.quantity
-                                        ).toFixed(2)}
+                                        ).toFixed(2)}{" "}
+                                        total
                                     </p>
                                     {item.notes && (
                                         <p className="text-xs text-gray-400 italic mt-1">
@@ -294,9 +298,7 @@ function DrawerContent({
             {items.length > 0 && (
                 <div className="shrink-0 px-5 py-4 border-t border-gray-100 bg-white">
                     <div className="flex justify-between items-center mb-3">
-                        <span className="text-sm text-gray-500">
-                            Estimated Total
-                        </span>
+                        <span className="text-sm text-gray-500">Total</span>
                         <span className="text-lg font-bold text-wa-navy">
                             CHF {totalCost.toFixed(2)}
                         </span>
