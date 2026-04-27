@@ -10,8 +10,6 @@ import { useNavigate } from "react-router-dom";
 import api from "../api";
 import AddApparelProductForm from "../components/AddApparelProductForm";
 import AddVariantModal from "../components/AddVariantModal";
-import TakeApparelModal from "../components/TakeApparelModal";
-import ReturnApparelModal from "../components/ReturnApparelModal";
 import ApparelDetailsModal from "../components/ApparelDetailsModal";
 import ApparelRequestModal from "../components/ApparelRequestModal";
 
@@ -36,11 +34,6 @@ function Apparel() {
   const navigate = useNavigate();
   const [showAddVariantModal, setShowAddVariantModal] = useState(false);
   const [selectedProductForVariant, setSelectedProductForVariant] =
-    useState(null);
-  const [showTakeModal, setShowTakeModal] = useState(false);
-  const [selectedProductForTake, setSelectedProductForTake] = useState(null);
-  const [showReturnModal, setShowReturnModal] = useState(false);
-  const [selectedProductForReturn, setSelectedProductForReturn] =
     useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedProductForDetails, setSelectedProductForDetails] =
@@ -528,26 +521,6 @@ function Apparel() {
                       + Add Variant
                     </button>
 
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          setSelectedProductForTake(product);
-                          setShowTakeModal(true);
-                        }}
-                        className="btn_take"
-                      >
-                        Take
-                      </button>
-                      <button
-                        onClick={() => {
-                          setSelectedProductForReturn(product);
-                          setShowReturnModal(true);
-                        }}
-                        className="btn_return"
-                      >
-                        Return
-                      </button>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -567,28 +540,6 @@ function Apparel() {
         />
       )}
 
-      {/* Take Apparel Modal */}
-      {showTakeModal && selectedProductForTake && (
-        <TakeApparelModal
-          product={selectedProductForTake}
-          onClose={() => {
-            setShowTakeModal(false);
-            setSelectedProductForTake(null);
-          }}
-          onSuccess={fetchProducts}
-        />
-      )}
-      {/* Return Apparel Modal */}
-      {showReturnModal && selectedProductForReturn && (
-        <ReturnApparelModal
-          product={selectedProductForReturn}
-          onClose={() => {
-            setShowReturnModal(false);
-            setSelectedProductForReturn(null);
-          }}
-          onSuccess={fetchProducts}
-        />
-      )}
       {/* Apparel Details Modal */}
       {showDetailsModal && selectedProductForDetails && (
         <ApparelDetailsModal
