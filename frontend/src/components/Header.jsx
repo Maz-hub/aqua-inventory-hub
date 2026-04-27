@@ -14,7 +14,7 @@ import logo from "../assets/images/WorldAquatics-Logo_CMYK_White_Horiz.png";
 
 function Header({ onSelectionOpen }) {
     const [userMenuOpen, setUserMenuOpen] = useState(false);
-    const { user, clearUser } = useUser();
+    const { user, clearUser, hasAccess } = useUser();
     const { totalItems } = useSelection();
     const navigate = useNavigate();
 
@@ -109,13 +109,24 @@ function Header({ onSelectionOpen }) {
                                     navigate("/requests/mine");
                                     setUserMenuOpen(false);
                                 }}
-                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                                className="w-full text-left px-4 py-2 text-sm text-wa-navy hover:bg-gray-100 cursor-pointer font-medium"
                             >
                                 My Requests
                             </button>
+                            {hasAccess("admin") && (
+                                <button
+                                    onClick={() => {
+                                        navigate("/admin-panel");
+                                        setUserMenuOpen(false);
+                                    }}
+                                    className="w-full text-left px-4 py-2 text-sm text-wa-navy hover:bg-gray-100 cursor-pointer font-medium"
+                                >
+                                    Admin Panel
+                                </button>
+                            )}
                             <button
                                 onClick={handleLogout}
-                                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 cursor-pointer"
+                                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 cursor-pointer font-medium"
                             >
                                 Logout
                             </button>
