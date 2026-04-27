@@ -23,6 +23,7 @@ import Gifts from "./pages/Gifts";
 import Apparel from "./pages/Apparel";
 import NewRequest from "./pages/NewRequest";
 import RequestConfirmation from "./pages/RequestConfirmation";
+import MyRequests from "./pages/MyRequests";
 // Page components
 
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -96,6 +97,15 @@ function App() {
           element={
             <ProtectedRoute>
               <RequestConfirmation />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/requests/mine"
+          element={
+            <ProtectedRoute>
+              <MyRequests />
             </ProtectedRoute>
           }
         />
