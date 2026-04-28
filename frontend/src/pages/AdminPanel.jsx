@@ -10,6 +10,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import SelectionDrawer from "../components/SelectionDrawer";
+import AdminRequests from "../components/admin/AdminRequests";
 
 // Sidebar navigation items
 const NAV_ITEMS = [
@@ -17,49 +18,49 @@ const NAV_ITEMS = [
         id: "requests",
         label: "Requests",
         icon: "📋",
-        description: "Manage incoming item requests"
+        description: "Manage incoming item requests",
     },
     {
         id: "gifts",
         label: "Gifts",
         icon: "🛍️",
-        description: "Manage gifts inventory"
+        description: "Manage gifts inventory",
     },
     {
         id: "apparel",
         label: "Apparel",
         icon: "👕",
-        description: "Manage apparel inventory"
+        description: "Manage apparel inventory",
     },
     {
         id: "executive",
         label: "Executive Office",
         icon: "💼",
-        description: "Manage executive items"
+        description: "Manage executive items",
     },
     {
         id: "office",
         label: "Office & Events",
         icon: "🗂️",
-        description: "Manage office and event materials"
+        description: "Manage office and event materials",
     },
     {
         id: "it",
         label: "IT Assets",
         icon: "🖥️",
-        description: "Manage IT equipment"
+        description: "Manage IT equipment",
     },
     {
         id: "dashboard",
         label: "Dashboard",
         icon: "📈",
-        description: "Statistics and reports"
+        description: "Statistics and reports",
     },
     {
         id: "settings",
         label: "Settings",
         icon: "⚙️",
-        description: "Categories, departments, reasons"
+        description: "Categories, departments, reasons",
     },
 ];
 
@@ -69,14 +70,13 @@ function AdminPanel() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const navigate = useNavigate();
 
-    const activeItem = NAV_ITEMS.find(i => i.id === activeSection);
+    const activeItem = NAV_ITEMS.find((i) => i.id === activeSection);
 
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col">
             <Header onSelectionOpen={() => setSelectionOpen(true)} />
 
             <div className="flex flex-1 overflow-hidden">
-
                 {/* MOBILE: sidebar toggle button */}
                 <button
                     onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -86,7 +86,8 @@ function AdminPanel() {
                 </button>
 
                 {/* SIDEBAR */}
-                <aside className={`
+                <aside
+                    className={`
                     fixed md:static inset-y-0 left-0 z-40
                     w-64 bg-wa-navy text-white
                     flex flex-col
@@ -94,18 +95,19 @@ function AdminPanel() {
                     ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
                     md:translate-x-0
                     mt-0
-                `}>
+                `}
+                >
                     {/* Sidebar Header */}
                     <div className="px-6 py-5 border-b border-white/10">
                         <h2 className="text-lg font-bold">Admin Panel</h2>
                         <p className="text-xs text-white/50 mt-0.5">
-                            Inventory Management
+                            Aqua Inventory Hub
                         </p>
                     </div>
 
                     {/* Navigation */}
                     <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-                        {NAV_ITEMS.map(item => (
+                        {NAV_ITEMS.map((item) => (
                             <button
                                 key={item.id}
                                 onClick={() => {
@@ -113,9 +115,10 @@ function AdminPanel() {
                                     setSidebarOpen(false);
                                 }}
                                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer text-left
-                                    ${activeSection === item.id
-                                        ? "bg-white/20 text-white"
-                                        : "text-white/70 hover:bg-white/10 hover:text-white"
+                                    ${
+                                        activeSection === item.id
+                                            ? "bg-white/20 text-white"
+                                            : "text-white/70 hover:bg-white/10 hover:text-white"
                                     }`}
                             >
                                 <span>{item.icon}</span>
@@ -147,7 +150,6 @@ function AdminPanel() {
                 {/* MAIN CONTENT */}
                 <main className="flex-1 overflow-y-auto p-4 md:p-8">
                     <div className="max-w-6xl mx-auto">
-
                         {/* Page title */}
                         <div className="mb-8">
                             <h1 className="text-2xl font-bold text-wa-navy">
@@ -158,13 +160,19 @@ function AdminPanel() {
                             </p>
                         </div>
 
-                        {/* Content placeholder per section */}
-                        <div className="bg-white rounded-2xl shadow p-8 text-center">
-                            <div className="text-5xl mb-4">{activeItem?.icon}</div>
-                            <p className="text-gray-500">
-                                {activeItem?.label} management coming soon.
-                            </p>
-                        </div>
+                        {/* Content per section */}
+                        {activeSection === "requests" ? (
+                            <AdminRequests />
+                        ) : (
+                            <div className="bg-white rounded-2xl shadow p-8 text-center">
+                                <div className="text-5xl mb-4">
+                                    {activeItem?.icon}
+                                </div>
+                                <p className="text-gray-500">
+                                    {activeItem?.label} management coming soon.
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </main>
             </div>
