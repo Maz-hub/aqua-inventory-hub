@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
-import GiftForm from "../components/GiftForm";
 import GiftDetailsModal from "../components/GiftDetailsModal";
 import SelectionDrawer from "../components/SelectionDrawer";
 import Header from "../components/Header";
@@ -11,7 +10,6 @@ function Gifts() {
   const [gifts, setGifts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedGift, setSelectedGift] = useState(null); // Tracks which gift is selected for viewing details
-  const [showAddForm, setShowAddForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [categories, setCategories] = useState([]);
@@ -160,32 +158,6 @@ function Gifts() {
           </div>
         </div>
 
-        {/* Add New Item Button / Form Toggle */}
-        {!showAddForm ? (
-          <div className="bg-white p-6 rounded-lg shadow mb-8 text-center">
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="bg-wa-blue text-white px-8 py-3 rounded-md font-medium hover:bg-wa-ocean cursor-pointer transition-all duration-200"
-            >
-              + Add New Item
-            </button>
-          </div>
-        ) : (
-          <div>
-            <button
-              onClick={() => setShowAddForm(false)}
-              className="btn_cancel mb-4 py-3 px-5"
-            >
-              ← Cancel
-            </button>
-            <GiftForm
-              onSuccess={() => {
-                getGifts();
-                setShowAddForm(false);
-              }}
-            />
-          </div>
-        )}
       </div>
 
       {/* Gifts Grid */}
