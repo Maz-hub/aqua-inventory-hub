@@ -129,7 +129,7 @@ def update_request_status(request, pk):
     item_request = get_object_or_404(ItemRequest, pk=pk)
     new_status = request.data.get('status')
 
-    valid_statuses = ['in_preparation', 'ready', 'completed', 'cancelled']
+    valid_statuses = ['draft', 'pending', 'in_preparation', 'ready', 'completed', 'cancelled']
 
     if new_status not in valid_statuses:
         return Response(

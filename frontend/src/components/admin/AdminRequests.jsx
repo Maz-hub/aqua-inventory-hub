@@ -29,19 +29,21 @@ const STATUS_LABELS = {
 
 // Which statuses admin can move a request to
 const NEXT_STATUSES = {
-    draft:          ["pending", "cancelled"],
-    pending:        ["in_preparation", "ready", "completed", "cancelled"],
-    in_preparation: ["ready", "completed", "cancelled"],
-    ready:          ["completed", "cancelled"],
-    completed:      ["cancelled"],
-    cancelled:      ["pending"],
+    draft:          ['pending', 'in_preparation', 'ready', 'completed', 'cancelled'],
+    pending:        ['draft', 'in_preparation', 'ready', 'completed', 'cancelled'],
+    in_preparation: ['draft', 'pending', 'ready', 'completed', 'cancelled'],
+    ready:          ['draft', 'pending', 'in_preparation', 'completed', 'cancelled'],
+    completed:      ['draft', 'pending', 'in_preparation', 'ready', 'cancelled'],
+    cancelled:      ['draft', 'pending', 'in_preparation', 'ready', 'completed'],
 };
 
 const STATUS_ACTION_LABELS = {
-    in_preparation: "Mark In Preparation",
-    ready:          "Mark Ready",
-    completed:      "Mark Completed",
-    cancelled:      "Cancel Request",
+    draft:          'Move to Draft',
+    pending:        'Move to Pending',
+    in_preparation: 'Mark In Preparation',
+    ready:          'Mark Ready',
+    completed:      'Mark Completed',
+    cancelled:      'Cancel Request',
 };
 
 function AdminRequests() {
