@@ -52,6 +52,14 @@ function MyRequests() {
             });
     };
 
+    const cancelRequest = (requestId) => {
+        if (window.confirm("Are you sure you want to cancel this request?")) {
+            api.patch(`/api/requests/${requestId}/status/`, { status: 'cancelled' })
+                .then(() => fetchRequests())
+                .catch(err => alert(err.response?.data?.error || "Failed to cancel request"));
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col">
             <Header onSelectionOpen={() => setSelectionOpen(true)} />
@@ -91,68 +99,58 @@ function MyRequests() {
                     ) : (
                         <div className="space-y-4">
                             {requests.map(request => (
-                                <div
-                                    key={request.id}
-                                    className="bg-white rounded-2xl shadow p-6"
-                                >
-                                    {/* Request Header */}
-                                    <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
-                                        <div>
-                                            <p className="text-sm text-gray-400 mb-1">
-                                                Request #{request.id}
-                                            </p>
-                                            <p className="text-sm text-gray-600">
-                                                <span className="font-medium">Department:</span> {request.department?.name}
-                                            </p>
-                                            <p className="text-sm text-gray-600 mt-1">
-                                                <span className="font-medium">Reason:</span> {request.reason?.reason_name}
-                                            </p>
-                                            <p className="text-sm text-gray-600 mt-1">
-                                                <span className="font-medium">Date needed:</span> {new Date(request.date_needed).toLocaleDateString()}
-                                            </p>
-                                            <p className="text-sm text-gray-600 mt-1">
-                                                <span className="font-medium">Submitted:</span> {new Date(request.created_at).toLocaleDateString()} {new Date(request.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                            </p>
-                                        </div>
-                                        <div className="text-right">
-                                            <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${STATUS_STYLES[request.status]}`}>
-                                                {STATUS_LABELS[request.status]}
-                                            </span>
-                                            <p className="text-lg font-bold text-wa-navy mt-2">
-                                                CHF {parseFloat(request.total_cost).toFixed(2)}
-                                            </p>
-                                        </div>
+                                <div key={request.id} className="bg-white rounded-2xl shadow p-4 md:p-6">
+
+                                    {/* Status badge — full width on mobile */}
+                                    <div className="flex items-center justify-between mb-3">
+                                        <p className="text-sm font-semibold text-gray-400">
+                                            Request #{request.id}
+                                        </p>
+                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${STATUS_STYLES[request.status]}`}>
+                                            {STATUS_LABELS[request.status]}
+                                        </span>
+                                    </div>
+
+                                    {/* Info grid — stacks on mobile */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 mb-4">
+                                        <p className="text-sm text-gray-600">
+                                            <span className="font-medium">Department:</span> {request.department?.name}
+                                        </p>
+                                        <p className="text-sm text-gray-600">
+                                            <span className="font-medium">Reason:</span> {request.reason?.reason_name}
+                                        </p>
+                                        <p className="text-sm text-gray-600">
+                                            <span className="font-medium">Date needed:</span> {new Date(request.date_needed).toLocaleDateString()}
+                                        </p>
+                                        <p className="text-sm text-gray-600">
+                                            <span className="font-medium">Submitted:</span> {new Date(request.created_at).toLocaleDateString()} {new Date(request.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        </p>
                                     </div>
 
                                     {/* Line Items */}
                                     {request.items && request.items.length > 0 && (
-                                        <div className="border-t border-gray-100 pt-4">
+                                        <div className="border-t border-gray-100 pt-4 mb-4">
                                             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
                                                 Items
                                             </p>
                                             <ul className="space-y-2">
                                                 {request.items.map(item => (
-                                                    <li
-                                                        key={item.id}
-                                                        className="flex justify-between items-start text-sm"
-                                                    >
-                                                        <div>
-                                                            <span className="text-wa-navy font-medium">
+                                                    <li key={item.id} className="flex justify-between items-start text-sm gap-2">
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-wa-navy font-medium truncate">
                                                                 {item.item_name || `${item.item_type} #${item.item_id}`}
-                                                            </span>
+                                                            </p>
                                                             {item.notes && (
                                                                 <p className="text-xs text-gray-400 italic mt-0.5">
                                                                     📝 {item.notes}
                                                                 </p>
                                                             )}
                                                         </div>
-                                                        <div className="text-right ml-4 shrink-0">
-                                                            <span className="text-gray-500">
-                                                                x{item.quantity_requested}
-                                                            </span>
-                                                            <span className="text-wa-blue font-medium ml-2">
+                                                        <div className="text-right shrink-0">
+                                                            <p className="text-gray-500 text-xs">x{item.quantity_requested}</p>
+                                                            <p className="text-wa-blue font-medium text-sm whitespace-nowrap">
                                                                 CHF {parseFloat(item.unit_price * item.quantity_requested).toFixed(2)}
-                                                            </span>
+                                                            </p>
                                                         </div>
                                                     </li>
                                                 ))}
@@ -160,12 +158,25 @@ function MyRequests() {
                                         </div>
                                     )}
 
+                                    {/* Total + Cancel button row */}
+                                    <div className="flex items-center justify-between border-t border-gray-100 pt-4">
+                                        <p className="text-lg font-bold text-wa-navy whitespace-nowrap">
+                                            CHF {parseFloat(request.total_cost).toFixed(2)}
+                                        </p>
+                                        {(request.status === 'pending' || request.status === 'draft') && (
+                                            <button
+                                                onClick={() => cancelRequest(request.id)}
+                                                className="text-sm text-red-500 hover:text-red-700 cursor-pointer transition-colors font-medium"
+                                            >
+                                                Cancel Request
+                                            </button>
+                                        )}
+                                    </div>
+
                                     {/* Notes */}
                                     {request.notes && (
-                                        <div className="border-t border-gray-100 pt-4 mt-4">
-                                            <p className="text-xs text-gray-400 italic">
-                                                📝 {request.notes}
-                                            </p>
+                                        <div className="mt-3">
+                                            <p className="text-xs text-gray-400 italic">📝 {request.notes}</p>
                                         </div>
                                     )}
                                 </div>
