@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import SelectionDrawer from "../components/SelectionDrawer";
 import AdminRequests from "../components/admin/AdminRequests";
+import AdminGifts from "../components/admin/AdminGifts";
 
 // Sidebar navigation items
 const NAV_ITEMS = [
@@ -164,6 +165,8 @@ function AdminPanel() {
                         {/* Content per section */}
                         {activeSection === "requests" ? (
                             <AdminRequests />
+                        ) : activeSection === "gifts" ? (
+                            <AdminGifts />
                         ) : (
                             <div className="bg-white rounded-2xl shadow p-8 text-center">
                                 <div className="text-5xl mb-4">
