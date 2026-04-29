@@ -5,9 +5,9 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from core.serializers import UserSerializer, TakeReasonSerializer
+from core.serializers import UserSerializer, TakeReasonSerializer, StockAdjustmentReasonSerializer
 
-from core.models import TakeReason
+from core.models import TakeReason, StockAdjustmentReason
 
 from accounts.permissions import IsAdminUser
 
@@ -89,3 +89,18 @@ class CurrentUserView(APIView):
             'department': department,
             'is_superuser': user.is_superuser,
         })
+
+
+# ============================================
+# STOCK ADJUSTMENT REASON VIEW
+# ============================================
+
+class StockAdjustmentReasonList(generics.ListAPIView):
+    """
+    Returns all stock adjustment reasons.
+    GET /api/stock-adjustment-reasons/
+    Admin only — not visible to standard users.
+    """
+    serializer_class = StockAdjustmentReasonSerializer
+    permission_classes = [IsAdminUser]
+    queryset = StockAdjustmentReason.objects.all()

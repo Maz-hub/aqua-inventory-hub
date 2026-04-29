@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from core.models import TakeReason
+from core.models import TakeReason, StockAdjustmentReason
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -33,3 +33,13 @@ class TakeReasonSerializer(serializers.ModelSerializer):
     class Meta:
         model = TakeReason
         fields = ['id', 'reason_name', 'applies_to']
+
+
+class StockAdjustmentReasonSerializer(serializers.ModelSerializer):
+    """
+    Serializer for StockAdjustmentReason.
+    Used in Admin Panel stock adjustment forms only.
+    """
+    class Meta:
+        model = StockAdjustmentReason
+        fields = ['id', 'name']

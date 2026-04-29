@@ -63,3 +63,28 @@ class Department(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class StockAdjustmentReason(models.Model):
+    """
+    Standardised reasons for manual stock adjustments.
+    Used exclusively in the Admin Panel when editing
+    product quantities. Not visible to standard users.
+
+    Examples: Restock, Return from Event, Damaged,
+    Stock Correction, Donation, Lost
+    """
+    name = models.CharField(
+        max_length=100,
+        unique=True,
+        help_text="Reason for manual stock adjustment (e.g. 'Restock', 'Return from Event')"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = "Stock Adjustment Reason"
+        verbose_name_plural = "Stock Adjustment Reasons"
+
+    def __str__(self):
+        return self.name

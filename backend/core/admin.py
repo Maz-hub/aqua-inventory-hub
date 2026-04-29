@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import TakeReason, Department
+from .models import TakeReason, Department, StockAdjustmentReason
 
 @admin.register(TakeReason)
 class TakeReasonAdmin(admin.ModelAdmin):
@@ -18,6 +18,16 @@ class DepartmentAdmin(admin.ModelAdmin):
     Admin configuration for Department model.
     Allows admin to manage World Aquatics departments
     for budget tracking on Item Requests.
+    """
+    list_display = ['name', 'created_at']
+    search_fields = ['name']
+
+@admin.register(StockAdjustmentReason)
+class StockAdjustmentReasonAdmin(admin.ModelAdmin):
+    """
+    Admin configuration for StockAdjustmentReason.
+    Allows admin to manage reasons for manual stock
+    adjustments without touching the code.
     """
     list_display = ['name', 'created_at']
     search_fields = ['name']
