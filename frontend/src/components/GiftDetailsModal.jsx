@@ -8,7 +8,7 @@
 import { useState } from "react";
 import EditGiftForm from "./EditGiftForm";
 
-function GiftDetailsModal({ gift, onClose, onSuccess }) {
+function GiftDetailsModal({ gift, onClose, onSuccess, isAdmin = false }) {
   if (!gift) return null;
 
   const [showEditForm, setShowEditForm] = useState(false);
@@ -130,8 +130,8 @@ function GiftDetailsModal({ gift, onClose, onSuccess }) {
               </div>
             )}
 
-            {/* Supplier Information */}
-            {(gift.supplier_name ||
+            {/* Supplier Information — admin only */}
+            {isAdmin && (gift.supplier_name ||
               gift.supplier_email ||
               gift.supplier_address) && (
               <div>
@@ -185,12 +185,14 @@ function GiftDetailsModal({ gift, onClose, onSuccess }) {
             <button onClick={onClose} className="btn_cancel">
               Close
             </button>
-            <button
-              onClick={() => setShowEditForm(true)}
-              className="btn_confirm"
-            >
-              Edit Product
-            </button>
+            {isAdmin && (
+              <button
+                onClick={() => setShowEditForm(true)}
+                className="btn_confirm"
+              >
+                Edit Product
+              </button>
+            )}
           </div>
         </div>
       </div>

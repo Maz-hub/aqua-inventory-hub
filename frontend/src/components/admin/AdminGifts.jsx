@@ -8,6 +8,7 @@
 
 import { useState, useEffect } from "react";
 import api from "../../api";
+import GiftDetailsModal from "../GiftDetailsModal";
 
 function AdminGifts() {
     const [gifts, setGifts] = useState([]);
@@ -16,7 +17,7 @@ function AdminGifts() {
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("");
     const [categories, setCategories] = useState([]);
-    const [editingGift, setEditingGift] = useState(null);
+    const [selectedGift, setSelectedGift] = useState(null);
     const [adjustReasons, setAdjustReasons] = useState([]);
 
     useEffect(() => {
@@ -101,7 +102,7 @@ function AdminGifts() {
                     </select>
                 </div>
                 <button
-                    onClick={() => setEditingGift({})}
+                    onClick={() => setSelectedGift({})}
                     className="bg-wa-blue text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-wa-ocean transition-colors cursor-pointer whitespace-nowrap"
                 >
                     + Add New Gift
@@ -118,14 +119,14 @@ function AdminGifts() {
                         onClick={() => {
                             if (selected.length === 1) {
                                 const gift = gifts.find(g => g.id === selected[0]);
-                                setEditingGift(gift);
+                                setSelectedGift(gift);
                             } else {
-                                alert("Please select only one item to edit.");
+                                alert("Please select only one item to view.");
                             }
                         }}
                         className="text-sm bg-wa-blue text-white px-4 py-1.5 rounded-lg cursor-pointer hover:bg-wa-ocean transition-colors"
                     >
-                        Edit Selected
+                        View Selected
                     </button>
                 </div>
             )}
@@ -148,8 +149,6 @@ function AdminGifts() {
                             <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Category</th>
                             <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Stock</th>
                             <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Price</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">HS Code</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Supplier</th>
                             <th className="px-4 py-3"></th>
                         </tr>
                     </thead>
@@ -195,14 +194,12 @@ function AdminGifts() {
                                 <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
                                     CHF {parseFloat(gift.unit_price).toFixed(2)}
                                 </td>
-                                <td className="px-4 py-3 text-gray-500 text-xs">{gift.hs_code || "—"}</td>
-                                <td className="px-4 py-3 text-gray-500 text-xs">{gift.supplier_name || "—"}</td>
                                 <td className="px-4 py-3">
                                     <button
-                                        onClick={() => setEditingGift(gift)}
+                                        onClick={() => setSelectedGift(gift)}
                                         className="text-wa-blue hover:text-wa-ocean text-xs font-medium cursor-pointer transition-colors"
                                     >
-                                        Edit
+                                        View
                                     </button>
                                 </td>
                             </tr>
@@ -252,41 +249,22 @@ function AdminGifts() {
                                 )}
                             </div>
                             <button
-                                onClick={() => setEditingGift(gift)}
+                                onClick={() => setSelectedGift(gift)}
                                 className="text-wa-blue hover:text-wa-ocean text-xs font-medium cursor-pointer transition-colors shrink-0"
                             >
-                                Edit
+                                View
                             </button>
                         </div>
                     </div>
                 ))}
             </div>
 
-            {/* Edit Modal placeholder */}
-            {editingGift && (
-                <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-lg font-bold text-wa-navy">
-                                {editingGift.id ? `Edit: ${editingGift.product_name}` : "Add New Gift"}
-                            </h2>
-                            <button
-                                onClick={() => setEditingGift(null)}
-                                className="text-gray-400 hover:text-gray-600 cursor-pointer text-2xl leading-none"
-                            >×</button>
-                        </div>
-                        <p className="text-gray-500 text-sm">
-                            Edit form coming in next step...
-                        </p>
-                        <button
-                            onClick={() => setEditingGift(null)}
-                            className="mt-4 w-full py-2 bg-gray-100 rounded-xl text-gray-600 cursor-pointer hover:bg-gray-200 transition-colors"
-                        >
-                            Close
-                        </button>
-                    </div>
-                </div>
-            )}
+            <GiftDetailsModal
+                gift={selectedGift}
+                onClose={() => setSelectedGift(null)}
+                onSuccess={fetchGifts}
+                isAdmin={true}
+            />
         </div>
     );
 }
