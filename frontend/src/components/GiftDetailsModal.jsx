@@ -7,197 +7,258 @@
 
 import { useState } from "react";
 import EditGiftForm from "./EditGiftForm";
+import StockAdjustmentModal from "./StockAdjustmentModal";
 
 function GiftDetailsModal({ gift, onClose, onSuccess, isAdmin = false }) {
-  if (!gift) return null;
+    if (!gift) return null;
 
-  const [showEditForm, setShowEditForm] = useState(false);
+    const [showEditForm, setShowEditForm] = useState(false);
+    const [showStockModal, setShowStockModal] = useState(false);
 
-  // If edit form is open, show it instead of details
-  if (showEditForm) {
+    // If edit form is open, show it instead of details
+    if (showEditForm) {
+        return (
+            <EditGiftForm
+                gift={gift}
+                onClose={() => setShowEditForm(false)}
+                onSuccess={() => {
+                    setShowEditForm(false);
+                    onSuccess();
+                    onClose();
+                }}
+            />
+        );
+    }
+
     return (
-      <EditGiftForm
-        gift={gift}
-        onClose={() => setShowEditForm(false)}
-        onSuccess={() => {
-          setShowEditForm(false);
-          onSuccess();
-          onClose();
-        }}
-      />
+        <>
+            <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div className="p-6">
+                        {/* Header */}
+                        <div className="flex justify-between items-start mb-4">
+                            <h2 className="text-2xl font-bold text-wa-navy">
+                                Product Details
+                            </h2>
+                            <button
+                                onClick={onClose}
+                                className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        {/* Product Image */}
+                        {gift.product_image && (
+                            <div className="mb-6">
+                                <img
+                                    src={gift.product_image.replace(
+                                        "http://localhost:8000",
+                                        "",
+                                    )}
+                                    alt={gift.product_name}
+                                    className="w-full h-64 object-cover rounded-lg"
+                                />
+                            </div>
+                        )}
+
+                        {/* Product Information */}
+                        <div className="space-y-6">
+                            {/* Basic Info */}
+                            <div>
+                                <h3 className="text-lead font-semibold text-wa-navy mb-3 border-b pb-2">
+                                    Basic Information
+                                </h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p className="text-sm text-gray-600">
+                                            Product Name
+                                        </p>
+                                        <p className="font-medium text-wa-navy">
+                                            {gift.product_name}
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <p className="text-sm text-gray-600">
+                                            Category
+                                        </p>
+                                        <p className="font-medium text-wa-navy">
+                                            {gift.category.name}
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <p className="text-sm text-gray-600">
+                                            Stock Quantity
+                                        </p>
+                                        <p className="font-medium text-wa-navy">
+                                            {gift.qty_stock} units
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <p className="text-sm text-gray-600">
+                                            Unit Price
+                                        </p>
+                                        <p className="font-medium text-wa-navy">
+                                            ${gift.unit_price}
+                                        </p>
+                                    </div>
+
+                                    {gift.material && (
+                                        <div>
+                                            <p className="text-sm text-gray-600">
+                                                Material
+                                            </p>
+                                            <p className="font-medium text-wa-navy">
+                                                {gift.material}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {gift.description && (
+                                    <div className="mt-4">
+                                        <p className="text-sm text-gray-600">
+                                            Description
+                                        </p>
+                                        <p className="text-wa-navy font-medium">
+                                            {gift.description}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Customs & Logistics */}
+                            {(gift.hs_code || gift.country_of_origin) && (
+                                <div>
+                                    <h3 className="text-lead font-semibold text-wa-navy mb-3 border-b pb-2">
+                                        Customs & Logistics
+                                    </h3>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {gift.hs_code && (
+                                            <div>
+                                                <p className="text-sm text-gray-600">
+                                                    HS Code
+                                                </p>
+                                                <p className="font-medium text-wa-navy">
+                                                    {gift.hs_code}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {gift.country_of_origin && (
+                                            <div>
+                                                <p className="text-sm text-gray-600">
+                                                    Country of Origin
+                                                </p>
+                                                <p className="font-medium text-wa-navy">
+                                                    {gift.country_of_origin}
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Supplier Information — admin only */}
+                            {isAdmin &&
+                                (gift.supplier_name ||
+                                    gift.supplier_email ||
+                                    gift.supplier_address) && (
+                                    <div>
+                                        <h3 className="text-lead font-semibold text-wa-navy mb-3 border-b pb-2">
+                                            Supplier Information
+                                        </h3>
+                                        <div className="space-y-3">
+                                            {gift.supplier_name && (
+                                                <div>
+                                                    <p className="text-sm text-gray-600">
+                                                        Supplier Name
+                                                    </p>
+                                                    <p className="font-medium text-wa-navy">
+                                                        {gift.supplier_name}
+                                                    </p>
+                                                </div>
+                                            )}
+
+                                            {gift.supplier_email && (
+                                                <div>
+                                                    <p className="text-sm text-gray-600">
+                                                        Email
+                                                    </p>
+                                                    <p className="font-medium text-wa-navy">
+                                                        {gift.supplier_email}
+                                                    </p>
+                                                </div>
+                                            )}
+
+                                            {gift.supplier_address && (
+                                                <div>
+                                                    <p className="text-sm text-gray-600">
+                                                        Address
+                                                    </p>
+                                                    <p className="font-medium text-wa-navy">
+                                                        {gift.supplier_address}
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                            {/* Internal Notes */}
+                            {gift.notes && (
+                                <div>
+                                    <h3 className="text-lead font-semibold text-wa-navy mb-3 border-b pb-2">
+                                        Internal Notes
+                                    </h3>
+                                    <p className="text-wa-navy font-medium">
+                                        {gift.notes}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="mt-6 flex gap-3">
+                            <button onClick={onClose} className="btn_cancel">
+                                Close
+                            </button>
+                            {isAdmin && (
+                                <>
+                                    <button
+                                        onClick={() => setShowStockModal(true)}
+                                        className="flex-1 bg-wa-cyan hover:bg-wa-ocean text-white rounded-md text-sm font-medium px-8 py-3 cursor-pointer transition-all"
+                                    >
+                                        Adjust Stock
+                                    </button>
+                                    <button
+                                        onClick={() => setShowEditForm(true)}
+                                        className="btn_confirm"
+                                    >
+                                        Edit Product
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {showStockModal && (
+                <StockAdjustmentModal
+                    gift={gift}
+                    onClose={() => setShowStockModal(false)}
+                    onSuccess={() => {
+                        setShowStockModal(false);
+                        onSuccess();
+                    }}
+                />
+            )}
+        </>
     );
-  }
-
-  return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          {/* Header */}
-          <div className="flex justify-between items-start mb-4">
-            <h2 className="text-2xl font-bold text-wa-navy">Product Details</h2>
-            <button
-              onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
-            >
-              ×
-            </button>
-          </div>
-
-          {/* Product Image */}
-          {gift.product_image && (
-            <div className="mb-6">
-              <img
-                src={gift.product_image.replace("http://localhost:8000", "")}
-                alt={gift.product_name}
-                className="w-full h-64 object-cover rounded-lg"
-              />
-            </div>
-          )}
-
-          {/* Product Information */}
-          <div className="space-y-6">
-            {/* Basic Info */}
-            <div>
-              <h3 className="text-lead font-semibold text-wa-navy mb-3 border-b pb-2">
-                Basic Information
-              </h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-600">Product Name</p>
-                  <p className="font-medium text-wa-navy">
-                    {gift.product_name}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-sm text-gray-600">Category</p>
-                  <p className="font-medium text-wa-navy">
-                    {gift.category.name}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-sm text-gray-600">Stock Quantity</p>
-                  <p className="font-medium text-wa-navy">
-                    {gift.qty_stock} units
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-sm text-gray-600">Unit Price</p>
-                  <p className="font-medium text-wa-navy">${gift.unit_price}</p>
-                </div>
-
-                {gift.material && (
-                  <div>
-                    <p className="text-sm text-gray-600">Material</p>
-                    <p className="font-medium text-wa-navy">{gift.material}</p>
-                  </div>
-                )}
-              </div>
-
-              {gift.description && (
-                <div className="mt-4">
-                  <p className="text-sm text-gray-600">Description</p>
-                  <p className="text-wa-navy font-medium">{gift.description}</p>
-                </div>
-              )}
-            </div>
-
-            {/* Customs & Logistics */}
-            {(gift.hs_code || gift.country_of_origin) && (
-              <div>
-                <h3 className="text-lead font-semibold text-wa-navy mb-3 border-b pb-2">
-                  Customs & Logistics
-                </h3>
-                <div className="grid grid-cols-2 gap-4">
-                  {gift.hs_code && (
-                    <div>
-                      <p className="text-sm text-gray-600">HS Code</p>
-                      <p className="font-medium text-wa-navy">{gift.hs_code}</p>
-                    </div>
-                  )}
-
-                  {gift.country_of_origin && (
-                    <div>
-                      <p className="text-sm text-gray-600">Country of Origin</p>
-                      <p className="font-medium text-wa-navy">
-                        {gift.country_of_origin}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Supplier Information — admin only */}
-            {isAdmin && (gift.supplier_name ||
-              gift.supplier_email ||
-              gift.supplier_address) && (
-              <div>
-                <h3 className="text-lead font-semibold text-wa-navy mb-3 border-b pb-2">
-                  Supplier Information
-                </h3>
-                <div className="space-y-3">
-                  {gift.supplier_name && (
-                    <div>
-                      <p className="text-sm text-gray-600">Supplier Name</p>
-                      <p className="font-medium text-wa-navy">
-                        {gift.supplier_name}
-                      </p>
-                    </div>
-                  )}
-
-                  {gift.supplier_email && (
-                    <div>
-                      <p className="text-sm text-gray-600">Email</p>
-                      <p className="font-medium text-wa-navy">
-                        {gift.supplier_email}
-                      </p>
-                    </div>
-                  )}
-
-                  {gift.supplier_address && (
-                    <div>
-                      <p className="text-sm text-gray-600">Address</p>
-                      <p className="font-medium text-wa-navy">
-                        {gift.supplier_address}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Internal Notes */}
-            {gift.notes && (
-              <div>
-                <h3 className="text-lead font-semibold text-wa-navy mb-3 border-b pb-2">
-                  Internal Notes
-                </h3>
-                <p className="text-wa-navy font-medium">{gift.notes}</p>
-              </div>
-            )}
-          </div>
-
-          {/* Action Buttons */}
-          <div className="mt-6 flex gap-3">
-            <button onClick={onClose} className="btn_cancel">
-              Close
-            </button>
-            {isAdmin && (
-              <button
-                onClick={() => setShowEditForm(true)}
-                className="btn_confirm"
-              >
-                Edit Product
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 export default GiftDetailsModal;
