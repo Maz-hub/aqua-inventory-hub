@@ -96,8 +96,9 @@ class ApparelProductSerializer(serializers.ModelSerializer):
         model = ApparelProduct
         fields = [
             'id', 'product_name', 'category', 'category_id', 'item_id', 'primary_color', 'primary_color_id',
-            'material', 'description', 'hs_code', 'unit_price',
-            'country_of_origin', 'product_image', 'notes', 'variants',
+            'material', 'description', 'hs_code',
+            'merchant_product_id', 'manufacturer_product_id', 'standardised_product_id', 'supplier_phone',
+            'unit_price', 'country_of_origin', 'product_image', 'notes', 'variants',
             'created_at', 'updated_at'
         ]
         read_only_fields = ['created_at', 'updated_at']

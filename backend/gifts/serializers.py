@@ -49,7 +49,11 @@ class GiftSerializer(serializers.ModelSerializer):
             "country_of_origin",     # Manufacturing country
             "supplier_name",         # Supplier company name
             "supplier_email",        # Supplier contact email
+            "supplier_phone",        # Supplier contact phone number
             "supplier_address",      # Supplier physical address
+            "merchant_product_id",       # Your unique product code / SKU for customs declarations
+            "manufacturer_product_id",   # Supplier's non-standardised product code
+            "standardised_product_id",   # Standardised code (GTIN, EAN, ISBN)
             "created_at",            # Timestamp when record was created
             "created_by",            # User who created the record
             "updated_at",            # Timestamp of last modification

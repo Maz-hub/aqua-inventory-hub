@@ -30,11 +30,31 @@ class Gift(models.Model):
 
     # Customs & logistics
     hs_code = models.CharField(max_length=20, blank=True)
+    merchant_product_id = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Your unique product code / SKU for customs declarations"
+    )
+    manufacturer_product_id = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Supplier's non-standardised product code"
+    )
+    standardised_product_id = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Standardised code if exists: GTIN, EAN, ISBN. Enter NO if not applicable."
+    )
     country_of_origin = models.CharField(max_length=100, blank=True)
 
     # Supplier information
     supplier_name = models.CharField(max_length=200, blank=True)
     supplier_email = models.EmailField(blank=True)
+    supplier_phone = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Supplier contact phone number"
+    )
     supplier_address = models.TextField(blank=True)
 
     # System tracking

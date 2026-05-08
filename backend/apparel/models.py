@@ -156,6 +156,27 @@ class ApparelProduct(models.Model):
         help_text="Harmonized System code for customs"
     )
 
+    merchant_product_id = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Your unique product code / SKU for customs declarations"
+    )
+    manufacturer_product_id = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Supplier's non-standardised product code"
+    )
+    standardised_product_id = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Standardised code if exists: GTIN, EAN, ISBN. Enter NO if not applicable."
+    )
+    supplier_phone = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Supplier contact phone number"
+    )
+
     unit_price = models.DecimalField(
         max_digits=10,
         decimal_places=2,

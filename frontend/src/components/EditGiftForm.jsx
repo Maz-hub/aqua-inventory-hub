@@ -13,7 +13,6 @@ function EditGiftForm({ gift, onClose, onSuccess }) {
   const [categories, setCategories] = useState([]);
   const [productName, setProductName] = useState(gift.product_name);
   const [categoryId, setCategoryId] = useState(gift.category.id);
-  const [qtyStock, setQtyStock] = useState(gift.qty_stock);
   const [unitPrice, setUnitPrice] = useState(gift.unit_price);
   const [description, setDescription] = useState(gift.description || "");
   const [material, setMaterial] = useState(gift.material || "");
@@ -54,7 +53,6 @@ function EditGiftForm({ gift, onClose, onSuccess }) {
     const formData = new FormData();
     formData.append("product_name", productName);
     formData.append("category_id", categoryId);
-    formData.append("qty_stock", qtyStock);
     formData.append("unit_price", unitPrice);
     formData.append("description", description);
     formData.append("material", material);
@@ -174,24 +172,6 @@ function EditGiftForm({ gift, onClose, onSuccess }) {
                   </option>
                 ))}
               </select>
-            </div>
-
-            {/* Quantity */}
-            <div>
-              <label
-                htmlFor="qtyStock"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Quantity in Stock *
-              </label>
-              <input
-                type="number"
-                id="qtyStock"
-                required
-                value={qtyStock}
-                onChange={(e) => setQtyStock(e.target.value)}
-                className="form_input"
-              />
             </div>
 
             {/* Unit Price */}
