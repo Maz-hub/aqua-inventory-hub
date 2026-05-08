@@ -26,6 +26,10 @@ function EditApparelProductForm({ product, onSuccess, onCancel }) {
   );
   const [productImage, setProductImage] = useState(null);
   const [notes, setNotes] = useState(product.notes || "");
+  const [supplierPhone, setSupplierPhone] = useState(product.supplier_phone || "");
+  const [merchantProductId, setMerchantProductId] = useState(product.merchant_product_id || "");
+  const [manufacturerProductId, setManufacturerProductId] = useState(product.manufacturer_product_id || "");
+  const [standardisedProductId, setStandardisedProductId] = useState(product.standardised_product_id || "");
 
   useEffect(() => {
     getCategories();
@@ -69,6 +73,10 @@ function EditApparelProductForm({ product, onSuccess, onCancel }) {
     formData.append("unit_price", unitPrice);
     formData.append("country_of_origin", countryOfOrigin);
     formData.append("notes", notes);
+    formData.append("supplier_phone", supplierPhone);
+    formData.append("merchant_product_id", merchantProductId);
+    formData.append("manufacturer_product_id", manufacturerProductId);
+    formData.append("standardised_product_id", standardisedProductId);
 
     // Add image if new one selected
     if (productImage) {
@@ -309,6 +317,73 @@ function EditApparelProductForm({ product, onSuccess, onCancel }) {
             value={countryOfOrigin}
             onChange={(e) => setCountryOfOrigin(e.target.value)}
             className="form_input"
+          />
+        </div>
+
+        {/* Supplier Information Section */}
+        <div className="md:col-span-2 mt-4">
+          <h3 className="text-lg font-semibold text-wa-navy mb-4 border-b pb-2">
+            Supplier Information
+          </h3>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Supplier Phone
+          </label>
+          <input
+            type="tel"
+            value={supplierPhone}
+            onChange={(e) => setSupplierPhone(e.target.value)}
+            className="form_input"
+            placeholder="+41 XX XXX XX XX"
+          />
+        </div>
+
+        {/* Product Identifiers Section */}
+        <div className="md:col-span-2 mt-4">
+          <h3 className="text-lg font-semibold text-wa-navy mb-4 border-b pb-2">
+            Product Identifiers (EU Customs — required from July 2026)
+          </h3>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Merchant Product ID
+          </label>
+          <input
+            type="text"
+            value={merchantProductId}
+            onChange={(e) => setMerchantProductId(e.target.value)}
+            className="form_input"
+            placeholder="Your SKU or item code"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Manufacturer Product ID
+          </label>
+          <input
+            type="text"
+            value={manufacturerProductId}
+            onChange={(e) => setManufacturerProductId(e.target.value)}
+            className="form_input"
+            placeholder="Supplier's product code"
+          />
+        </div>
+
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Standardised Product ID
+            <span className="text-gray-400 font-normal"> (GTIN, EAN, ISBN — enter NO if not applicable)</span>
+          </label>
+          <input
+            type="text"
+            value={standardisedProductId}
+            onChange={(e) => setStandardisedProductId(e.target.value)}
+            className="form_input"
+            placeholder="e.g. GTIN 00000006 or NO"
           />
         </div>
 

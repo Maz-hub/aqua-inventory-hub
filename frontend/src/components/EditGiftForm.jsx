@@ -22,9 +22,13 @@ function EditGiftForm({ gift, onClose, onSuccess }) {
   );
   const [supplierName, setSupplierName] = useState(gift.supplier_name || "");
   const [supplierEmail, setSupplierEmail] = useState(gift.supplier_email || "");
+  const [supplierPhone, setSupplierPhone] = useState(gift.supplier_phone || "");
   const [supplierAddress, setSupplierAddress] = useState(
     gift.supplier_address || ""
   );
+  const [merchantProductId, setMerchantProductId] = useState(gift.merchant_product_id || "");
+  const [manufacturerProductId, setManufacturerProductId] = useState(gift.manufacturer_product_id || "");
+  const [standardisedProductId, setStandardisedProductId] = useState(gift.standardised_product_id || "");
   const [minimumStockLevel, setMinimumStockLevel] = useState(
     gift.minimum_stock_level
   );
@@ -60,7 +64,11 @@ function EditGiftForm({ gift, onClose, onSuccess }) {
     formData.append("country_of_origin", countryOfOrigin);
     formData.append("supplier_name", supplierName);
     formData.append("supplier_email", supplierEmail);
+    formData.append("supplier_phone", supplierPhone);
     formData.append("supplier_address", supplierAddress);
+    formData.append("merchant_product_id", merchantProductId);
+    formData.append("manufacturer_product_id", manufacturerProductId);
+    formData.append("standardised_product_id", standardisedProductId);
     formData.append("minimum_stock_level", minimumStockLevel);
     formData.append("notes", notes);
 
@@ -284,6 +292,53 @@ function EditGiftForm({ gift, onClose, onSuccess }) {
               />
             </div>
 
+            {/* Product Identifiers Section */}
+            <div className="md:col-span-2 mt-4">
+              <h3 className="text-lg font-semibold text-wa-navy mb-4 border-b pb-2">
+                Product Identifiers (EU Customs — required from July 2026)
+              </h3>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Merchant Product ID
+              </label>
+              <input
+                type="text"
+                value={merchantProductId}
+                onChange={(e) => setMerchantProductId(e.target.value)}
+                className="form_input"
+                placeholder="Your SKU or item code"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Manufacturer Product ID
+              </label>
+              <input
+                type="text"
+                value={manufacturerProductId}
+                onChange={(e) => setManufacturerProductId(e.target.value)}
+                className="form_input"
+                placeholder="Supplier's product code"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Standardised Product ID
+                <span className="text-gray-400 font-normal"> (GTIN, EAN, ISBN — enter NO if not applicable)</span>
+              </label>
+              <input
+                type="text"
+                value={standardisedProductId}
+                onChange={(e) => setStandardisedProductId(e.target.value)}
+                className="form_input"
+                placeholder="e.g. GTIN 00000006 or NO"
+              />
+            </div>
+
             {/* Supplier Information Section */}
             <div className="md:col-span-2 mt-4">
               <h3 className="text-lg font-semibold text-wa-navy mb-4 border-b pb-2">
@@ -322,6 +377,21 @@ function EditGiftForm({ gift, onClose, onSuccess }) {
                 value={supplierEmail}
                 onChange={(e) => setSupplierEmail(e.target.value)}
                 className="form_input"
+              />
+            </div>
+
+            {/* Supplier Phone */}
+            <div>
+              <label htmlFor="supplierPhone" className="block text-sm font-medium text-gray-700 mb-2">
+                Supplier Phone
+              </label>
+              <input
+                type="tel"
+                id="supplierPhone"
+                value={supplierPhone}
+                onChange={(e) => setSupplierPhone(e.target.value)}
+                className="form_input"
+                placeholder="+41 XX XXX XX XX"
               />
             </div>
 
