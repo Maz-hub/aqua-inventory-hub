@@ -254,6 +254,7 @@ function GiftDetailsModal({ gift, onClose, onSuccess, isAdmin = false }) {
                     onSuccess={() => {
                         setShowStockModal(false);
                         onSuccess();
+                        onClose();
                     }}
                 />
             )}
