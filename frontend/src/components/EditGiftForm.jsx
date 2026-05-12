@@ -97,7 +97,7 @@ function EditGiftForm({ gift, onClose, onSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-start justify-center z-50 p-4 overflow-y-auto">
       <div className="bg-white rounded-lg max-w-4xl w-full my-8">
         <div className="p-6">
           {/* Header */}
@@ -292,13 +292,6 @@ function EditGiftForm({ gift, onClose, onSuccess }) {
               />
             </div>
 
-            {/* Product Identifiers Section */}
-            <div className="md:col-span-2 mt-4">
-              <h3 className="text-lg font-semibold text-wa-navy mb-4 border-b pb-2">
-                Product Identifiers (EU Customs — required from July 2026)
-              </h3>
-            </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Merchant Product ID
@@ -308,7 +301,6 @@ function EditGiftForm({ gift, onClose, onSuccess }) {
                 value={merchantProductId}
                 onChange={(e) => setMerchantProductId(e.target.value)}
                 className="form_input"
-                placeholder="Your SKU or item code"
               />
             </div>
 
@@ -321,21 +313,19 @@ function EditGiftForm({ gift, onClose, onSuccess }) {
                 value={manufacturerProductId}
                 onChange={(e) => setManufacturerProductId(e.target.value)}
                 className="form_input"
-                placeholder="Supplier's product code"
               />
             </div>
 
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Standardised Product ID
-                <span className="text-gray-400 font-normal"> (GTIN, EAN, ISBN — enter NO if not applicable)</span>
               </label>
               <input
                 type="text"
                 value={standardisedProductId}
                 onChange={(e) => setStandardisedProductId(e.target.value)}
                 className="form_input"
-                placeholder="e.g. GTIN 00000006 or NO"
+                placeholder="e.g. GTIN / EAN / ISBN"
               />
             </div>
 

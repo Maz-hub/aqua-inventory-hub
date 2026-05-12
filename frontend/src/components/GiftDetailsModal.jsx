@@ -131,7 +131,7 @@ function GiftDetailsModal({ gift, onClose, onSuccess, isAdmin = false }) {
                             </div>
 
                             {/* Customs & Logistics */}
-                            {(gift.hs_code || gift.country_of_origin) && (
+                            {(gift.hs_code || gift.country_of_origin || gift.merchant_product_id || gift.manufacturer_product_id || gift.standardised_product_id || gift.supplier_phone) && (
                                 <div>
                                     <h3 className="text-lead font-semibold text-wa-navy mb-3 border-b pb-2">
                                         Customs & Logistics
@@ -158,6 +158,50 @@ function GiftDetailsModal({ gift, onClose, onSuccess, isAdmin = false }) {
                                                 </p>
                                             </div>
                                         )}
+
+                                        {gift.merchant_product_id && (
+                                            <div>
+                                                <p className="text-sm text-gray-600">
+                                                    Merchant Product ID
+                                                </p>
+                                                <p className="font-medium text-wa-navy">
+                                                    {gift.merchant_product_id}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {gift.manufacturer_product_id && (
+                                            <div>
+                                                <p className="text-sm text-gray-600">
+                                                    Manufacturer Product ID
+                                                </p>
+                                                <p className="font-medium text-wa-navy">
+                                                    {gift.manufacturer_product_id}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {gift.standardised_product_id && (
+                                            <div>
+                                                <p className="text-sm text-gray-600">
+                                                    Standardised Product ID
+                                                </p>
+                                                <p className="font-medium text-wa-navy">
+                                                    {gift.standardised_product_id}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {gift.supplier_phone && (
+                                            <div>
+                                                <p className="text-sm text-gray-600">
+                                                    Supplier Phone
+                                                </p>
+                                                <p className="font-medium text-wa-navy">
+                                                    {gift.supplier_phone}
+                                                </p>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}
@@ -166,6 +210,7 @@ function GiftDetailsModal({ gift, onClose, onSuccess, isAdmin = false }) {
                             {isAdmin &&
                                 (gift.supplier_name ||
                                     gift.supplier_email ||
+                                    gift.supplier_phone ||
                                     gift.supplier_address) && (
                                     <div>
                                         <h3 className="text-lead font-semibold text-wa-navy mb-3 border-b pb-2">
@@ -190,6 +235,17 @@ function GiftDetailsModal({ gift, onClose, onSuccess, isAdmin = false }) {
                                                     </p>
                                                     <p className="font-medium text-wa-navy">
                                                         {gift.supplier_email}
+                                                    </p>
+                                                </div>
+                                            )}
+
+                                            {gift.supplier_phone && (
+                                                <div>
+                                                    <p className="text-sm text-gray-600">
+                                                        Phone
+                                                    </p>
+                                                    <p className="font-medium text-wa-navy">
+                                                        {gift.supplier_phone}
                                                     </p>
                                                 </div>
                                             )}
