@@ -46,11 +46,15 @@ function StockAdjustmentModal({ gift, onClose, onSuccess }) {
 
         setLoading(true);
 
+        const action = adjustment > 0 ? "return" : "take";
+        const quantity = Math.abs(adjustment);
+
         try {
-            await api.patch(`/api/gifts/update/${gift.id}/`, {
-                qty_stock: gift.qty_stock + adjustment,
-                stock_adjustment_reason: parseInt(reason),
-                stock_adjustment_notes: notes,
+            await api.patch(`/api/gifts/update-stock/${gift.id}/`, {
+                action,
+                quantity,
+                reason: parseInt(reason),
+                notes,
             });
             onSuccess();
             onClose();

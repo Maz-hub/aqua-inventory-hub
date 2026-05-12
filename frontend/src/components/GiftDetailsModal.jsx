@@ -275,6 +275,7 @@ function GiftDetailsModal({ gift, onClose, onSuccess, isAdmin = false }) {
                                     </p>
                                 </div>
                             )}
+
                         </div>
 
                         {/* Action Buttons */}

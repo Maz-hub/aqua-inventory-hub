@@ -9,6 +9,7 @@
 import { useState, useEffect } from "react";
 import api from "../../api";
 import GiftDetailsModal from "../GiftDetailsModal";
+import TransactionHistoryModal from "../TransactionHistoryModal";
 
 function AdminGifts() {
     const [gifts, setGifts] = useState([]);
@@ -18,6 +19,7 @@ function AdminGifts() {
     const [selectedCategory, setSelectedCategory] = useState("");
     const [categories, setCategories] = useState([]);
     const [selectedGift, setSelectedGift] = useState(null);
+    const [historyGift, setHistoryGift] = useState(null);
     const [adjustReasons, setAdjustReasons] = useState([]);
 
     useEffect(() => {
@@ -195,12 +197,20 @@ function AdminGifts() {
                                     CHF {parseFloat(gift.unit_price).toFixed(2)}
                                 </td>
                                 <td className="px-4 py-3">
-                                    <button
-                                        onClick={() => setSelectedGift(gift)}
-                                        className="text-wa-blue hover:text-wa-ocean text-xs font-medium cursor-pointer transition-colors"
-                                    >
-                                        View
-                                    </button>
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={() => setSelectedGift(gift)}
+                                            className="text-wa-blue hover:text-wa-ocean text-xs font-medium cursor-pointer transition-colors"
+                                        >
+                                            View
+                                        </button>
+                                        <button
+                                            onClick={() => setHistoryGift(gift)}
+                                            className="text-gray-400 hover:text-wa-navy text-xs font-medium cursor-pointer transition-colors"
+                                        >
+                                            History
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         ))}
@@ -248,12 +258,20 @@ function AdminGifts() {
                                     <span className="text-xs text-red-500 font-medium">Low Stock</span>
                                 )}
                             </div>
-                            <button
-                                onClick={() => setSelectedGift(gift)}
-                                className="text-wa-blue hover:text-wa-ocean text-xs font-medium cursor-pointer transition-colors shrink-0"
-                            >
-                                View
-                            </button>
+                            <div className="flex flex-col gap-2 shrink-0">
+                                <button
+                                    onClick={() => setSelectedGift(gift)}
+                                    className="text-wa-blue hover:text-wa-ocean text-xs font-medium cursor-pointer transition-colors"
+                                >
+                                    View
+                                </button>
+                                <button
+                                    onClick={() => setHistoryGift(gift)}
+                                    className="text-gray-400 hover:text-wa-navy text-xs font-medium cursor-pointer transition-colors"
+                                >
+                                    History
+                                </button>
+                            </div>
                         </div>
                     </div>
                 ))}
@@ -265,6 +283,13 @@ function AdminGifts() {
                 onSuccess={fetchGifts}
                 isAdmin={true}
             />
+
+            {historyGift && (
+                <TransactionHistoryModal
+                    gift={historyGift}
+                    onClose={() => setHistoryGift(null)}
+                />
+            )}
         </div>
     );
 }

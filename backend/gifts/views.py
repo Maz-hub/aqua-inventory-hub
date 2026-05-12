@@ -7,7 +7,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 
-from gifts.serializers import GiftSerializer, GiftCategorySerializer
+from gifts.serializers import GiftSerializer, GiftCategorySerializer, InventoryTransactionSerializer
 
 from gifts.models import Gift, GiftCategory, InventoryTransaction
 from core.models import TakeReason
@@ -137,7 +137,7 @@ def update_gift_stock(request, pk):
     # Create transaction record for audit trail
     # Get TakeReason object if reason_id provided
     take_reason = None
-    if action == 'take' and reason_id:
+    if reason_id:
         try:
             take_reason = TakeReason.objects.get(id=reason_id)
         except TakeReason.DoesNotExist:
@@ -198,6 +198,25 @@ def update_gift(request, pk):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
+
+
+# ============================================
+# GIFT TRANSACTION VIEWS
+# ============================================
+
+class GiftTransactionListView(generics.ListAPIView):
+    """
+    Returns the audit trail of inventory movements for a specific gift.
+    GET /api/gifts/{pk}/transactions/
+    """
+
+    serializer_class = InventoryTransactionSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return InventoryTransaction.objects.filter(
+            gift__pk=self.kwargs["pk"]
+        ).order_by("-created_at")
 
 
 # ============================================

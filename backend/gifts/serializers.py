@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from gifts.models import Gift, GiftCategory
+from gifts.models import Gift, GiftCategory, InventoryTransaction
 
 
 class GiftCategorySerializer(serializers.ModelSerializer):
@@ -75,3 +75,23 @@ class GiftSerializer(serializers.ModelSerializer):
             "updated_by": {"read_only": True},
             # User automatically captured from request on updates
         }
+
+
+class InventoryTransactionSerializer(serializers.ModelSerializer):
+    created_by = serializers.SlugRelatedField(slug_field="username", read_only=True)
+    reason = serializers.SlugRelatedField(slug_field="reason_name", read_only=True)
+
+    class Meta:
+        model = InventoryTransaction
+        fields = [
+            "id",
+            "transaction_type",
+            "quantity",
+            "reason",
+            "notes",
+            "created_at",
+            "stock_before",
+            "stock_after",
+            "created_by",
+        ]
+        read_only_fields = fields
