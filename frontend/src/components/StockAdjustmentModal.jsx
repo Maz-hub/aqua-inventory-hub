@@ -10,7 +10,8 @@ import { useState, useEffect } from "react";
 import api from "../api";
 
 function StockAdjustmentModal({ gift, onClose, onSuccess }) {
-    const [adjustment, setAdjustment] = useState(0);
+    const [action, setAction] = useState("take");
+    const [quantity, setQuantity] = useState(1);
     const [reason, setReason] = useState("");
     const [notes, setNotes] = useState("");
     const [reasons, setReasons] = useState([]);
@@ -22,7 +23,9 @@ function StockAdjustmentModal({ gift, onClose, onSuccess }) {
             .catch((err) => console.error("Failed to load reasons:", err));
     }, []);
 
-    const newTotal = gift.qty_stock + adjustment;
+    const newTotal = action === "take"
+        ? gift.qty_stock - quantity
+        : gift.qty_stock + quantity;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -32,12 +35,7 @@ function StockAdjustmentModal({ gift, onClose, onSuccess }) {
             return;
         }
 
-        if (adjustment === 0) {
-            alert("Please enter a quantity to add or remove.");
-            return;
-        }
-
-        if (gift.qty_stock + adjustment < 0) {
+        if (action === "take" && quantity > gift.qty_stock) {
             alert(
                 `Cannot remove more than current stock (${gift.qty_stock} units).`,
             );
@@ -45,9 +43,6 @@ function StockAdjustmentModal({ gift, onClose, onSuccess }) {
         }
 
         setLoading(true);
-
-        const action = adjustment > 0 ? "return" : "take";
-        const quantity = Math.abs(adjustment);
 
         try {
             await api.patch(`/api/gifts/update-stock/${gift.id}/`, {
@@ -97,35 +92,58 @@ function StockAdjustmentModal({ gift, onClose, onSuccess }) {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Adjustment quantity */}
+                    {/* Action toggle */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                            Quantity to Add or Remove *
+                            Action *
+                        </label>
+                        <div className="flex rounded-lg border border-gray-300 overflow-hidden">
+                            <button
+                                type="button"
+                                onClick={() => setAction("take")}
+                                className={`flex-1 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
+                                    action === "take"
+                                        ? "bg-wa-blue text-white"
+                                        : "bg-white text-gray-500 hover:bg-gray-50"
+                                }`}
+                            >
+                                Take
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setAction("return")}
+                                className={`flex-1 py-2.5 text-sm font-medium transition-colors cursor-pointer border-l border-gray-300 ${
+                                    action === "return"
+                                        ? "bg-wa-blue text-white"
+                                        : "bg-white text-gray-500 hover:bg-gray-50"
+                                }`}
+                            >
+                                Return
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Quantity */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                            Quantity *
                         </label>
                         <input
                             type="number"
-                            value={adjustment}
+                            min="1"
+                            value={quantity}
                             onChange={(e) =>
-                                setAdjustment(parseInt(e.target.value) || 0)
+                                setQuantity(Math.max(1, parseInt(e.target.value) || 1))
                             }
                             onFocus={(e) => e.target.select()}
                             className="form_input"
-                            placeholder="e.g. +50 to add, -5 to remove"
                             required
                         />
-                        <p className="text-xs text-gray-400 mt-1">
-                            Use positive number to add stock, negative to remove
-                        </p>
-                        {adjustment !== 0 && (
-                            <div
-                                className={`mt-2 px-3 py-2 rounded-lg text-sm font-medium
-                                ${newTotal < 0 ? "bg-red-50 text-red-600" : "bg-green-50 text-green-700"}`}
-                            >
-                                {gift.qty_stock} →{" "}
-                                {newTotal < 0 ? "Cannot go below 0" : newTotal}{" "}
-                                units
-                            </div>
-                        )}
+                        <div className={`mt-2 px-3 py-2 rounded-lg text-sm font-medium ${
+                            newTotal < 0 ? "bg-red-50 text-red-600" : "bg-green-50 text-green-700"
+                        }`}>
+                            {gift.qty_stock} → {newTotal < 0 ? "Cannot go below 0" : newTotal} units
+                        </div>
                     </div>
 
                     {/* Reason */}

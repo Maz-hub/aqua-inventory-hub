@@ -10,7 +10,7 @@ from rest_framework import status
 from gifts.serializers import GiftSerializer, GiftCategorySerializer, InventoryTransactionSerializer
 
 from gifts.models import Gift, GiftCategory, InventoryTransaction
-from core.models import TakeReason
+from core.models import StockAdjustmentReason
 
 
 # ============================================
@@ -83,7 +83,7 @@ def update_gift_stock(request, pk):
     # Get action, quantity, reason, and notes from request
     action = request.data.get('action')  # 'take' or 'return'
     quantity = request.data.get('quantity')
-    reason_id = request.data.get('reason')  # Now expects TakeReason ID
+    reason_id = request.data.get('reason')
     notes = request.data.get('notes', '')  # Optional notes
 
     # Validate required fields
@@ -134,20 +134,25 @@ def update_gift_stock(request, pk):
     gift.updated_by = request.user
     gift.save()
 
-    # Create transaction record for audit trail
-    # Get TakeReason object if reason_id provided
-    take_reason = None
-    if reason_id:
-        try:
-            take_reason = TakeReason.objects.get(id=reason_id)
-        except TakeReason.DoesNotExist:
-            pass  # Will save transaction with None reason if invalid ID
+    if not reason_id:
+        return Response(
+            {"error": "A reason is required for stock adjustments."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        take_reason = StockAdjustmentReason.objects.get(id=reason_id)
+    except StockAdjustmentReason.DoesNotExist:
+        return Response(
+            {"error": "Invalid reason ID."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
     InventoryTransaction.objects.create(
         gift=gift,
         transaction_type=action,
         quantity=quantity,
-        reason=take_reason,  # Now uses TakeReason object
+        reason=take_reason,
         notes=notes,
         created_by=request.user,
         stock_before=stock_before,

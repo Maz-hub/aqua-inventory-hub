@@ -54,7 +54,8 @@ function TransactionHistoryModal({ gift, onClose }) {
                                 {transactions.map((tx) => (
                                     <tr key={tx.id} className="border-b border-gray-100 last:border-0">
                                         <td className="py-3 pr-4 text-gray-500 whitespace-nowrap">
-                                            {new Date(tx.created_at).toLocaleDateString("en-GB")}
+                                            <span className="block">{new Date(tx.created_at).toLocaleDateString("en-GB")}</span>
+                                            <span className="block text-xs text-gray-400">{new Date(tx.created_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}</span>
                                         </td>
                                         <td className="py-3 pr-4">
                                             <span className={`font-medium capitalize ${tx.transaction_type === "take" ? "text-red-500" : "text-green-600"}`}>
