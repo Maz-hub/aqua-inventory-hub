@@ -24,6 +24,7 @@ function AdminGifts() {
     const [historyGift, setHistoryGift] = useState(null);
     const [adjustGift, setAdjustGift] = useState(null);
     const [showAddForm, setShowAddForm] = useState(false);
+    const [showLowStockOnly, setShowLowStockOnly] = useState(false);
     const [adjustReasons, setAdjustReasons] = useState([]);
 
     useEffect(() => {
@@ -73,8 +74,18 @@ function AdminGifts() {
             .includes(searchQuery.toLowerCase());
         const matchesCategory = selectedCategory === "" ||
             gift.category.id === parseInt(selectedCategory);
-        return matchesSearch && matchesCategory;
+        const matchesLowStock = !showLowStockOnly ||
+            gift.qty_stock <= gift.minimum_stock_level;
+        return matchesSearch && matchesCategory && matchesLowStock;
     });
+
+    const filtersActive = searchQuery !== "" || selectedCategory !== "" || showLowStockOnly;
+
+    const clearFilters = () => {
+        setSearchQuery("");
+        setSelectedCategory("");
+        setShowLowStockOnly(false);
+    };
 
     if (loading) {
         return (
@@ -87,19 +98,20 @@ function AdminGifts() {
     return (
         <div>
             {/* Toolbar */}
-            <div className="flex flex-wrap gap-3 mb-6 items-center justify-between">
-                <div className="flex flex-wrap gap-3 flex-1">
+            <div className="flex flex-col gap-3 mb-6">
+                {/* Row 1: Search + Category */}
+                <div className="flex gap-3">
                     <input
                         type="text"
                         placeholder="Search gifts..."
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
-                        className="form_input flex-1 min-w-48"
+                        className="form_input flex-1 min-w-0"
                     />
                     <select
                         value={selectedCategory}
                         onChange={e => setSelectedCategory(e.target.value)}
-                        className="form_input"
+                        className="form_input flex-1 min-w-0"
                     >
                         <option value="">All Categories</option>
                         {categories.map(cat => (
@@ -107,12 +119,36 @@ function AdminGifts() {
                         ))}
                     </select>
                 </div>
-                <button
-                    onClick={() => setShowAddForm(true)}
-                    className="bg-wa-blue text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-wa-ocean transition-colors cursor-pointer whitespace-nowrap"
-                >
-                    + Add New Gift
-                </button>
+
+                {/* Row 2: Add New Gift (left) | Low Stock + Clear (right) */}
+                <div className="flex items-center justify-between gap-3">
+                    <button
+                        onClick={() => setShowAddForm(true)}
+                        className="bg-wa-blue text-white px-4 py-2 rounded-lg text-sm hover:bg-wa-ocean transition-colors cursor-pointer whitespace-nowrap"
+                    >
+                        + Add New Gift
+                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setShowLowStockOnly(!showLowStockOnly)}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium cursor-pointer transition-colors whitespace-nowrap border ${
+                                showLowStockOnly
+                                    ? "bg-red-500 border-red-500 text-white hover:bg-red-600 hover:border-red-600"
+                                    : "bg-white border-gray-300 text-gray-600 hover:bg-gray-50"
+                            }`}
+                        >
+                            {showLowStockOnly ? "✓ Low Stock Only" : "Show Low Stock"}
+                        </button>
+                        {filtersActive && (
+                            <button
+                                onClick={clearFilters}
+                                className="px-4 py-2 rounded-lg text-sm font-medium cursor-pointer border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 transition-colors whitespace-nowrap"
+                            >
+                                Clear
+                            </button>
+                        )}
+                    </div>
+                </div>
             </div>
 
             {/* Selected actions bar */}
