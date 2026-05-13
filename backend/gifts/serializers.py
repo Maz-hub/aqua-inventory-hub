@@ -79,7 +79,7 @@ class GiftSerializer(serializers.ModelSerializer):
 
 class InventoryTransactionSerializer(serializers.ModelSerializer):
     created_by = serializers.SlugRelatedField(slug_field="username", read_only=True)
-    reason = serializers.SlugRelatedField(slug_field="reason_name", read_only=True)
+    reason = serializers.SlugRelatedField(slug_field="name", read_only=True)
 
     class Meta:
         model = InventoryTransaction

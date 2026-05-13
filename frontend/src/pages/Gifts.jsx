@@ -13,7 +13,6 @@ function Gifts() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [categories, setCategories] = useState([]);
-  const [showLowStockOnly, setShowLowStockOnly] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const navigate = useNavigate();
   const [selectionOpen, setSelectionOpen] = useState(false);
@@ -58,11 +57,7 @@ function Gifts() {
       selectedCategory === "" ||
       gift.category.id === parseInt(selectedCategory);
 
-    // Low stock filter - shows only items below minimum stock level
-    const matchesLowStock =
-      !showLowStockOnly || gift.qty_stock <= gift.minimum_stock_level;
-
-    return matchesSearch && matchesCategory && matchesLowStock;
+    return matchesSearch && matchesCategory;
   });
 
   return (
@@ -129,25 +124,12 @@ function Gifts() {
                 </select>
               </div>
 
-              {/* Low Stock Filter Toggle */}
-              <button
-                onClick={() => setShowLowStockOnly(!showLowStockOnly)}
-                className={`px-6 py-2 rounded-md font-light cursor-pointer transition-all whitespace-nowrap ${
-                  showLowStockOnly
-                    ? "bg-wa-red text-white hover:bg-red-700"
-                    : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-                }`}
-              >
-                {showLowStockOnly ? "✓ Low Stock Only" : "Show Low Stock"}
-              </button>
-
               {/* Clear Filters Button */}
               <div className="md:w-32">
                 <button
                   onClick={() => {
                     setSearchQuery("");
                     setSelectedCategory("");
-                    setShowLowStockOnly(false);
                   }}
                   className="w-full px-4 py-2 bg-gray-500 text-white rounded-md font-medium hover:bg-gray-600 transition-colors h-full"
                 >

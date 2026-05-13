@@ -10,6 +10,8 @@ import { useState, useEffect } from "react";
 import api from "../../api";
 import GiftDetailsModal from "../GiftDetailsModal";
 import TransactionHistoryModal from "../TransactionHistoryModal";
+import StockAdjustmentModal from "../StockAdjustmentModal";
+import GiftForm from "../GiftForm";
 
 function AdminGifts() {
     const [gifts, setGifts] = useState([]);
@@ -20,6 +22,8 @@ function AdminGifts() {
     const [categories, setCategories] = useState([]);
     const [selectedGift, setSelectedGift] = useState(null);
     const [historyGift, setHistoryGift] = useState(null);
+    const [adjustGift, setAdjustGift] = useState(null);
+    const [showAddForm, setShowAddForm] = useState(false);
     const [adjustReasons, setAdjustReasons] = useState([]);
 
     useEffect(() => {
@@ -104,7 +108,7 @@ function AdminGifts() {
                     </select>
                 </div>
                 <button
-                    onClick={() => setSelectedGift({})}
+                    onClick={() => setShowAddForm(true)}
                     className="bg-wa-blue text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-wa-ocean transition-colors cursor-pointer whitespace-nowrap"
                 >
                     + Add New Gift
@@ -117,19 +121,7 @@ function AdminGifts() {
                     <p className="text-sm font-medium text-wa-navy">
                         {selected.length} item{selected.length !== 1 ? "s" : ""} selected
                     </p>
-                    <button
-                        onClick={() => {
-                            if (selected.length === 1) {
-                                const gift = gifts.find(g => g.id === selected[0]);
-                                setSelectedGift(gift);
-                            } else {
-                                alert("Please select only one item to view.");
-                            }
-                        }}
-                        className="text-sm bg-wa-blue text-white px-4 py-1.5 rounded-lg cursor-pointer hover:bg-wa-ocean transition-colors"
-                    >
-                        View Selected
-                    </button>
+                    {/* Export to Excel button will go here */}
                 </div>
             )}
 
@@ -205,6 +197,12 @@ function AdminGifts() {
                                             View
                                         </button>
                                         <button
+                                            onClick={() => setAdjustGift(gift)}
+                                            className="text-wa-cyan hover:text-wa-ocean text-xs font-medium cursor-pointer transition-colors"
+                                        >
+                                            Adjust Stock
+                                        </button>
+                                        <button
                                             onClick={() => setHistoryGift(gift)}
                                             className="text-gray-400 hover:text-wa-navy text-xs font-medium cursor-pointer transition-colors"
                                         >
@@ -266,6 +264,12 @@ function AdminGifts() {
                                     View
                                 </button>
                                 <button
+                                    onClick={() => setAdjustGift(gift)}
+                                    className="text-wa-cyan hover:text-wa-ocean text-xs font-medium cursor-pointer transition-colors"
+                                >
+                                    Adjust Stock
+                                </button>
+                                <button
                                     onClick={() => setHistoryGift(gift)}
                                     className="text-gray-400 hover:text-wa-navy text-xs font-medium cursor-pointer transition-colors"
                                 >
@@ -288,6 +292,29 @@ function AdminGifts() {
                 <TransactionHistoryModal
                     gift={historyGift}
                     onClose={() => setHistoryGift(null)}
+                />
+            )}
+
+            {showAddForm && (
+                <GiftForm
+                    onClose={() => setShowAddForm(false)}
+                    onSuccess={() => {
+                        setShowAddForm(false);
+                        setSearchQuery("");
+                        setSelectedCategory("");
+                        fetchGifts();
+                    }}
+                />
+            )}
+
+            {adjustGift && (
+                <StockAdjustmentModal
+                    gift={adjustGift}
+                    onClose={() => setAdjustGift(null)}
+                    onSuccess={() => {
+                        setAdjustGift(null);
+                        fetchGifts();
+                    }}
                 />
             )}
         </div>
