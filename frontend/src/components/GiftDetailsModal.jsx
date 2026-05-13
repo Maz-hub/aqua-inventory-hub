@@ -6,6 +6,7 @@
  */
 
 import { useState } from "react";
+import api from "../api";
 import EditGiftForm from "./EditGiftForm";
 import StockAdjustmentModal from "./StockAdjustmentModal";
 
@@ -14,6 +15,16 @@ function GiftDetailsModal({ gift, onClose, onSuccess, isAdmin = false }) {
 
     const [showEditForm, setShowEditForm] = useState(false);
     const [showStockModal, setShowStockModal] = useState(false);
+
+    const handleDelete = async () => {
+        const confirmed = window.confirm(
+            "Are you sure you want to delete this product? This action cannot be undone."
+        );
+        if (!confirmed) return;
+        await api.delete(`/api/gifts/delete/${gift.id}/`);
+        onSuccess();
+        onClose();
+    };
 
     // If edit form is open, show it instead of details
     if (showEditForm) {
@@ -275,6 +286,12 @@ function GiftDetailsModal({ gift, onClose, onSuccess, isAdmin = false }) {
                             </button>
                             {isAdmin && (
                                 <>
+                                    <button
+                                        onClick={handleDelete}
+                                        className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-medium px-8 py-3 cursor-pointer transition-all"
+                                    >
+                                        Delete
+                                    </button>
                                     <button
                                         onClick={() => setShowStockModal(true)}
                                         className="flex-1 bg-wa-cyan hover:bg-wa-ocean text-white rounded-md text-sm font-medium px-8 py-3 cursor-pointer transition-all"
