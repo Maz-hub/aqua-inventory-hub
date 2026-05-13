@@ -108,7 +108,7 @@ function Home() {
                     <CategoryCard
                         emoji="🛍️"
                         title="Gifts"
-                        description="Promotional gifts and branded merchandise for events and meetings"
+                        
                         subtext={loading ? "Loading..." : `${gifts.length} items in stock`}
                         accessGroup="gifts_access"
                         route="/gifts"
@@ -116,7 +116,7 @@ function Home() {
                     <CategoryCard
                         emoji="👕"
                         title="Apparel"
-                        description="361° clothing for staff and events"
+
                         subtext="Manage Inventory"
                         accessGroup="apparel_access"
                         route="/apparel"
@@ -124,7 +124,7 @@ function Home() {
                     <CategoryCard
                         emoji="📋"
                         title="Office & Events"
-                        description="Banners, name plates, roll-ups and event materials"
+
                         subtext="Manage Inventory"
                         accessGroup="office_access"
                         route="/office"
@@ -132,7 +132,7 @@ function Home() {
                     <CategoryCard
                         emoji="💼"
                         title="Executive Office"
-                        description="Premium gifts and exclusive items"
+
                         subtext="Manage Inventory"
                         accessGroup="executive_access"
                         route="/executive"
@@ -140,7 +140,7 @@ function Home() {
                     <CategoryCard
                         emoji="🖥️"
                         title="IT Assets"
-                        description="Laptops, peripherals and technical equipment"
+
                         subtext="Manage Inventory"
                         accessGroup="it_access"
                         route="/it"
@@ -148,7 +148,7 @@ function Home() {
                     <CategoryCard
                         emoji="📈"
                         title="Dashboard"
-                        description="Reports, statistics and budget tracking"
+
                         subtext="View Dashboard"
                         accessGroup="admin"
                         route="/dashboard"
