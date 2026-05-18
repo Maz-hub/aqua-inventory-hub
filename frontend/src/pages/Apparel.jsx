@@ -9,7 +9,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
 import AddApparelProductForm from "../components/AddApparelProductForm";
-import AddVariantModal from "../components/AddVariantModal";
 import ApparelDetailsModal from "../components/ApparelDetailsModal";
 import ApparelRequestModal from "../components/ApparelRequestModal";
 
@@ -32,9 +31,6 @@ function Apparel() {
   const [footwearSizes, setFootwearSizes] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const navigate = useNavigate();
-  const [showAddVariantModal, setShowAddVariantModal] = useState(false);
-  const [selectedProductForVariant, setSelectedProductForVariant] =
-    useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedProductForDetails, setSelectedProductForDetails] =
     useState(null);
@@ -511,16 +507,6 @@ function Apparel() {
                       View Details
                     </button>
 
-                    <button
-                      onClick={() => {
-                        setSelectedProductForVariant(product);
-                        setShowAddVariantModal(true);
-                      }}
-                      className="w-full bg-wa-cyan text-white px-4 py-2 rounded-md font-medium hover:bg-cyan-600 transition-colors"
-                    >
-                      + Add Variant
-                    </button>
-
                   </div>
                 </div>
               </div>
@@ -528,18 +514,6 @@ function Apparel() {
           </div>
         )}
       </div>
-      {/* Add Variant Modal */}
-      {showAddVariantModal && selectedProductForVariant && (
-        <AddVariantModal
-          product={selectedProductForVariant}
-          onClose={() => {
-            setShowAddVariantModal(false);
-            setSelectedProductForVariant(null);
-          }}
-          onSuccess={fetchProducts}
-        />
-      )}
-
       {/* Apparel Details Modal */}
       {showDetailsModal && selectedProductForDetails && (
         <ApparelDetailsModal
