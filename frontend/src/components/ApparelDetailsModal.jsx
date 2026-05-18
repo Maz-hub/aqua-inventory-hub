@@ -5,31 +5,8 @@
  * Shows product details, customs info, and variant stock levels.
  */
 
-import { useState } from "react";
-import EditApparelProductForm from "./EditApparelProductForm";
-
-function ApparelDetailsModal({ product, onClose, onSuccess }) {
+function ApparelDetailsModal({ product, onClose, onSuccess, isAdmin = false }) {
   if (!product) return null;
-
-  const [isEditing, setIsEditing] = useState(false);
-
-  if (isEditing) {
-    return (
-      <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-          <EditApparelProductForm
-            product={product}
-            onSuccess={() => {
-              setIsEditing(false);
-              onSuccess();
-              onClose();
-            }}
-            onCancel={() => setIsEditing(false)}
-          />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -99,15 +76,6 @@ function ApparelDetailsModal({ product, onClose, onSuccess }) {
                   </p>
                 </div>
 
-                {product.item_id && (
-                  <div>
-                    <p className="text-sm text-gray-600">Item ID (361°)</p>
-                    <p className="font-medium text-wa-navy">
-                      {product.item_id}
-                    </p>
-                  </div>
-                )}
-
                 {product.material && (
                   <div>
                     <p className="text-sm text-gray-600">Material</p>
@@ -172,12 +140,26 @@ function ApparelDetailsModal({ product, onClose, onSuccess }) {
             </div>
 
             {/* Customs & Logistics */}
-            {(product.hs_code || product.country_of_origin) && (
+            {(product.item_id ||
+              product.hs_code ||
+              product.country_of_origin ||
+              product.merchant_product_id ||
+              product.manufacturer_product_id ||
+              product.standardised_product_id) && (
               <div>
                 <h3 className="text-lg font-semibold text-wa-navy mb-3 border-b pb-2">
                   Customs & Logistics
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
+                  {product.item_id && (
+                    <div>
+                      <p className="text-sm text-gray-600">Item ID (361°)</p>
+                      <p className="font-medium text-wa-navy">
+                        {product.item_id}
+                      </p>
+                    </div>
+                  )}
+
                   {product.hs_code && (
                     <div>
                       <p className="text-sm text-gray-600">HS Code</p>
@@ -195,12 +177,95 @@ function ApparelDetailsModal({ product, onClose, onSuccess }) {
                       </p>
                     </div>
                   )}
+
+                  {product.merchant_product_id && (
+                    <div>
+                      <p className="text-sm text-gray-600">
+                        Merchant Product ID
+                      </p>
+                      <p className="font-medium text-wa-navy">
+                        {product.merchant_product_id}
+                      </p>
+                    </div>
+                  )}
+
+                  {product.manufacturer_product_id && (
+                    <div>
+                      <p className="text-sm text-gray-600">
+                        Manufacturer Product ID
+                      </p>
+                      <p className="font-medium text-wa-navy">
+                        {product.manufacturer_product_id}
+                      </p>
+                    </div>
+                  )}
+
+                  {product.standardised_product_id && (
+                    <div>
+                      <p className="text-sm text-gray-600">
+                        Standardised Product ID
+                      </p>
+                      <p className="font-medium text-wa-navy">
+                        {product.standardised_product_id}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
 
-            {/* Internal Notes */}
-            {product.notes && (
+            {/* Supplier Information — admin only */}
+            {isAdmin &&
+              (product.supplier_name ||
+                product.supplier_email ||
+                product.supplier_phone ||
+                product.supplier_address) && (
+                <div>
+                  <h3 className="text-lg font-semibold text-wa-navy mb-3 border-b pb-2">
+                    Supplier Information
+                  </h3>
+                  <div className="space-y-3">
+                    {product.supplier_name && (
+                      <div>
+                        <p className="text-sm text-gray-600">Supplier Name</p>
+                        <p className="font-medium text-wa-navy">
+                          {product.supplier_name}
+                        </p>
+                      </div>
+                    )}
+
+                    {product.supplier_email && (
+                      <div>
+                        <p className="text-sm text-gray-600">Email</p>
+                        <p className="font-medium text-wa-navy">
+                          {product.supplier_email}
+                        </p>
+                      </div>
+                    )}
+
+                    {product.supplier_phone && (
+                      <div>
+                        <p className="text-sm text-gray-600">Phone</p>
+                        <p className="font-medium text-wa-navy">
+                          {product.supplier_phone}
+                        </p>
+                      </div>
+                    )}
+
+                    {product.supplier_address && (
+                      <div>
+                        <p className="text-sm text-gray-600">Address</p>
+                        <p className="font-medium text-wa-navy">
+                          {product.supplier_address}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+            {/* Internal Notes — admin only */}
+            {isAdmin && product.notes && (
               <div>
                 <h3 className="text-lg font-semibold text-wa-navy mb-3 border-b pb-2">
                   Internal Notes
@@ -214,9 +279,6 @@ function ApparelDetailsModal({ product, onClose, onSuccess }) {
           <div className="mt-6 flex gap-3">
             <button onClick={onClose} className="btn_cancel">
               Close
-            </button>
-            <button onClick={() => setIsEditing(true)} className="btn_main">
-              Edit Product
             </button>
           </div>
         </div>
