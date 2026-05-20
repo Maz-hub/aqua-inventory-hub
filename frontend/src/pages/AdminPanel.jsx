@@ -12,6 +12,7 @@ import Header from "../components/Header";
 import SelectionDrawer from "../components/SelectionDrawer";
 import AdminRequests from "../components/admin/AdminRequests";
 import AdminGifts from "../components/admin/AdminGifts";
+import AdminApparel from "../components/admin/AdminApparel";
 
 // Sidebar navigation items
 const NAV_ITEMS = [
@@ -167,6 +168,8 @@ function AdminPanel() {
                             <AdminRequests />
                         ) : activeSection === "gifts" ? (
                             <AdminGifts />
+                        ) : activeSection === "apparel" ? (
+                            <AdminApparel />
                         ) : (
                             <div className="bg-white rounded-2xl shadow p-8 text-center">
                                 <div className="text-5xl mb-4">
