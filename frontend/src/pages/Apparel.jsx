@@ -298,32 +298,15 @@ function Apparel() {
           </div>
         </div>
 
-        {/* Add New Product Button / Form Toggle */}
-        {!showAddForm ? (
-          <div className="bg-white p-6 rounded-lg shadow mb-8 text-center">
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="bg-wa-blue text-white px-8 py-3 rounded-md font-medium hover:bg-wa-ocean cursor-pointer transition-all duration-200"
-            >
-              + Add New Product
-            </button>
-          </div>
-        ) : (
-          <div>
-            <button
-              onClick={() => setShowAddForm(false)}
-              className="btn_cancel mb-4 py-3 px-5"
-            >
-              ← Cancel
-            </button>
-            <AddApparelProductForm
-              onSuccess={() => {
-                fetchProducts();
-                setShowAddForm(false);
-              }}
-            />
-          </div>
-        )}
+        {/* Add New Product Button */}
+        <div className="bg-white p-6 rounded-lg shadow mb-8 text-center">
+          <button
+            onClick={() => setShowAddForm(true)}
+            className="bg-wa-blue text-white px-8 py-3 rounded-md font-medium hover:bg-wa-ocean cursor-pointer transition-all duration-200"
+          >
+            + Add New Product
+          </button>
+        </div>
       </div>
 
       {/* Products Grid */}
@@ -373,10 +356,11 @@ function Apparel() {
                     <span className="text-sm text-wa-blue">
                       {product.category.name}
                     </span>
-                    Color:{" "}
-                    {product.primary_color
-                      ? product.primary_color.color_name
-                      : "Not Set"}
+                    <span className="text-sm text-gray-600">
+                      {product.variants && product.variants.length > 0
+                        ? [...new Set(product.variants.map((v) => v.color.color_name))].join(", ")
+                        : "No variants yet"}
+                    </span>
                   </div>
 
                   {/* Variants Display - Grouped by Gender */}
@@ -514,6 +498,17 @@ function Apparel() {
           </div>
         )}
       </div>
+      {/* Add Product Modal */}
+      {showAddForm && (
+        <AddApparelProductForm
+          onSuccess={() => {
+            fetchProducts();
+            setShowAddForm(false);
+          }}
+          onClose={() => setShowAddForm(false)}
+        />
+      )}
+
       {/* Apparel Details Modal */}
       {showDetailsModal && selectedProductForDetails && (
         <ApparelDetailsModal

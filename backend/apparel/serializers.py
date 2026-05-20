@@ -97,7 +97,8 @@ class ApparelProductSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'product_name', 'category', 'category_id', 'item_id', 'primary_color', 'primary_color_id',
             'material', 'description', 'hs_code',
-            'merchant_product_id', 'manufacturer_product_id', 'standardised_product_id', 'supplier_phone',
+            'merchant_product_id', 'manufacturer_product_id', 'standardised_product_id',
+            'supplier_name', 'supplier_email', 'supplier_phone', 'supplier_address',
             'unit_price', 'country_of_origin', 'product_image', 'notes', 'variants',
             'created_at', 'updated_at'
         ]

@@ -171,10 +171,26 @@ class ApparelProduct(models.Model):
         blank=True,
         help_text="Standardised code if exists: GTIN, EAN, ISBN. Enter NO if not applicable."
     )
+    supplier_name = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Supplier company or contact name"
+    )
+
+    supplier_email = models.EmailField(
+        blank=True,
+        help_text="Supplier contact email address"
+    )
+
     supplier_phone = models.CharField(
         max_length=50,
         blank=True,
         help_text="Supplier contact phone number"
+    )
+
+    supplier_address = models.TextField(
+        blank=True,
+        help_text="Supplier mailing address"
     )
 
     unit_price = models.DecimalField(
