@@ -8,7 +8,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
-import AddApparelProductForm from "../components/AddApparelProductForm";
 import ApparelDetailsModal from "../components/ApparelDetailsModal";
 import ApparelRequestModal from "../components/ApparelRequestModal";
 
@@ -29,7 +28,6 @@ function Apparel() {
   const [colors, setColors] = useState([]);
   const [clothingSizes, setClothingSizes] = useState([]);
   const [footwearSizes, setFootwearSizes] = useState([]);
-  const [showAddForm, setShowAddForm] = useState(false);
   const navigate = useNavigate();
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedProductForDetails, setSelectedProductForDetails] =
@@ -298,15 +296,6 @@ function Apparel() {
           </div>
         </div>
 
-        {/* Add New Product Button */}
-        <div className="bg-white p-6 rounded-lg shadow mb-8 text-center">
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="bg-wa-blue text-white px-8 py-3 rounded-md font-medium hover:bg-wa-ocean cursor-pointer transition-all duration-200"
-          >
-            + Add New Product
-          </button>
-        </div>
       </div>
 
       {/* Products Grid */}
@@ -498,16 +487,6 @@ function Apparel() {
           </div>
         )}
       </div>
-      {/* Add Product Modal */}
-      {showAddForm && (
-        <AddApparelProductForm
-          onSuccess={() => {
-            fetchProducts();
-            setShowAddForm(false);
-          }}
-          onClose={() => setShowAddForm(false)}
-        />
-      )}
 
       {/* Apparel Details Modal */}
       {showDetailsModal && selectedProductForDetails && (
