@@ -5,6 +5,8 @@
  * Shows product details, customs info, and variant stock levels.
  */
 
+const GENDER_LABELS = { M: 'Men', W: 'Women', U: 'Unisex', Y: 'Youth' };
+
 function ApparelDetailsModal({ product, onClose, onSuccess, isAdmin = false }) {
   if (!product) return null;
 
@@ -57,19 +59,6 @@ function ApparelDetailsModal({ product, onClose, onSuccess, isAdmin = false }) {
                 </div>
 
                 <div>
-                  <p className="text-sm text-gray-600">Gender</p>
-                  <p className="font-medium text-wa-navy">
-                    {product.gender === "M"
-                      ? "Men"
-                      : product.gender === "W"
-                        ? "Women"
-                        : product.gender === "U"
-                          ? "Unisex"
-                          : "Youth"}
-                  </p>
-                </div>
-
-                <div>
                   <p className="text-sm text-gray-600">Unit Price</p>
                   <p className="font-medium text-wa-navy">
                     ${product.unit_price}
@@ -116,7 +105,8 @@ function ApparelDetailsModal({ product, onClose, onSuccess, isAdmin = false }) {
                         <div>
                           <p className="font-semibold text-wa-navy">
                             {variant.color.color_name} -{" "}
-                            {variant.size.size_value}
+                            {variant.size.size_value} —{" "}
+                            {GENDER_LABELS[variant.gender] ?? variant.gender}
                           </p>
                           <p className="text-sm text-gray-600">
                             Stock: <strong>{variant.qty_stock}</strong>

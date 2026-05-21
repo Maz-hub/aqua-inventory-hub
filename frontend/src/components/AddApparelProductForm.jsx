@@ -63,6 +63,20 @@ function AddApparelProductForm({ onSuccess, onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const filledVariants = variants.filter(
+      (v) => v.size_id && v.color_id && v.qty_stock !== ""
+    );
+
+    const seen = new Set();
+    for (const v of filledVariants) {
+      const key = `${v.size_id}-${v.color_id}-${v.gender}`;
+      if (seen.has(key)) {
+        alert("Duplicate variant detected: same size, colour and gender cannot be added twice.");
+        return;
+      }
+      seen.add(key);
+    }
+
     const formData = new FormData();
     formData.append("product_name", productName);
     formData.append("category_id", categoryId);
@@ -94,10 +108,6 @@ function AddApparelProductForm({ onSuccess, onClose }) {
 
       const productId = productRes.data.id;
 
-      const filledVariants = variants.filter(
-        (v) => v.size_id && v.color_id && v.qty_stock !== ""
-      );
-
       for (const v of filledVariants) {
         await api.post("/api/apparel/variants/", {
           product_id: productId,
@@ -111,6 +121,7 @@ function AddApparelProductForm({ onSuccess, onClose }) {
       onSuccess();
     } catch (err) {
       console.error("Error creating product:", err);
+      console.error("Backend validation error:", JSON.stringify(err.response?.data));
       alert("Failed to create product. Check console for details.");
     }
   };
