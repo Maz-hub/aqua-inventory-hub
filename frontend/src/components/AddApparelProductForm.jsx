@@ -241,6 +241,83 @@ function AddApparelProductForm({ onSuccess, onClose }) {
               <p className="text-sm text-gray-500 mt-1">Accepted formats: JPG, PNG, GIF (Max 5MB)</p>
             </div>
 
+            {/* Variants */}
+            <div className="md:col-span-2 mt-4">
+              <h3 className="text-lg font-semibold text-wa-navy mb-4 border-b pb-2">
+                Variants
+              </h3>
+            </div>
+
+            <div className="md:col-span-2 space-y-3">
+              {variants.map((variant, index) => (
+                <div
+                  key={index}
+                  className="flex flex-wrap gap-2 items-center bg-gray-50 p-3 rounded-md border border-gray-200"
+                >
+                  <select
+                    value={variant.size_id}
+                    onChange={(e) => updateVariant(index, "size_id", e.target.value)}
+                    className="form_input flex-1 min-w-28"
+                  >
+                    <option value="">Size</option>
+                    {sizes.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.size_value} ({s.size_type})
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={variant.color_id}
+                    onChange={(e) => updateVariant(index, "color_id", e.target.value)}
+                    className="form_input flex-1 min-w-28"
+                  >
+                    <option value="">Colour</option>
+                    {colors.map((c) => (
+                      <option key={c.id} value={c.id}>{c.color_name}</option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={variant.gender}
+                    onChange={(e) => updateVariant(index, "gender", e.target.value)}
+                    className="form_input w-32"
+                  >
+                    <option value="U">Unisex</option>
+                    <option value="M">Men</option>
+                    <option value="W">Women</option>
+                    <option value="Y">Youth</option>
+                  </select>
+
+                  <input
+                    type="number"
+                    min="0"
+                    value={variant.qty_stock}
+                    onChange={(e) => updateVariant(index, "qty_stock", e.target.value)}
+                    className="form_input w-24"
+                    placeholder="Qty"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => removeVariant(index)}
+                    className="text-red-500 hover:text-red-700 text-lg px-2 cursor-pointer"
+                    title="Remove variant"
+                  >
+                    🗑
+                  </button>
+                </div>
+              ))}
+
+              <button
+                type="button"
+                onClick={addVariantRow}
+                className="text-wa-blue hover:text-wa-ocean font-medium text-sm cursor-pointer"
+              >
+                + Add a variant
+              </button>
+            </div>
+
             {/* Customs & Logistics */}
             <div className="md:col-span-2 mt-4">
               <h3 className="text-lg font-semibold text-wa-navy mb-4 border-b pb-2">
@@ -407,83 +484,6 @@ function AddApparelProductForm({ onSuccess, onClose }) {
                 className="form_input min-h-20"
                 placeholder="Enter any internal notes or special instructions..."
               />
-            </div>
-
-            {/* Variants */}
-            <div className="md:col-span-2 mt-4">
-              <h3 className="text-lg font-semibold text-wa-navy mb-4 border-b pb-2">
-                Variants
-              </h3>
-            </div>
-
-            <div className="md:col-span-2 space-y-3">
-              {variants.map((variant, index) => (
-                <div
-                  key={index}
-                  className="flex flex-wrap gap-2 items-center bg-gray-50 p-3 rounded-md border border-gray-200"
-                >
-                  <select
-                    value={variant.size_id}
-                    onChange={(e) => updateVariant(index, "size_id", e.target.value)}
-                    className="form_input flex-1 min-w-28"
-                  >
-                    <option value="">Size</option>
-                    {sizes.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.size_value} ({s.size_type})
-                      </option>
-                    ))}
-                  </select>
-
-                  <select
-                    value={variant.color_id}
-                    onChange={(e) => updateVariant(index, "color_id", e.target.value)}
-                    className="form_input flex-1 min-w-28"
-                  >
-                    <option value="">Colour</option>
-                    {colors.map((c) => (
-                      <option key={c.id} value={c.id}>{c.color_name}</option>
-                    ))}
-                  </select>
-
-                  <select
-                    value={variant.gender}
-                    onChange={(e) => updateVariant(index, "gender", e.target.value)}
-                    className="form_input w-32"
-                  >
-                    <option value="U">Unisex</option>
-                    <option value="M">Men</option>
-                    <option value="W">Women</option>
-                    <option value="Y">Youth</option>
-                  </select>
-
-                  <input
-                    type="number"
-                    min="0"
-                    value={variant.qty_stock}
-                    onChange={(e) => updateVariant(index, "qty_stock", e.target.value)}
-                    className="form_input w-24"
-                    placeholder="Qty"
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() => removeVariant(index)}
-                    className="text-red-500 hover:text-red-700 text-lg px-2 cursor-pointer"
-                    title="Remove variant"
-                  >
-                    🗑
-                  </button>
-                </div>
-              ))}
-
-              <button
-                type="button"
-                onClick={addVariantRow}
-                className="text-wa-blue hover:text-wa-ocean font-medium text-sm cursor-pointer"
-              >
-                + Add a variant
-              </button>
             </div>
 
             {/* Action Buttons */}
