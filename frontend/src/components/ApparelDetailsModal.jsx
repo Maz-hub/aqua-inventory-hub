@@ -105,7 +105,7 @@ function ApparelDetailsModal({ product, onClose, onSuccess, isAdmin = false }) {
                         <div>
                           <p className="font-semibold text-wa-navy">
                             {variant.color.color_name} -{" "}
-                            {variant.size.size_value} —{" "}
+                            {variant.size.size_value} -{" "}
                             {GENDER_LABELS[variant.gender] ?? variant.gender}
                           </p>
                           <p className="text-sm text-gray-600">

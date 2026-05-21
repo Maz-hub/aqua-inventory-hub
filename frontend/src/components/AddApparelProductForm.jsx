@@ -469,7 +469,7 @@ function AddApparelProductForm({ onSuccess, onClose }) {
                   <button
                     type="button"
                     onClick={() => removeVariant(index)}
-                    className="text-red-500 hover:text-red-700 text-lg px-2"
+                    className="text-red-500 hover:text-red-700 text-lg px-2 cursor-pointer"
                     title="Remove variant"
                   >
                     🗑
@@ -480,7 +480,7 @@ function AddApparelProductForm({ onSuccess, onClose }) {
               <button
                 type="button"
                 onClick={addVariantRow}
-                className="text-wa-blue hover:text-wa-ocean font-medium text-sm"
+                className="text-wa-blue hover:text-wa-ocean font-medium text-sm cursor-pointer"
               >
                 + Add a variant
               </button>
