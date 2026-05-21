@@ -4,7 +4,7 @@
  * Creates a base apparel product and optional size/color variants in one step.
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import api from "../api";
 
 function AddApparelProductForm({ onSuccess, onClose }) {
@@ -39,6 +39,8 @@ function AddApparelProductForm({ onSuccess, onClose }) {
 
   // Variants
   const [variants, setVariants] = useState([]);
+  const [variantErrors, setVariantErrors] = useState([]);
+  const variantRowRefs = useRef([]);
 
   useEffect(() => {
     api.get("/api/apparel/categories/").then((res) => setCategories(res.data)).catch(console.error);
@@ -48,20 +50,41 @@ function AddApparelProductForm({ onSuccess, onClose }) {
 
   const addVariantRow = () => {
     setVariants([...variants, { size_id: "", color_id: "", gender: "U", qty_stock: "" }]);
+    setVariantErrors([...variantErrors, { size_id: false, color_id: false, qty_stock: false }]);
   };
 
   const updateVariant = (index, field, value) => {
     const updated = [...variants];
     updated[index] = { ...updated[index], [field]: value };
     setVariants(updated);
+
+    if (value !== "" && variantErrors[index]?.[field]) {
+      const updatedErrors = [...variantErrors];
+      updatedErrors[index] = { ...updatedErrors[index], [field]: false };
+      setVariantErrors(updatedErrors);
+    }
   };
 
   const removeVariant = (index) => {
     setVariants(variants.filter((_, i) => i !== index));
+    setVariantErrors(variantErrors.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const newErrors = variants.map((v) => ({
+      size_id: !v.size_id,
+      color_id: !v.color_id,
+      qty_stock: v.qty_stock === "",
+    }));
+    const hasIncompleteVariant = newErrors.some((e) => e.size_id || e.color_id || e.qty_stock);
+    if (hasIncompleteVariant) {
+      setVariantErrors(newErrors);
+      const firstErrorIndex = newErrors.findIndex((e) => e.size_id || e.color_id || e.qty_stock);
+      variantRowRefs.current[firstErrorIndex]?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
 
     const filledVariants = variants.filter(
       (v) => v.size_id && v.color_id && v.qty_stock !== ""
@@ -252,12 +275,13 @@ function AddApparelProductForm({ onSuccess, onClose }) {
               {variants.map((variant, index) => (
                 <div
                   key={index}
+                  ref={(el) => (variantRowRefs.current[index] = el)}
                   className="flex flex-wrap gap-2 items-center bg-gray-50 p-3 rounded-md border border-gray-200"
                 >
                   <select
                     value={variant.size_id}
                     onChange={(e) => updateVariant(index, "size_id", e.target.value)}
-                    className="form_input flex-1 min-w-28"
+                    className={`form_input flex-1 min-w-28 ${variantErrors[index]?.size_id ? "border-red-500" : ""}`}
                   >
                     <option value="">Size</option>
                     {sizes.map((s) => (
@@ -270,7 +294,7 @@ function AddApparelProductForm({ onSuccess, onClose }) {
                   <select
                     value={variant.color_id}
                     onChange={(e) => updateVariant(index, "color_id", e.target.value)}
-                    className="form_input flex-1 min-w-28"
+                    className={`form_input flex-1 min-w-28 ${variantErrors[index]?.color_id ? "border-red-500" : ""}`}
                   >
                     <option value="">Colour</option>
                     {colors.map((c) => (
@@ -294,7 +318,7 @@ function AddApparelProductForm({ onSuccess, onClose }) {
                     min="0"
                     value={variant.qty_stock}
                     onChange={(e) => updateVariant(index, "qty_stock", e.target.value)}
-                    className="form_input w-24"
+                    className={`form_input w-24 ${variantErrors[index]?.qty_stock ? "border-red-500" : ""}`}
                     placeholder="Qty"
                   />
 
@@ -316,6 +340,10 @@ function AddApparelProductForm({ onSuccess, onClose }) {
               >
                 + Add a variant
               </button>
+
+              {variantErrors.some((e) => e.size_id || e.color_id || e.qty_stock) && (
+                <p className="text-red-500 text-sm mt-1">Please complete all highlighted fields.</p>
+              )}
             </div>
 
             {/* Customs & Logistics */}
