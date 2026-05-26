@@ -183,7 +183,7 @@ function ApparelStockAdjustModal({ product, onClose, onSuccess }) {
                         <select
                             value={reason}
                             onChange={(e) => setReason(e.target.value)}
-                            className="form_input"
+                            className="form_input max-w-full overflow-hidden"
                             required
                         >
                             <option value="">Select a reason...</option>
