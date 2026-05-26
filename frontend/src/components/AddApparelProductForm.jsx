@@ -40,6 +40,8 @@ function AddApparelProductForm({ onSuccess, onClose }) {
   // Variants
   const [variants, setVariants] = useState([]);
   const [variantErrors, setVariantErrors] = useState([]);
+  const [variantDuplicates, setVariantDuplicates] = useState([]);
+  const [duplicateError, setDuplicateError] = useState("");
   const variantRowRefs = useRef([]);
 
   useEffect(() => {
@@ -51,6 +53,7 @@ function AddApparelProductForm({ onSuccess, onClose }) {
   const addVariantRow = () => {
     setVariants([...variants, { size_id: "", color_id: "", gender: "U", qty_stock: "" }]);
     setVariantErrors([...variantErrors, { size_id: false, color_id: false, qty_stock: false }]);
+    setVariantDuplicates([...variantDuplicates, false]);
   };
 
   const updateVariant = (index, field, value) => {
@@ -63,11 +66,21 @@ function AddApparelProductForm({ onSuccess, onClose }) {
       updatedErrors[index] = { ...updatedErrors[index], [field]: false };
       setVariantErrors(updatedErrors);
     }
+
+    if (variantDuplicates[index]) {
+      const updatedDuplicates = [...variantDuplicates];
+      updatedDuplicates[index] = false;
+      setVariantDuplicates(updatedDuplicates);
+      if (!updatedDuplicates.some(Boolean)) setDuplicateError("");
+    }
   };
 
   const removeVariant = (index) => {
     setVariants(variants.filter((_, i) => i !== index));
     setVariantErrors(variantErrors.filter((_, i) => i !== index));
+    const updatedDuplicates = variantDuplicates.filter((_, i) => i !== index);
+    setVariantDuplicates(updatedDuplicates);
+    if (!updatedDuplicates.some(Boolean)) setDuplicateError("");
   };
 
   const handleSubmit = async (e) => {
@@ -90,14 +103,28 @@ function AddApparelProductForm({ onSuccess, onClose }) {
       (v) => v.size_id && v.color_id && v.qty_stock !== ""
     );
 
-    const seen = new Set();
-    for (const v of filledVariants) {
-      const key = `${v.size_id}-${v.color_id}-${v.gender}`;
-      if (seen.has(key)) {
-        alert("Duplicate variant detected: same size, colour and gender cannot be added twice.");
-        return;
+    const keyMap = new Map();
+    variants.forEach((v, i) => {
+      if (v.size_id && v.color_id) {
+        const key = `${v.size_id}-${v.color_id}-${v.gender}`;
+        if (!keyMap.has(key)) keyMap.set(key, []);
+        keyMap.get(key).push(i);
       }
-      seen.add(key);
+    });
+    const newDuplicates = variants.map(() => false);
+    let hasDuplicates = false;
+    keyMap.forEach((indices) => {
+      if (indices.length > 1) {
+        hasDuplicates = true;
+        indices.forEach((i) => { newDuplicates[i] = true; });
+      }
+    });
+    if (hasDuplicates) {
+      setVariantDuplicates(newDuplicates);
+      setDuplicateError("Duplicate variants highlighted in red - each size, colour and gender combination must be unique.");
+      const firstDuplicateIndex = newDuplicates.findIndex(Boolean);
+      variantRowRefs.current[firstDuplicateIndex]?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
     }
 
     const formData = new FormData();
@@ -281,7 +308,7 @@ function AddApparelProductForm({ onSuccess, onClose }) {
                   <select
                     value={variant.size_id}
                     onChange={(e) => updateVariant(index, "size_id", e.target.value)}
-                    className={`form_input flex-1 min-w-28 ${variantErrors[index]?.size_id ? "border-red-500" : ""}`}
+                    className={`form_input flex-1 min-w-28 ${variantErrors[index]?.size_id || variantDuplicates[index] ? "border-red-500" : ""}`}
                   >
                     <option value="">Size</option>
                     {sizes.map((s) => (
@@ -294,7 +321,7 @@ function AddApparelProductForm({ onSuccess, onClose }) {
                   <select
                     value={variant.color_id}
                     onChange={(e) => updateVariant(index, "color_id", e.target.value)}
-                    className={`form_input flex-1 min-w-28 ${variantErrors[index]?.color_id ? "border-red-500" : ""}`}
+                    className={`form_input flex-1 min-w-28 ${variantErrors[index]?.color_id || variantDuplicates[index] ? "border-red-500" : ""}`}
                   >
                     <option value="">Colour</option>
                     {colors.map((c) => (
@@ -305,7 +332,7 @@ function AddApparelProductForm({ onSuccess, onClose }) {
                   <select
                     value={variant.gender}
                     onChange={(e) => updateVariant(index, "gender", e.target.value)}
-                    className="form_input w-32"
+                    className={`form_input w-32 ${variantDuplicates[index] ? "border-red-500" : ""}`}
                   >
                     <option value="U">Unisex</option>
                     <option value="M">Men</option>
@@ -343,6 +370,9 @@ function AddApparelProductForm({ onSuccess, onClose }) {
 
               {variantErrors.some((e) => e.size_id || e.color_id || e.qty_stock) && (
                 <p className="text-red-500 text-sm mt-1">Please complete all highlighted fields.</p>
+              )}
+              {duplicateError && (
+                <p className="text-red-500 text-sm mt-1">{duplicateError}</p>
               )}
             </div>
 
