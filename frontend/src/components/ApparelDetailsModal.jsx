@@ -5,10 +5,29 @@
  * Shows product details, customs info, and variant stock levels.
  */
 
+import { useState } from "react";
+import EditApparelProductForm from "./EditApparelProductForm";
+
 const GENDER_LABELS = { M: 'Men', W: 'Women', U: 'Unisex', Y: 'Youth' };
 
 function ApparelDetailsModal({ product, onClose, onSuccess, isAdmin = false }) {
+  const [isEditing, setIsEditing] = useState(false);
+
   if (!product) return null;
+
+  if (isEditing) {
+    return (
+      <EditApparelProductForm
+        product={product}
+        onClose={() => setIsEditing(false)}
+        onSuccess={() => {
+          setIsEditing(false);
+          onSuccess();
+          onClose();
+        }}
+      />
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -270,6 +289,11 @@ function ApparelDetailsModal({ product, onClose, onSuccess, isAdmin = false }) {
             <button onClick={onClose} className="btn_cancel">
               Close
             </button>
+            {isAdmin && (
+              <button onClick={() => setIsEditing(true)} className="btn_confirm">
+                Edit Product
+              </button>
+            )}
           </div>
         </div>
       </div>
