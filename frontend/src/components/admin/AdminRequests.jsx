@@ -374,60 +374,56 @@ function AdminRequests() {
                                                         💬 {item.notes}
                                                     </p>
                                                 )}
-                                                {/* Row 3: Quantity left, price right */}
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center gap-2">
+                                                {/* Row 3: Qty (requested read-only + confirmed editable) and price */}
+                                                <div className="flex items-center justify-between gap-3 flex-wrap">
+                                                    <div className="flex items-center gap-3 flex-wrap">
                                                         <span className="text-xs text-gray-500">
-                                                            Qty:
+                                                            Requested:{" "}
+                                                            <span className="font-semibold text-gray-700">
+                                                                {item.quantity_requested}
+                                                            </span>
                                                         </span>
-                                                        <input
-                                                            type="number"
-                                                            min="1"
-                                                            defaultValue={
-                                                                item.quantity_requested
-                                                            }
-                                                            onFocus={(e) =>
-                                                                e.target.select()
-                                                            }
-                                                            onBlur={(e) => {
-                                                                const newQty =
-                                                                    parseInt(
-                                                                        e.target
-                                                                            .value,
-                                                                    );
-                                                                if (
-                                                                    newQty !==
-                                                                        item.quantity_requested &&
-                                                                    newQty > 0
-                                                                ) {
-                                                                    api.patch(
-                                                                        `/api/requests/${request.id}/items/${item.id}/`,
-                                                                        {
-                                                                            quantity_requested:
-                                                                                newQty,
-                                                                        },
-                                                                    )
-                                                                        .then(
-                                                                            () =>
-                                                                                fetchRequests(),
-                                                                        )
-                                                                        .catch(
-                                                                            (
-                                                                                err,
-                                                                            ) =>
-                                                                                alert(
-                                                                                    err
-                                                                                        .response
-                                                                                        ?.data
-                                                                                        ?.error ||
-                                                                                        "Failed to update quantity",
-                                                                                ),
-                                                                        );
+                                                        <div className="flex items-center gap-1.5">
+                                                            <span className="text-xs text-gray-500">
+                                                                Confirmed:
+                                                            </span>
+                                                            <input
+                                                                type="number"
+                                                                min="0"
+                                                                defaultValue={
+                                                                    item.quantity_confirmed ??
+                                                                    item.quantity_requested
                                                                 }
-                                                            }}
-                                                            title="Click to edit — saves automatically"
-                                                            className="w-16 text-center text-sm border border-gray-200 rounded-lg py-1 focus:outline-none focus:border-wa-blue cursor-pointer"
-                                                        />
+                                                                onFocus={(e) =>
+                                                                    e.target.select()
+                                                                }
+                                                                onBlur={(e) => {
+                                                                    const newQty = parseInt(e.target.value);
+                                                                    if (!isNaN(newQty) && newQty >= 0) {
+                                                                        api.patch(
+                                                                            `/api/requests/${request.id}/items/${item.id}/confirm/`,
+                                                                            { quantity_confirmed: newQty },
+                                                                        )
+                                                                            .then(() => fetchRequests())
+                                                                            .catch((err) =>
+                                                                                alert(
+                                                                                    err.response?.data?.error ||
+                                                                                    "Failed to confirm quantity",
+                                                                                ),
+                                                                            );
+                                                                    }
+                                                                }}
+                                                                title="Set confirmed quantity — saves on click away"
+                                                                className="w-16 text-center text-sm border border-gray-200 rounded-lg py-1 focus:outline-none focus:border-wa-blue cursor-pointer"
+                                                            />
+                                                        </div>
+                                                        {item.quantity_confirmed !== null &&
+                                                            item.quantity_confirmed !== undefined &&
+                                                            item.quantity_confirmed !== item.quantity_requested && (
+                                                            <span className="text-xs text-amber-600 font-medium">
+                                                                Requested: {item.quantity_requested} → Confirmed: {item.quantity_confirmed}
+                                                            </span>
+                                                        )}
                                                     </div>
                                                     <p className="text-sm font-medium text-wa-blue whitespace-nowrap">
                                                         CHF{" "}
@@ -596,11 +592,6 @@ function AdminRequests() {
                                             + Add Item to Request
                                         </button>
                                     )}
-
-                                    <p className="text-xs text-gray-400 italic mb-4">
-                                        💡 Click quantity to edit — saves
-                                        automatically when you click away
-                                    </p>
 
                                     {/* Requester Notes */}
                                     {request.notes && (

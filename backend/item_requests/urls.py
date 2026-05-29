@@ -36,4 +36,7 @@ urlpatterns = [
 
     # Update or delete a specific line item
     path("<int:pk>/items/<int:item_pk>/", views.manage_request_item, name="item-request-manage-item"),
+
+    # Admin confirms quantity for a specific line item (adjusts stock accordingly)
+    path("<int:pk>/items/<int:item_pk>/confirm/", views.confirm_request_item, name="item-request-confirm-item"),
 ]

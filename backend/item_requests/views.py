@@ -353,3 +353,104 @@ def manage_request_item(request, pk, item_pk):
         return Response(serializer.data)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['PATCH'])
+@permission_classes([IsAdminUser])
+def confirm_request_item(request, pk, item_pk):
+    """
+    Admin sets or updates quantity_confirmed on a line item.
+    PATCH /api/requests/<id>/items/<item_id>/confirm/
+    Reconciles stock against the previously deducted quantity:
+      - new qty < old qty → return the difference to stock
+      - new qty > old qty → deduct the difference (400 if insufficient)
+      - no change         → just save, no stock movement
+    """
+    item_request = get_object_or_404(ItemRequest, pk=pk)
+    item = get_object_or_404(ItemRequestItem, pk=item_pk, request=item_request)
+
+    new_qty = request.data.get('quantity_confirmed')
+    if new_qty is None:
+        return Response(
+            {"error": "quantity_confirmed is required."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    try:
+        new_qty = int(new_qty)
+        if new_qty < 0:
+            raise ValueError
+    except (ValueError, TypeError):
+        return Response(
+            {"error": "quantity_confirmed must be a non-negative integer."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Previously deducted: use existing confirmed qty if already set, else original requested qty
+    previously_deducted = (
+        item.quantity_confirmed if item.quantity_confirmed is not None
+        else item.quantity_requested
+    )
+    diff = new_qty - previously_deducted  # positive → need more stock; negative → return excess
+
+    if diff != 0:
+        if item.item_type == 'gift':
+            try:
+                gift = Gift.objects.get(pk=item.item_id)
+            except Gift.DoesNotExist:
+                return Response(
+                    {"error": f"Gift #{item.item_id} no longer exists."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if diff > 0 and gift.qty_stock < diff:
+                return Response(
+                    {"error": f"Only {gift.qty_stock} units available for {gift.product_name}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            stock_before = gift.qty_stock
+            gift.qty_stock -= diff  # negative diff adds stock back, positive deducts
+            gift.save()
+            InventoryTransaction.objects.create(
+                gift=gift,
+                transaction_type='return' if diff < 0 else 'take',
+                quantity=abs(diff),
+                created_by=request.user,
+                stock_before=stock_before,
+                stock_after=gift.qty_stock,
+            )
+
+        elif item.item_type == 'apparel':
+            try:
+                variant = ApparelVariant.objects.get(pk=item.item_id)
+            except ApparelVariant.DoesNotExist:
+                return Response(
+                    {"error": f"Apparel variant #{item.item_id} no longer exists."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if diff > 0 and variant.qty_stock < diff:
+                item_name = (
+                    f"{variant.product.product_name} — "
+                    f"{variant.size.size_value} {variant.color.color_name}"
+                )
+                return Response(
+                    {"error": f"Only {variant.qty_stock} units available for {item_name}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            stock_before = variant.qty_stock
+            variant.qty_stock -= diff
+            variant.save()
+            ApparelTransaction.objects.create(
+                variant=variant,
+                transaction_type='return' if diff < 0 else 'take',
+                quantity=abs(diff),
+                created_by=request.user,
+                stock_before=stock_before,
+                stock_after=variant.qty_stock,
+            )
+
+    item.quantity_confirmed = new_qty
+    item.save()
+
+    return Response(
+        {"message": "Quantity confirmed and stock adjusted.", "quantity_confirmed": new_qty},
+        status=status.HTTP_200_OK
+    )
