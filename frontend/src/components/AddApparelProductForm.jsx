@@ -293,9 +293,12 @@ function AddApparelProductForm({ onSuccess, onClose }) {
 
             {/* Variants */}
             <div className="md:col-span-2 mt-4">
-              <h3 className="text-lg font-semibold text-wa-navy mb-4 border-b pb-2">
+              <h3 className="text-lg font-semibold text-wa-navy mb-1 border-b pb-2">
                 Variants
               </h3>
+              <p className="text-xs text-gray-500 mb-4">
+                One product = one colour. Create a separate product for each colour variation.
+              </p>
             </div>
 
             <div className="md:col-span-2 space-y-3">
