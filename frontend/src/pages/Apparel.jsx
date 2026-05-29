@@ -1,7 +1,7 @@
 /**
  * Apparel Inventory Page
  *
- * Displays 361° apparel products with size/color variant management.
+ * Displays apparel products with size/color variant management.
  * Shows available stock for each size/color combination.
  */
 
@@ -315,7 +315,7 @@ function Apparel() {
             {filteredProducts.map((product) => (
               <div
                 key={product.id}
-                className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden"
+                className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden flex flex-col"
               >
                 {/* Product Image */}
                 <div className="h-48 bg-white flex items-center justify-center overflow-hidden">
@@ -336,7 +336,7 @@ function Apparel() {
                   )}
                 </div>
 
-                <div className="p-4">
+                <div className="p-4 flex flex-col flex-1">
                   <h3 className="font-bold text-lg text-wa-navy mb-1 truncate">
                     {product.product_name}
                   </h3>
@@ -353,7 +353,7 @@ function Apparel() {
                   </div>
 
                   {/* Variants Display - Grouped by Gender */}
-                  <div className="border-t pt-3 mt-3">
+                  <div className="border-t pt-3 mt-3 flex-1">
                     <p className="text-xs font-semibold text-gray-700 mb-2">
                       Available Sizes:
                     </p>
@@ -387,7 +387,7 @@ function Apparel() {
                               </p>
 
                               {/* Size Badges */}
-                              <div className="flex flex-wrap gap-1">
+                              <div className="flex flex-wrap gap-1 mb-2">
                                 {genderVariants.map((variant) => (
                                   <span
                                     key={variant.id}
@@ -451,7 +451,7 @@ function Apparel() {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="space-y-2 mt-4">
+                  <div className="space-y-2 mt-auto">
                     <button
                       onClick={() => {
                         setSelectedProductForRequest(product);
