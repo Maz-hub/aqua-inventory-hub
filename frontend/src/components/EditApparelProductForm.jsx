@@ -9,6 +9,7 @@ function EditApparelProductForm({ product, onSuccess, onClose }) {
   // Product fields — pre-populated from product prop
   const [productName, setProductName] = useState(product.product_name);
   const [categoryId, setCategoryId] = useState(product.category.id);
+  const [primaryColorId, setPrimaryColorId] = useState(product.primary_color?.id || "");
   const [unitPrice, setUnitPrice] = useState(product.unit_price);
   const [material, setMaterial] = useState(product.material || "");
   const [description, setDescription] = useState(product.description || "");
@@ -55,8 +56,8 @@ function EditApparelProductForm({ product, onSuccess, onClose }) {
   };
 
   const addNewVariantRow = () => {
-    setNewVariants([...newVariants, { size_id: "", color_id: "", gender: "U", qty_stock: "" }]);
-    setVariantErrors([...variantErrors, { size_id: false, color_id: false, qty_stock: false }]);
+    setNewVariants([...newVariants, { size_id: "", gender: "U", qty_stock: "" }]);
+    setVariantErrors([...variantErrors, { size_id: false, qty_stock: false }]);
   };
 
   const updateNewVariant = (index, field, value) => {
@@ -82,10 +83,9 @@ function EditApparelProductForm({ product, onSuccess, onClose }) {
     // Validate new variant rows
     const newErrors = newVariants.map((v) => ({
       size_id: !v.size_id,
-      color_id: !v.color_id,
       qty_stock: v.qty_stock === "",
     }));
-    const hasIncomplete = newErrors.some((e) => e.size_id || e.color_id || e.qty_stock);
+    const hasIncomplete = newErrors.some((e) => e.size_id || e.qty_stock);
     if (hasIncomplete) {
       setVariantErrors(newErrors);
       const firstErrorIndex = newErrors.findIndex((e) => e.size_id || e.color_id || e.qty_stock);
@@ -94,16 +94,16 @@ function EditApparelProductForm({ product, onSuccess, onClose }) {
     }
 
     const filledNewVariants = newVariants.filter(
-      (v) => v.size_id && v.color_id && v.qty_stock !== ""
+      (v) => v.size_id && v.qty_stock !== ""
     );
 
     // Duplicate check: seed with remaining existing variants, then check new ones
     const seen = new Set();
     for (const ev of existingVariants) {
-      seen.add(`${ev.size.id}-${ev.color.id}-${ev.gender}`);
+      seen.add(`${ev.size.id}-${ev.gender}`);
     }
     for (const v of filledNewVariants) {
-      const key = `${v.size_id}-${v.color_id}-${v.gender}`;
+      const key = `${v.size_id}-${v.gender}`;
       if (seen.has(key)) {
         alert("Duplicate variant detected: same size, colour and gender already exists.");
         return;
@@ -128,6 +128,7 @@ function EditApparelProductForm({ product, onSuccess, onClose }) {
     formData.append("supplier_phone", supplierPhone);
     formData.append("supplier_address", supplierAddress);
     formData.append("notes", notes);
+    if (primaryColorId) formData.append("primary_color_id", primaryColorId);
     if (productImage) formData.append("product_image", productImage);
 
     try {
@@ -144,7 +145,7 @@ function EditApparelProductForm({ product, onSuccess, onClose }) {
         await api.post("/api/apparel/variants/", {
           product_id: product.id,
           size_id: parseInt(v.size_id),
-          color_id: parseInt(v.color_id),
+          color_id: parseInt(primaryColorId),
           gender: v.gender,
           qty_stock: parseInt(v.qty_stock),
         });
@@ -214,6 +215,24 @@ function EditApparelProductForm({ product, onSuccess, onClose }) {
                 <option value="">Select a category</option>
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>{cat.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="primaryColor" className="block text-sm font-medium text-gray-700 mb-2">
+                Primary Colour *
+              </label>
+              <select
+                id="primaryColor"
+                required
+                value={primaryColorId}
+                onChange={(e) => setPrimaryColorId(e.target.value)}
+                className="form_input"
+              >
+                <option value="">Select a colour</option>
+                {colors.map((color) => (
+                  <option key={color.id} value={color.id}>{color.color_name}</option>
                 ))}
               </select>
             </div>
@@ -301,9 +320,6 @@ function EditApparelProductForm({ product, onSuccess, onClose }) {
                   <span className="form_input flex-1 min-w-28 bg-gray-100 text-gray-700 cursor-default select-none">
                     {variant.size.size_value} ({variant.size.size_type})
                   </span>
-                  <span className="form_input flex-1 min-w-28 bg-gray-100 text-gray-700 cursor-default select-none">
-                    {variant.color.color_name}
-                  </span>
                   <span className="form_input w-32 bg-gray-100 text-gray-700 cursor-default select-none">
                     {genderLabel[variant.gender] || variant.gender}
                   </span>
@@ -337,17 +353,6 @@ function EditApparelProductForm({ product, onSuccess, onClose }) {
                       <option key={s.id} value={s.id}>
                         {s.size_value} ({s.size_type})
                       </option>
-                    ))}
-                  </select>
-
-                  <select
-                    value={variant.color_id}
-                    onChange={(e) => updateNewVariant(index, "color_id", e.target.value)}
-                    className={`form_input flex-1 min-w-28 ${variantErrors[index]?.color_id ? "border-red-500" : ""}`}
-                  >
-                    <option value="">Colour</option>
-                    {colors.map((c) => (
-                      <option key={c.id} value={c.id}>{c.color_name}</option>
                     ))}
                   </select>
 
@@ -390,7 +395,7 @@ function EditApparelProductForm({ product, onSuccess, onClose }) {
                 + Add new variant
               </button>
 
-              {variantErrors.some((e) => e.size_id || e.color_id || e.qty_stock) && (
+              {variantErrors.some((e) => e.size_id || e.qty_stock) && (
                 <p className="text-red-500 text-sm mt-1">Please complete all highlighted fields.</p>
               )}
             </div>

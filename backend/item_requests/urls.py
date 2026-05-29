@@ -21,6 +21,9 @@ urlpatterns = [
     # Requester submits their draft request
     path("<int:pk>/submit/", views.submit_request, name="item-request-submit"),
 
+    # Requester or admin cancels a pending request (restores stock)
+    path("<int:pk>/cancel/", views.cancel_request, name="item-request-cancel"),
+
     # Admin updates request status
     path("<int:pk>/status/", views.update_request_status, name="item-request-status"),
 

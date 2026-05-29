@@ -7,6 +7,8 @@ from .models import ItemRequest, ItemRequestItem
 from .serializers import ItemRequestSerializer, ItemRequestItemSerializer, DepartmentSerializer
 from accounts.permissions import IsAdminUser
 from core.models import Department
+from gifts.models import Gift, InventoryTransaction
+from apparel.models import ApparelVariant, ApparelTransaction
 
 
 # ============================================
@@ -89,31 +91,163 @@ def submit_request(request, pk):
     """
     Moves a Draft request to Pending status.
     PATCH /api/requests/<id>/submit/
-    Only the requester can submit their own draft.
-    Stock reservation happens here.
+    Checks stock for all line items, deducts stock, creates transaction
+    records, then sets status to pending.
     """
     item_request = get_object_or_404(ItemRequest, pk=pk)
 
-    # Only the owner can submit their own request
     if item_request.requested_by != request.user:
         return Response(
             {"error": "You can only submit your own requests."},
             status=status.HTTP_403_FORBIDDEN
         )
 
-    # Can only submit from Draft status
     if item_request.status != 'draft':
         return Response(
             {"error": "Only draft requests can be submitted."},
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    # Move to Pending — stock reservation handled here later
+    # --- Stock availability check (all-or-nothing before any deduction) ---
+    for item in item_request.items.all():
+        if item.item_type == 'gift':
+            try:
+                gift = Gift.objects.get(pk=item.item_id)
+            except Gift.DoesNotExist:
+                return Response(
+                    {"error": f"Gift #{item.item_id} no longer exists."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if item.quantity_requested > gift.qty_stock:
+                return Response(
+                    {"error": f"Only {gift.qty_stock} units available for {gift.product_name}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        elif item.item_type == 'apparel':
+            try:
+                variant = ApparelVariant.objects.get(pk=item.item_id)
+            except ApparelVariant.DoesNotExist:
+                return Response(
+                    {"error": f"Apparel variant #{item.item_id} no longer exists."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            item_name = (
+                f"{variant.product.product_name} — "
+                f"{variant.size.size_value} {variant.color.color_name}"
+            )
+            if item.quantity_requested > variant.qty_stock:
+                return Response(
+                    {"error": f"Only {variant.qty_stock} units available for {item_name}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+    # --- Deduct stock and record transactions ---
+    for item in item_request.items.all():
+        if item.item_type == 'gift':
+            gift = Gift.objects.get(pk=item.item_id)
+            stock_before = gift.qty_stock
+            gift.qty_stock -= item.quantity_requested
+            gift.save()
+            InventoryTransaction.objects.create(
+                gift=gift,
+                transaction_type='take',
+                quantity=item.quantity_requested,
+                created_by=request.user,
+                stock_before=stock_before,
+                stock_after=gift.qty_stock,
+            )
+        elif item.item_type == 'apparel':
+            variant = ApparelVariant.objects.get(pk=item.item_id)
+            stock_before = variant.qty_stock
+            variant.qty_stock -= item.quantity_requested
+            variant.save()
+            ApparelTransaction.objects.create(
+                variant=variant,
+                transaction_type='take',
+                quantity=item.quantity_requested,
+                created_by=request.user,
+                stock_before=stock_before,
+                stock_after=variant.qty_stock,
+            )
+
     item_request.status = 'pending'
     item_request.save()
 
     return Response(
         {"message": "Request submitted successfully.", "status": "pending"},
+        status=status.HTTP_200_OK
+    )
+
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def cancel_request(request, pk):
+    """
+    Cancels a Pending request and restores stock.
+    PATCH /api/requests/<id>/cancel/
+    Only the requester or an admin can cancel. Only pending requests
+    can be cancelled (draft requests should just be deleted).
+    """
+    item_request = get_object_or_404(ItemRequest, pk=pk)
+
+    is_admin = (
+        request.user.is_superuser or
+        request.user.groups.filter(name='admin').exists()
+    )
+
+    if item_request.requested_by != request.user and not is_admin:
+        return Response(
+            {"error": "You can only cancel your own requests."},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    if item_request.status != 'pending':
+        return Response(
+            {"error": "Only pending requests can be cancelled."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # --- Restore stock and record return transactions ---
+    for item in item_request.items.all():
+        if item.item_type == 'gift':
+            try:
+                gift = Gift.objects.get(pk=item.item_id)
+                stock_before = gift.qty_stock
+                gift.qty_stock += item.quantity_requested
+                gift.save()
+                InventoryTransaction.objects.create(
+                    gift=gift,
+                    transaction_type='return',
+                    quantity=item.quantity_requested,
+                    created_by=request.user,
+                    stock_before=stock_before,
+                    stock_after=gift.qty_stock,
+                )
+            except Gift.DoesNotExist:
+                pass  # Item deleted after submission — skip stock restore
+        elif item.item_type == 'apparel':
+            try:
+                variant = ApparelVariant.objects.get(pk=item.item_id)
+                stock_before = variant.qty_stock
+                variant.qty_stock += item.quantity_requested
+                variant.save()
+                ApparelTransaction.objects.create(
+                    variant=variant,
+                    transaction_type='return',
+                    quantity=item.quantity_requested,
+                    created_by=request.user,
+                    stock_before=stock_before,
+                    stock_after=variant.qty_stock,
+                )
+            except ApparelVariant.DoesNotExist:
+                pass  # Variant deleted after submission — skip stock restore
+
+    item_request.status = 'cancelled'
+    item_request.updated_by = request.user
+    item_request.save()
+
+    return Response(
+        {"message": "Request cancelled and stock restored.", "status": "cancelled"},
         status=status.HTTP_200_OK
     )
 

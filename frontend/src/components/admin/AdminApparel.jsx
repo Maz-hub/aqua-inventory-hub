@@ -209,7 +209,7 @@ function AdminApparel() {
                                     {product.variants?.length ?? 0}
                                 </td>
                                 <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
-                                    CHF {parseFloat(product.unit_price).toFixed(2)}
+                                    $ {parseFloat(product.unit_price).toFixed(2)}
                                 </td>
                                 <td className="px-4 py-3">
                                     <div className="flex gap-3">
@@ -280,7 +280,7 @@ function AdminApparel() {
                                         {product.variants?.length !== 1 ? "s" : ""}
                                     </span>
                                     <span className="text-sm text-gray-500">
-                                        CHF {parseFloat(product.unit_price).toFixed(2)}
+                                        $ {parseFloat(product.unit_price).toFixed(2)}
                                     </span>
                                 </div>
                                 {isLowStock(product) && (

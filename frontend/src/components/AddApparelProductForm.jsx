@@ -15,6 +15,7 @@ function AddApparelProductForm({ onSuccess, onClose }) {
   // Product fields
   const [productName, setProductName] = useState("");
   const [categoryId, setCategoryId] = useState("");
+  const [primaryColorId, setPrimaryColorId] = useState("");
   const [unitPrice, setUnitPrice] = useState("");
   const [material, setMaterial] = useState("");
   const [description, setDescription] = useState("");
@@ -51,8 +52,8 @@ function AddApparelProductForm({ onSuccess, onClose }) {
   }, []);
 
   const addVariantRow = () => {
-    setVariants([...variants, { size_id: "", color_id: "", gender: "U", qty_stock: "" }]);
-    setVariantErrors([...variantErrors, { size_id: false, color_id: false, qty_stock: false }]);
+    setVariants([...variants, { size_id: "", gender: "U", qty_stock: "" }]);
+    setVariantErrors([...variantErrors, { size_id: false, qty_stock: false }]);
     setVariantDuplicates([...variantDuplicates, false]);
   };
 
@@ -88,10 +89,9 @@ function AddApparelProductForm({ onSuccess, onClose }) {
 
     const newErrors = variants.map((v) => ({
       size_id: !v.size_id,
-      color_id: !v.color_id,
       qty_stock: v.qty_stock === "",
     }));
-    const hasIncompleteVariant = newErrors.some((e) => e.size_id || e.color_id || e.qty_stock);
+    const hasIncompleteVariant = newErrors.some((e) => e.size_id || e.qty_stock);
     if (hasIncompleteVariant) {
       setVariantErrors(newErrors);
       const firstErrorIndex = newErrors.findIndex((e) => e.size_id || e.color_id || e.qty_stock);
@@ -100,13 +100,13 @@ function AddApparelProductForm({ onSuccess, onClose }) {
     }
 
     const filledVariants = variants.filter(
-      (v) => v.size_id && v.color_id && v.qty_stock !== ""
+      (v) => v.size_id && v.qty_stock !== ""
     );
 
     const keyMap = new Map();
     variants.forEach((v, i) => {
-      if (v.size_id && v.color_id) {
-        const key = `${v.size_id}-${v.color_id}-${v.gender}`;
+      if (v.size_id) {
+        const key = `${v.size_id}-${v.gender}`;
         if (!keyMap.has(key)) keyMap.set(key, []);
         keyMap.get(key).push(i);
       }
@@ -144,6 +144,7 @@ function AddApparelProductForm({ onSuccess, onClose }) {
     formData.append("supplier_phone", supplierPhone);
     formData.append("supplier_address", supplierAddress);
     formData.append("notes", notes);
+    if (primaryColorId) formData.append("primary_color_id", primaryColorId);
     if (productImage) formData.append("product_image", productImage);
 
     try {
@@ -162,7 +163,7 @@ function AddApparelProductForm({ onSuccess, onClose }) {
         await api.post("/api/apparel/variants/", {
           product_id: productId,
           size_id: parseInt(v.size_id),
-          color_id: parseInt(v.color_id),
+          color_id: parseInt(primaryColorId),
           gender: v.gender,
           qty_stock: parseInt(v.qty_stock),
         });
@@ -235,6 +236,24 @@ function AddApparelProductForm({ onSuccess, onClose }) {
             </div>
 
             <div>
+              <label htmlFor="primaryColor" className="block text-sm font-medium text-gray-700 mb-2">
+                Primary Colour *
+              </label>
+              <select
+                id="primaryColor"
+                required
+                value={primaryColorId}
+                onChange={(e) => setPrimaryColorId(e.target.value)}
+                className="form_input"
+              >
+                <option value="">Select a colour</option>
+                {colors.map((color) => (
+                  <option key={color.id} value={color.id}>{color.color_name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
               <label htmlFor="unitPrice" className="block text-sm font-medium text-gray-700 mb-2">
                 Unit Price ($) *
               </label>
@@ -250,7 +269,7 @@ function AddApparelProductForm({ onSuccess, onClose }) {
               />
             </div>
 
-            <div>
+            <div className="md:col-span-2">
               <label htmlFor="material" className="block text-sm font-medium text-gray-700 mb-2">
                 Material
               </label>
@@ -322,17 +341,6 @@ function AddApparelProductForm({ onSuccess, onClose }) {
                   </select>
 
                   <select
-                    value={variant.color_id}
-                    onChange={(e) => updateVariant(index, "color_id", e.target.value)}
-                    className={`form_input flex-1 min-w-28 ${variantErrors[index]?.color_id || variantDuplicates[index] ? "border-red-500" : ""}`}
-                  >
-                    <option value="">Colour</option>
-                    {colors.map((c) => (
-                      <option key={c.id} value={c.id}>{c.color_name}</option>
-                    ))}
-                  </select>
-
-                  <select
                     value={variant.gender}
                     onChange={(e) => updateVariant(index, "gender", e.target.value)}
                     className={`form_input w-32 ${variantDuplicates[index] ? "border-red-500" : ""}`}
@@ -371,7 +379,7 @@ function AddApparelProductForm({ onSuccess, onClose }) {
                 + Add a variant
               </button>
 
-              {variantErrors.some((e) => e.size_id || e.color_id || e.qty_stock) && (
+              {variantErrors.some((e) => e.size_id || e.qty_stock) && (
                 <p className="text-red-500 text-sm mt-1">Please complete all highlighted fields.</p>
               )}
               {duplicateError && (
