@@ -54,7 +54,7 @@ function MyRequests() {
 
     const cancelRequest = (requestId) => {
         if (window.confirm("Are you sure you want to cancel this request?")) {
-            api.patch(`/api/requests/${requestId}/status/`, { status: 'cancelled' })
+            api.patch(`/api/requests/${requestId}/cancel/`)
                 .then(() => fetchRequests())
                 .catch(err => alert(err.response?.data?.error || "Failed to cancel request"));
         }
