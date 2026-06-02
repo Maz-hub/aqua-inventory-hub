@@ -82,7 +82,7 @@ function AdminPanel() {
                 {/* MOBILE: sidebar toggle button */}
                 <button
                     onClick={() => setSidebarOpen(!sidebarOpen)}
-                    className="md:hidden fixed top-20 right-4 z-50 bg-wa-cyan text-white px-3 py-2 rounded-lg shadow-lg cursor-pointer text-sm "
+                    className="xl:hidden fixed top-20 right-4 z-50 bg-wa-cyan text-white px-3 py-2 rounded-lg shadow-lg cursor-pointer text-sm "
                 >
                     ☰ Menu
                 </button>
@@ -95,7 +95,7 @@ function AdminPanel() {
                     flex flex-col
                     transform transition-transform duration-300 ease-in-out
                     ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
-                    md:translate-x-0
+                    xl:translate-x-0
                     h-screen
                 `}
                     style={{ paddingTop: "64px" }}
@@ -145,13 +145,13 @@ function AdminPanel() {
                 {/* Mobile sidebar backdrop */}
                 {sidebarOpen && (
                     <div
-                        className="fixed inset-0 bg-black/30 backdrop-blur-sm z-30 md:hidden"
+                        className="fixed inset-0 bg-black/30 backdrop-blur-sm z-30 xl:hidden"
                         onClick={() => setSidebarOpen(false)}
                     />
                 )}
 
                 {/* MAIN CONTENT */}
-                <main className="flex-1 overflow-y-auto p-4 md:p-8 md:ml-64">
+                <main className="flex-1 overflow-y-auto p-4 xl:p-8 xl:ml-64">
                     <div className="max-w-6xl mx-auto">
                         {/* Page title */}
                         <div className="mb-8">

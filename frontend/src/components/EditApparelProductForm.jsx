@@ -16,7 +16,6 @@ function EditApparelProductForm({ product, onSuccess, onClose }) {
   const [productImage, setProductImage] = useState(null);
 
   // Customs & Logistics
-  const [itemId, setItemId] = useState(product.item_id || "");
   const [hsCode, setHsCode] = useState(product.hs_code || "");
   const [countryOfOrigin, setCountryOfOrigin] = useState(product.country_of_origin || "");
   const [merchantProductId, setMerchantProductId] = useState(product.merchant_product_id || "");
@@ -117,7 +116,6 @@ function EditApparelProductForm({ product, onSuccess, onClose }) {
     formData.append("unit_price", unitPrice);
     formData.append("material", material);
     formData.append("description", description);
-    formData.append("item_id", itemId);
     formData.append("hs_code", hsCode);
     formData.append("country_of_origin", countryOfOrigin);
     formData.append("merchant_product_id", merchantProductId);
@@ -429,19 +427,6 @@ function EditApparelProductForm({ product, onSuccess, onClose }) {
                 id="countryOfOrigin"
                 value={countryOfOrigin}
                 onChange={(e) => setCountryOfOrigin(e.target.value)}
-                className="form_input"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="itemId" className="block text-sm font-medium text-gray-700 mb-2">
-                Item ID (361° Code)
-              </label>
-              <input
-                type="text"
-                id="itemId"
-                value={itemId}
-                onChange={(e) => setItemId(e.target.value)}
                 className="form_input"
               />
             </div>

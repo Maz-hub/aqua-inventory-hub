@@ -94,18 +94,18 @@ function AdminApparel() {
             {/* Toolbar */}
             <div className="flex flex-col gap-3 mb-6">
                 {/* Row 1: Search + Category */}
-                <div className="flex flex-col md:flex-row gap-3">
+                <div className="flex flex-col xl:flex-row gap-3">
                     <input
                         type="text"
                         placeholder="Search products..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="form_input w-full md:flex-1 md:min-w-0"
+                        className="form_input w-full xl:flex-1 xl:min-w-0"
                     />
                     <select
                         value={selectedCategory}
                         onChange={(e) => setSelectedCategory(e.target.value)}
-                        className="form_input w-full md:flex-1 md:min-w-0"
+                        className="form_input w-full xl:flex-1 xl:min-w-0"
                     >
                         <option value="">All Categories</option>
                         {categories.map((cat) => (
@@ -117,17 +117,17 @@ function AdminApparel() {
                 </div>
 
                 {/* Row 2: Add button (left) | Low Stock + Clear (right) */}
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+                <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-2">
                     <button
                         onClick={() => setShowAddForm(true)}
-                        className="bg-wa-blue text-white px-4 py-2 rounded-lg text-sm hover:bg-wa-ocean transition-colors cursor-pointer w-full md:w-auto"
+                        className="bg-wa-blue text-white px-4 py-2 rounded-lg text-sm hover:bg-wa-ocean transition-colors cursor-pointer w-full xl:w-auto"
                     >
                         + Add New Product
                     </button>
-                    <div className="flex flex-col md:flex-row gap-2">
+                    <div className="flex flex-col xl:flex-row gap-2">
                         <button
                             onClick={() => setShowLowStockOnly(!showLowStockOnly)}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium cursor-pointer transition-colors border w-full md:w-auto ${
+                            className={`px-4 py-2 rounded-lg text-sm font-medium cursor-pointer transition-colors border w-full xl:w-auto ${
                                 showLowStockOnly
                                     ? "bg-red-500 border-red-500 text-white hover:bg-red-600 hover:border-red-600"
                                     : "bg-white border-gray-300 text-gray-600 hover:bg-gray-50"
@@ -138,7 +138,7 @@ function AdminApparel() {
                         {filtersActive && (
                             <button
                                 onClick={clearFilters}
-                                className="px-4 py-2 rounded-lg text-sm font-medium cursor-pointer border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 transition-colors w-full md:w-auto"
+                                className="px-4 py-2 rounded-lg text-sm font-medium cursor-pointer border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 transition-colors w-full xl:w-auto"
                             >
                                 Clear
                             </button>
@@ -148,7 +148,7 @@ function AdminApparel() {
             </div>
 
             {/* Table — desktop */}
-            <div className="hidden md:block bg-white rounded-2xl shadow overflow-hidden">
+            <div className="hidden xl:block bg-white rounded-2xl shadow overflow-hidden">
                 <table className="w-full text-sm">
                     <thead className="bg-gray-50 border-b border-gray-100">
                         <tr>
@@ -246,7 +246,7 @@ function AdminApparel() {
             </div>
 
             {/* Cards — mobile */}
-            <div className="md:hidden space-y-3">
+            <div className="xl:hidden space-y-3">
                 {filteredProducts.map((product) => (
                     <div
                         key={product.id}
@@ -345,7 +345,7 @@ function AdminApparel() {
 
             {showAddForm && (
                 <AddApparelProductForm
-                    onClose={() => setShowAddForm(false)}
+                    onClose={() => { setShowAddForm(false); fetchProducts(); }}
                     onSuccess={() => {
                         setShowAddForm(false);
                         setSearchQuery("");
