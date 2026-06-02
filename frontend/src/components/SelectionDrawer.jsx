@@ -118,7 +118,7 @@ function DrawerContent({
                     </h2>
                     {totalItems > 0 && (
                         <p className="text-xs text-gray-400 mt-0.5">
-                            {totalItems} item{totalItems !== 1 ? "s" : ""} · CHF{" "}
+                            {totalItems} item{totalItems !== 1 ? "s" : ""} · ${" "}
                             {totalCost.toFixed(2)}
                         </p>
                     )}
@@ -188,10 +188,10 @@ function DrawerContent({
                                         {item.item_type}
                                     </p>
                                     <p className="text-xs text-gray-400 mt-0.5">
-                                        CHF {item.unit_price.toFixed(2)} / unit
+                                        $ {item.unit_price.toFixed(2)} / unit
                                     </p>
                                     <p className="text-xs font-medium text-wa-blue mt-0.5">
-                                        CHF{" "}
+                                        ${" "}
                                         {(
                                             item.unit_price * item.quantity
                                         ).toFixed(2)}{" "}
@@ -300,7 +300,7 @@ function DrawerContent({
                     <div className="flex justify-between items-center mb-3">
                         <span className="text-sm text-gray-500">Total</span>
                         <span className="text-lg font-bold text-wa-navy">
-                            CHF {totalCost.toFixed(2)}
+                            $ {totalCost.toFixed(2)}
                         </span>
                     </div>
                     <button

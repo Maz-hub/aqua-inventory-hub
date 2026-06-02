@@ -147,9 +147,19 @@ function MyRequests() {
                                                             )}
                                                         </div>
                                                         <div className="text-right shrink-0">
-                                                            <p className="text-gray-500 text-xs">x{item.quantity_requested}</p>
+                                                            <p className="text-gray-400 text-xs">
+                                                                Unit price: $ {parseFloat(item.unit_price).toFixed(2)}
+                                                            </p>
+                                                            <p className="text-gray-500 text-xs">
+                                                                x{item.quantity_confirmed ?? item.quantity_requested}
+                                                                {item.quantity_confirmed !== null &&
+                                                                 item.quantity_confirmed !== undefined &&
+                                                                 item.quantity_confirmed !== item.quantity_requested && (
+                                                                    <span className="text-amber-600 ml-1">(requested: {item.quantity_requested})</span>
+                                                                )}
+                                                            </p>
                                                             <p className="text-wa-blue font-medium text-sm whitespace-nowrap">
-                                                                CHF {parseFloat(item.unit_price * item.quantity_requested).toFixed(2)}
+                                                                $ {parseFloat(item.unit_price * item.quantity_requested).toFixed(2)}
                                                             </p>
                                                         </div>
                                                     </li>
@@ -161,7 +171,7 @@ function MyRequests() {
                                     {/* Total + Cancel button row */}
                                     <div className="flex items-center justify-between border-t border-gray-100 pt-4">
                                         <p className="text-lg font-bold text-wa-navy whitespace-nowrap">
-                                            CHF {parseFloat(request.total_cost).toFixed(2)}
+                                            $ {parseFloat(request.total_cost).toFixed(2)}
                                         </p>
                                         {(request.status === 'pending' || request.status === 'draft') && (
                                             <button

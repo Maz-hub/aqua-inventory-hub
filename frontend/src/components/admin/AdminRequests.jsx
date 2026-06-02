@@ -285,7 +285,7 @@ function AdminRequests() {
                                 {/* Bottom row: total + item count + expand hint */}
                                 <div className="flex items-center justify-between">
                                     <p className="text-lg font-bold text-wa-navy whitespace-nowrap">
-                                        CHF{" "}
+                                        ${" "}
                                         {parseFloat(request.total_cost).toFixed(
                                             2,
                                         )}
@@ -426,7 +426,7 @@ function AdminRequests() {
                                                         )}
                                                     </div>
                                                     <p className="text-sm font-medium text-wa-blue whitespace-nowrap">
-                                                        CHF{" "}
+                                                        ${" "}
                                                         {parseFloat(
                                                             item.estimated_cost,
                                                         ).toFixed(2)}

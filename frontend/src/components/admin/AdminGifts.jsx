@@ -222,7 +222,7 @@ function AdminGifts() {
                                     </span>
                                 </td>
                                 <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
-                                    CHF {parseFloat(gift.unit_price).toFixed(2)}
+                                    $ {parseFloat(gift.unit_price).toFixed(2)}
                                 </td>
                                 <td className="px-4 py-3">
                                     <div className="flex gap-3">
@@ -285,7 +285,7 @@ function AdminGifts() {
                                         Stock: {gift.qty_stock}
                                     </span>
                                     <span className="text-sm text-gray-500">
-                                        CHF {parseFloat(gift.unit_price).toFixed(2)}
+                                        $ {parseFloat(gift.unit_price).toFixed(2)}
                                     </span>
                                 </div>
                                 {gift.qty_stock <= gift.minimum_stock_level && (

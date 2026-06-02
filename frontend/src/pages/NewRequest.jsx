@@ -146,7 +146,7 @@ function NewRequest() {
                                                 x{item.quantity}
                                             </p>
                                             <p className="text-xs text-wa-blue mt-0.5">
-                                                CHF{" "}
+                                                ${" "}
                                                 {(
                                                     item.unit_price *
                                                     item.quantity
@@ -163,7 +163,7 @@ function NewRequest() {
                                     Total
                                 </span>
                                 <span className="text-lg font-bold text-wa-navy">
-                                    CHF {totalCost.toFixed(2)}
+                                    $ {totalCost.toFixed(2)}
                                 </span>
                             </div>
                         </div>
