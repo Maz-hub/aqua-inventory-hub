@@ -164,7 +164,7 @@ function ApparelStockAdjustModal({ product, onClose, onSuccess }) {
                         {selectedVariant && newTotal !== null && (
                             <div
                                 className={`mt-2 px-3 py-2 rounded-lg text-sm font-medium ${
-                                    newTotal < 0
+                                    action === "take"
                                         ? "bg-red-50 text-red-600"
                                         : "bg-green-50 text-green-700"
                                 }`}

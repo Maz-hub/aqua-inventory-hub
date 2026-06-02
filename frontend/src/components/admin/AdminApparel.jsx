@@ -212,28 +212,28 @@ function AdminApparel() {
                                     $ {parseFloat(product.unit_price).toFixed(2)}
                                 </td>
                                 <td className="px-4 py-3">
-                                    <div className="flex gap-3">
+                                    <div className="flex gap-2">
                                         <button
                                             onClick={() => setSelectedProduct(product)}
-                                            className="text-wa-blue hover:text-wa-ocean text-xs font-medium cursor-pointer transition-colors"
+                                            className="text-wa-blue hover:text-wa-ocean border border-wa-blue hover:border-wa-ocean text-xs font-medium cursor-pointer transition-colors px-2 py-0.5 rounded"
                                         >
                                             View
                                         </button>
                                         <button
                                             onClick={() => setAdjustProduct(product)}
-                                            className="text-wa-cyan hover:text-wa-ocean text-xs font-medium cursor-pointer transition-colors"
+                                            className="text-wa-cyan hover:text-wa-ocean border border-wa-cyan hover:border-wa-ocean text-xs font-medium cursor-pointer transition-colors px-2 py-0.5 rounded"
                                         >
                                             Adjust Stock
                                         </button>
                                         <button
                                             onClick={() => setHistoryProduct(product)}
-                                            className="text-gray-400 hover:text-wa-navy text-xs font-medium cursor-pointer transition-colors"
+                                            className="text-gray-400 hover:text-wa-navy border border-gray-300 hover:border-wa-navy text-xs font-medium cursor-pointer transition-colors px-2 py-0.5 rounded"
                                         >
                                             History
                                         </button>
                                         <button
                                             onClick={() => handleDelete(product)}
-                                            className="text-red-400 hover:text-red-600 text-xs font-medium cursor-pointer transition-colors"
+                                            className="text-red-400 hover:text-red-600 border border-red-300 hover:border-red-500 text-xs font-medium cursor-pointer transition-colors px-2 py-0.5 rounded"
                                         >
                                             Delete
                                         </button>
@@ -274,15 +274,13 @@ function AdminApparel() {
                                 <p className="text-xs text-gray-400 mt-0.5">
                                     {product.category.name}
                                 </p>
-                                <div className="flex items-center gap-3 mt-2">
-                                    <span className="text-sm text-gray-600">
-                                        {product.variants?.length ?? 0} variant
-                                        {product.variants?.length !== 1 ? "s" : ""}
-                                    </span>
-                                    <span className="text-sm text-gray-500">
-                                        $ {parseFloat(product.unit_price).toFixed(2)}
-                                    </span>
-                                </div>
+                                <p className="text-sm text-gray-600 mt-2">
+                                    {product.variants?.length ?? 0} variant
+                                    {product.variants?.length !== 1 ? "s" : ""}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                    $ {parseFloat(product.unit_price).toFixed(2)}
+                                </p>
                                 {isLowStock(product) && (
                                     <span className="text-xs text-red-500 font-medium">
                                         Low Stock
@@ -292,25 +290,25 @@ function AdminApparel() {
                             <div className="flex flex-col gap-2 shrink-0">
                                 <button
                                     onClick={() => setSelectedProduct(product)}
-                                    className="text-wa-blue hover:text-wa-ocean text-xs font-medium cursor-pointer transition-colors"
+                                    className="text-wa-blue hover:text-wa-ocean border border-wa-blue hover:border-wa-ocean text-xs font-medium cursor-pointer transition-colors px-2 py-0.5 rounded"
                                 >
                                     View
                                 </button>
                                 <button
                                     onClick={() => setAdjustProduct(product)}
-                                    className="text-wa-cyan hover:text-wa-ocean text-xs font-medium cursor-pointer transition-colors"
+                                    className="text-wa-cyan hover:text-wa-ocean border border-wa-cyan hover:border-wa-ocean text-xs font-medium cursor-pointer transition-colors px-2 py-0.5 rounded"
                                 >
                                     Adjust Stock
                                 </button>
                                 <button
                                     onClick={() => setHistoryProduct(product)}
-                                    className="text-gray-400 hover:text-wa-navy text-xs font-medium cursor-pointer transition-colors"
+                                    className="text-gray-400 hover:text-wa-navy border border-gray-300 hover:border-wa-navy text-xs font-medium cursor-pointer transition-colors px-2 py-0.5 rounded"
                                 >
                                     History
                                 </button>
                                 <button
                                     onClick={() => handleDelete(product)}
-                                    className="text-red-400 hover:text-red-600 text-xs font-medium cursor-pointer transition-colors"
+                                    className="text-red-400 hover:text-red-600 border border-red-300 hover:border-red-500 text-xs font-medium cursor-pointer transition-colors px-2 py-0.5 rounded"
                                 >
                                     Delete
                                 </button>
