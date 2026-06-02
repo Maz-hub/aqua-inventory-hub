@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from core.models import TakeReason
+from core.models import StockAdjustmentReason
 
 class ApparelSize(models.Model):
     """
@@ -367,7 +367,7 @@ class ApparelTransaction(models.Model):
     )
 
     reason = models.ForeignKey(
-        TakeReason,
+        StockAdjustmentReason,
         on_delete=models.PROTECT,
         blank=True,
         null=True,

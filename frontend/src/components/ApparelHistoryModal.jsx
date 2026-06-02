@@ -80,13 +80,13 @@ function ApparelHistoryModal({ product, onClose }) {
                                         </td>
                                         <td className="py-3 pr-4">
                                             <span
-                                                className={`font-medium capitalize ${
+                                                className={`font-medium ${
                                                     tx.transaction_type === "take"
                                                         ? "text-red-500"
                                                         : "text-green-600"
                                                 }`}
                                             >
-                                                {tx.transaction_type}
+                                                {tx.transaction_type === "take" ? "Take" : "Add"}
                                             </span>
                                         </td>
                                         <td className="py-3 pr-4 font-medium text-wa-navy">

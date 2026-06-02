@@ -155,6 +155,7 @@ def submit_request(request, pk):
                 created_by=request.user,
                 stock_before=stock_before,
                 stock_after=gift.qty_stock,
+                notes=f'Request #{item_request.id}',
             )
         elif item.item_type == 'apparel':
             variant = ApparelVariant.objects.get(pk=item.item_id)
@@ -168,6 +169,7 @@ def submit_request(request, pk):
                 created_by=request.user,
                 stock_before=stock_before,
                 stock_after=variant.qty_stock,
+                notes=f'Request #{item_request.id}',
             )
 
     item_request.status = 'pending'
@@ -222,6 +224,7 @@ def cancel_request(request, pk):
                     created_by=request.user,
                     stock_before=stock_before,
                     stock_after=gift.qty_stock,
+                    notes=f'Request #{item_request.id}',
                 )
             except Gift.DoesNotExist:
                 pass  # Item deleted after submission — skip stock restore
@@ -238,6 +241,7 @@ def cancel_request(request, pk):
                     created_by=request.user,
                     stock_before=stock_before,
                     stock_after=variant.qty_stock,
+                    notes=f'Request #{item_request.id}',
                 )
             except ApparelVariant.DoesNotExist:
                 pass  # Variant deleted after submission — skip stock restore

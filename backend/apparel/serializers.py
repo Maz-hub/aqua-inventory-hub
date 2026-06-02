@@ -4,7 +4,7 @@ from apparel.models import (
     ApparelSize, ApparelColor, ApparelCategory,
     ApparelProduct, ApparelVariant, ApparelTransaction
 )
-from core.serializers import TakeReasonSerializer
+from core.serializers import StockAdjustmentReasonSerializer
 
 
 # ============================================
@@ -111,7 +111,7 @@ class ApparelTransactionSerializer(serializers.ModelSerializer):
     Includes nested variant and reason details for audit trail display.
     """
     variant = ApparelVariantSerializer(read_only=True)
-    reason = TakeReasonSerializer(read_only=True)
+    reason = StockAdjustmentReasonSerializer(read_only=True)
     created_by_username = serializers.CharField(source='created_by.username', read_only=True)
 
     class Meta:

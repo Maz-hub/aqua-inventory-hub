@@ -14,7 +14,7 @@ from apparel.models import (
     ApparelSize, ApparelColor, ApparelCategory,
     ApparelProduct, ApparelVariant, ApparelTransaction
 )
-from core.models import TakeReason
+from core.models import StockAdjustmentReason
 
 
 # ============================================
@@ -211,13 +211,12 @@ def update_apparel_stock(request, pk):
     variant.save()
 
     # Create transaction record for audit trail
-    # Get TakeReason object if reason_id provided
     take_reason = None
-    if action == 'take' and reason_id:
+    if reason_id:
         try:
-            take_reason = TakeReason.objects.get(id=reason_id)
-        except TakeReason.DoesNotExist:
-            pass  # Will save transaction with None reason if invalid ID
+            take_reason = StockAdjustmentReason.objects.get(id=reason_id)
+        except StockAdjustmentReason.DoesNotExist:
+            pass
 
     ApparelTransaction.objects.create(
         variant=variant,
