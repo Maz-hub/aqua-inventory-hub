@@ -59,11 +59,12 @@ class ApparelVariantSerializer(serializers.ModelSerializer):
         source='product',
         write_only=True
     )
+    product_name = serializers.CharField(source='product.product_name', read_only=True)
 
     class Meta:
         model = ApparelVariant
         fields = [
-            'id', 'size', 'color', 'size_id', 'color_id', 'product_id', 'gender',
+            'id', 'product_name', 'size', 'color', 'size_id', 'color_id', 'product_id', 'gender',
             'qty_stock', 'minimum_stock_level', 'weight', 'sku',
             'created_at'
         ]

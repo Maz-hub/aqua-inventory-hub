@@ -503,7 +503,7 @@ function AdminRequests() {
                                                                         {newItemCategory ===
                                                                         "gift"
                                                                             ? `${item.product_name.length > 30 ? item.product_name.substring(0, 30) + "..." : item.product_name} [stk: ${item.qty_stock}]`
-                                                                            : `${item.size?.size_value} — ${item.color?.color_name} [stk: ${item.qty_stock}]`}
+                                                                            : `${item.product_name?.length > 25 ? item.product_name.substring(0, 25) + "…" : item.product_name} — ${item.size?.size_value} - ${item.color?.color_name} - ${{ U: "Unisex", M: "Men", W: "Women", Y: "Youth" }[item.gender] ?? item.gender} [stk: ${item.qty_stock}]`}
                                                                     </option>
                                                                 ),
                                                             )}
