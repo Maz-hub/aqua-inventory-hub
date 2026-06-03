@@ -1,78 +1,117 @@
-/**
- * Admin Panel
- *
- * Shopify-style admin interface for inventory managers.
- * Left sidebar navigation with main content area.
- * Accessible to admin group users only.
- */
+// AdminPanel is the admin interface for inventory managers.
+// Access is scoped per group — not every user sees every section:
+//   Requests  → admin group only
+//   Gifts     → gifts_access (or admin)
+//   Apparel   → apparel_access (or admin)
+//   All other sections (coming soon) → admin only
+//
+// On load, if the user has none of those groups, they are redirected to home.
+// The sidebar only shows the sections the current user can access.
+// The initial active section is set to the first accessible tab after user info loads.
 
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Navigate } from "react-router-dom";
+import { useUser } from "../context/UserContext";
 import Header from "../components/Header";
 import SelectionDrawer from "../components/SelectionDrawer";
 import AdminRequests from "../components/admin/AdminRequests";
 import AdminGifts from "../components/admin/AdminGifts";
 import AdminApparel from "../components/admin/AdminApparel";
 
-// Sidebar navigation items
+// Full list of sidebar sections. Access requirements are applied at render time.
 const NAV_ITEMS = [
     {
         id: "requests",
         label: "Requests",
         icon: "📋",
         description: "Manage incoming item requests",
+        requiredGroup: "admin",
     },
     {
         id: "gifts",
         label: "Gifts",
         icon: "🛍️",
         description: "Manage gifts inventory",
+        requiredGroup: "gifts_access",
     },
     {
         id: "apparel",
         label: "Apparel",
         icon: "👕",
         description: "Manage apparel inventory",
+        requiredGroup: "apparel_access",
     },
     {
         id: "executive",
         label: "Executive Office",
         icon: "💼",
         description: "Manage executive items",
+        requiredGroup: "executive_access",
     },
     {
         id: "office",
         label: "Office & Events",
         icon: "🗂️",
         description: "Manage office and event materials",
+        requiredGroup: "admin",
     },
     {
         id: "it",
         label: "IT Assets",
         icon: "🖥️",
         description: "Manage IT equipment",
+        requiredGroup: "it_access",
     },
     {
         id: "dashboard",
         label: "Dashboard",
         icon: "📈",
         description: "Statistics and reports",
+        requiredGroup: "admin",
     },
     {
         id: "settings",
         label: "Settings",
         icon: "⚙️",
         description: "Categories, departments, reasons",
+        requiredGroup: "admin",
     },
 ];
 
 function AdminPanel() {
+    const { hasAccess, loadingUser } = useUser();
     const [activeSection, setActiveSection] = useState("requests");
     const [selectionOpen, setSelectionOpen] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const navigate = useNavigate();
 
-    const activeItem = NAV_ITEMS.find((i) => i.id === activeSection);
+    // Compute which nav items are visible for this user.
+    // During loading, hasAccess returns false for everything so visibleNavItems is empty
+    // until user info resolves — that's fine because we show a loading state below.
+    const visibleNavItems = NAV_ITEMS.filter(item => hasAccess(item.requiredGroup));
+
+    // After user info loads, ensure the active section is one the user can access.
+    // If the default "requests" isn't accessible (e.g. gifts-only user), switch to
+    // the first section that is.
+    useEffect(() => {
+        if (!loadingUser && visibleNavItems.length > 0) {
+            if (!visibleNavItems.find(item => item.id === activeSection)) {
+                setActiveSection(visibleNavItems[0].id);
+            }
+        }
+    }, [loadingUser]);
+
+    // Wait for user info before enforcing access rules
+    if (loadingUser) {
+        return <div className="min-h-screen bg-gray-100 flex items-center justify-center"><p className="text-gray-500">Loading...</p></div>;
+    }
+
+    // Redirect anyone with no relevant access to home
+    if (!hasAccess("admin") && !hasAccess("gifts_access") && !hasAccess("apparel_access")) {
+        return <Navigate to="/" />;
+    }
+
+    const activeItem = visibleNavItems.find((i) => i.id === activeSection);
 
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -108,9 +147,9 @@ function AdminPanel() {
                         </p>
                     </div>
 
-                    {/* Navigation — scrollable if needed */}
+                    {/* Navigation — only shows sections the user has access to */}
                     <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-                        {NAV_ITEMS.map((item) => (
+                        {visibleNavItems.map((item) => (
                             <button
                                 key={item.id}
                                 onClick={() => {

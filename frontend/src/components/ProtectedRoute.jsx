@@ -1,107 +1,95 @@
-/**
- * Protected Route Component
- * 
- * Wrapper component that protects routes requiring authentication.
- * Automatically checks JWT token validity and refreshes expired tokens.
- * Redirects to login page if authentication fails.
- * 
- * Usage:
- *   <ProtectedRoute>
- *     <InventoryPage />
- *   </ProtectedRoute>
- */
+// ProtectedRoute wraps any page that requires authentication.
+// It checks JWT token validity and refreshes expired tokens automatically.
+// Redirects to /login if the token is missing or cannot be refreshed.
+//
+// Optional prop:
+//   requireGroups - array of group names; if provided, the user must belong to at
+//                   least one of them (or be a superuser) after the JWT check passes.
+//                   If the user is authenticated but has none of the required groups,
+//                   they are redirected to / instead of /login.
+//
+// Loading states:
+//   isAuthorized === null   — JWT check still running
+//   requireGroups provided and loadingUser === true — waiting for user info from /api/user/me/
+//   Both resolved           — render children or redirect
 
 import { Navigate } from "react-router-dom";
-// Handles redirection to login page when unauthorized
-
 import { jwtDecode } from "jwt-decode";
-// Decodes JWT tokens to check expiration timestamp
-
 import api from "../api";
-// Configured axios instance for API requests
-
 import { REFRESH_TOKEN, ACCESS_TOKEN } from "../constants";
-// localStorage key names for JWT tokens
-
 import { useState, useEffect } from "react";
-// React hooks for state management and side effects
+import { useUser } from "../context/UserContext";
 
 
-function ProtectedRoute({ children }) {
-  // Wraps child components and only renders them if user is authenticated
-  
-  const [isAuthorized, setIsAuthorized] = useState(null);
-  // null = checking authentication status
-  // true = user is authorized
-  // false = user is not authorized
+function ProtectedRoute({ children, requireGroups }) {
+    const [isAuthorized, setIsAuthorized] = useState(null);
+    const { user, loadingUser } = useUser();
 
-  useEffect(() => {
-    // Runs once when component mounts to check authentication
-    auth().catch(() => setIsAuthorized(false))
-  }, [])
+    useEffect(() => {
+        auth().catch(() => setIsAuthorized(false));
+    }, []);
 
-  const refreshToken = async () => {
-    // Attempts to get a new access token using the refresh token
-    
-    const refreshToken = localStorage.getItem(REFRESH_TOKEN);
-    
-    try {
-      const res = await api.post("/api/token/refresh/", {
-        refresh: refreshToken,
-      });
-      // Sends refresh token to backend to get new access token
-      
-      if (res.status === 200) {
-        localStorage.setItem(ACCESS_TOKEN, res.data.access);
-        // Store new access token in localStorage
-        setIsAuthorized(true);
-      } else {
-        setIsAuthorized(false);
-      }
-    } catch (error) {
-      console.log(error);
-      setIsAuthorized(false);
-      // If refresh fails, user must login again
+    const refreshToken = async () => {
+        const refreshToken = localStorage.getItem(REFRESH_TOKEN);
+        try {
+            const res = await api.post("/api/token/refresh/", {
+                refresh: refreshToken,
+            });
+            if (res.status === 200) {
+                localStorage.setItem(ACCESS_TOKEN, res.data.access);
+                setIsAuthorized(true);
+            } else {
+                setIsAuthorized(false);
+            }
+        } catch (error) {
+            console.log(error);
+            setIsAuthorized(false);
+        }
+    };
+
+    const auth = async () => {
+        const token = localStorage.getItem(ACCESS_TOKEN);
+        if (!token) {
+            setIsAuthorized(false);
+            return;
+        }
+        const decoded = jwtDecode(token);
+        const tokenExpiration = decoded.exp;
+        const now = Date.now() / 1000;
+        if (tokenExpiration < now) {
+            await refreshToken();
+        } else {
+            setIsAuthorized(true);
+        }
+    };
+
+    // Still checking JWT validity
+    if (isAuthorized === null) {
+        return <div>Loading...</div>;
     }
-  };
 
-  const auth = async () => {
-    // Main authentication check logic
-    
-    const token = localStorage.getItem(ACCESS_TOKEN);
-    
-    if (!token) {
-      // No token found - user needs to login
-      setIsAuthorized(false);
-      return;
+    // JWT invalid — send to login
+    if (!isAuthorized) {
+        return <Navigate to="/login" />;
     }
-    
-    const decoded = jwtDecode(token);
-    // Decode token to read expiration timestamp
-    
-    const tokenExpiration = decoded.exp;
-    // Token expiration time (Unix timestamp)
-    
-    const now = Date.now() / 1000;
-    // Current time (Unix timestamp)
 
-    if (tokenExpiration < now) {
-      // Token expired - try to refresh it
-      await refreshToken();
-    } else {
-      // Token still valid - authorize user
-      setIsAuthorized(true);
+    // JWT valid but group check is needed and user info hasn't loaded yet
+    if (requireGroups && loadingUser) {
+        return <div>Loading...</div>;
     }
-  };
 
-  if (isAuthorized === null) {
-    // Still checking authentication status
-    return <div>Loading...</div>;
-  }
+    // Group membership check — user must belong to at least one required group
+    if (requireGroups) {
+        const hasRequiredGroup = user && (
+            user.is_superuser ||
+            requireGroups.some(g => user.groups?.includes(g))
+        );
+        if (!hasRequiredGroup) {
+            return <Navigate to="/" />;
+        }
+    }
 
-  return isAuthorized ? children : <Navigate to="/login" />;
-  // If authorized: render child components
-  // If not authorized: redirect to login page
+    return children;
 }
 
 export default ProtectedRoute;

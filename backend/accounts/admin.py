@@ -11,6 +11,7 @@ class UserProfileInline(admin.StackedInline):
     """
     model = UserProfile
     can_delete = False
+    extra = 0
     verbose_name = "Profile"
     verbose_name_plural = "Profile"
     fields = ['department']
