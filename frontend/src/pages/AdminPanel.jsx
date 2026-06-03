@@ -25,7 +25,7 @@ const NAV_ITEMS = [
         label: "Requests",
         icon: "📋",
         description: "Manage incoming item requests",
-        requiredGroup: "admin",
+        requiredGroup: "requests_access",
     },
     {
         id: "gifts",
@@ -67,14 +67,14 @@ const NAV_ITEMS = [
         label: "Dashboard",
         icon: "📈",
         description: "Statistics and reports",
-        requiredGroup: "admin",
+        requiredGroup: "dashboard_access",
     },
     {
         id: "settings",
         label: "Settings",
         icon: "⚙️",
         description: "Categories, departments, reasons",
-        requiredGroup: "admin",
+        requiredGroup: "settings_access",
     },
 ];
 

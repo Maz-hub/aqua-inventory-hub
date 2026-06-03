@@ -20,6 +20,9 @@ class Command(BaseCommand):
             'executive_viewer',   # Read-only access to Executive Office inventory
             'it_viewer',          # Read-only access to IT Assets inventory
             'office_viewer',      # Read-only access to Office & Events inventory
+            'requests_access',    # Access to Requests management in admin panel
+            'dashboard_access',   # Access to Dashboard in admin panel
+            'settings_access',    # Access to Settings in admin panel
         ]
 
         for group_name in groups:

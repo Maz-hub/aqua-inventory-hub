@@ -85,7 +85,7 @@ function ProtectedRoute({ children, requireGroups }) {
             requireGroups.some(g => user.groups?.includes(g))
         );
         if (!hasRequiredGroup) {
-            return <Navigate to="/" />;
+            return <Navigate to="/login" />;
         }
     }
 

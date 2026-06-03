@@ -114,7 +114,7 @@ function App() {
         <Route
           path="/admin-panel"
           element={
-            <ProtectedRoute requireGroups={["gifts_access", "apparel_access", "executive_access", "it_access", "admin"]}>
+            <ProtectedRoute requireGroups={["gifts_access", "apparel_access", "executive_access", "it_access", "requests_access", "dashboard_access", "settings_access", "admin"]}>
               <AdminPanel />
             </ProtectedRoute>
           }
