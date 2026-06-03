@@ -1,10 +1,36 @@
-/**
- * AdminApparel Component
- *
- * Table view of all apparel products for admin users.
- * Supports search, category filter, low-stock filter,
- * inline stock adjustment, transaction history, and product deletion.
- */
+// AdminApparel renders the apparel inventory table inside the Admin Panel.
+// No props — it fetches its own data on mount.
+//
+// State overview:
+//   products         - full list of apparel products, each including nested variants
+//   loading          - shows a loading message until the first fetch completes
+//   categories       - list for the category filter dropdown
+//   searchQuery      - live text filter applied to product names
+//   selectedCategory - category ID filter; empty string means "all"
+//   showLowStockOnly - when true, only shows products where at least one variant
+//                      is at or below its minimum_stock_level
+//   selectedProduct  - when set to a product object, opens ApparelDetailsModal
+//   historyProduct   - when set to a product object, opens ApparelHistoryModal
+//   adjustProduct    - when set to a product object, opens ApparelStockAdjustModal
+//   showAddForm      - controls visibility of the AddApparelProductForm modal
+//
+// isLowStock checks whether ANY variant of a product is low, not the product as a whole.
+// A product is flagged if even a single size/colour is below its threshold.
+//
+// filteredProducts is derived on every render by applying all active filters.
+//
+// handleDelete asks for confirmation before calling the DELETE endpoint.
+// Deleting a product also removes all its variants via the backend CASCADE rule.
+//
+// Modal pattern:
+//   ApparelDetailsModal is always mounted — it handles a null product prop internally.
+//   ApparelHistoryModal and ApparelStockAdjustModal are only mounted when triggered,
+//   to avoid fetching transaction history unnecessarily.
+//
+// AddApparelProductForm onClose calls fetchProducts() in addition to hiding the form.
+// This prevents the product table from disappearing if the parent component re-renders
+// and resets loading to true before fetchProducts has run again.
+// onSuccess also clears all filters so the newly added product is visible.
 
 import { useState, useEffect } from "react";
 import api from "../../api";
@@ -45,9 +71,11 @@ function AdminApparel() {
             .catch((err) => console.error("Failed to load categories:", err));
     };
 
+    // A product is considered low stock if any of its variants is at or below minimum.
     const isLowStock = (product) =>
         product.variants?.some((v) => v.qty_stock <= v.minimum_stock_level);
 
+    // Applies search, category, and low-stock filters to produce the visible list.
     const filteredProducts = products.filter((product) => {
         const matchesSearch = product.product_name
             .toLowerCase()
@@ -59,6 +87,7 @@ function AdminApparel() {
         return matchesSearch && matchesCategory && matchesLowStock;
     });
 
+    // True when any filter is active — used to show the Clear button.
     const filtersActive =
         searchQuery !== "" || selectedCategory !== "" || showLowStockOnly;
 
@@ -68,6 +97,7 @@ function AdminApparel() {
         setShowLowStockOnly(false);
     };
 
+    // Prompts for confirmation, then deletes the product and all its variants.
     const handleDelete = async (product) => {
         const confirmed = window.confirm(
             `Are you sure you want to delete "${product.product_name}"? This will also delete all its variants and cannot be undone.`
@@ -196,6 +226,7 @@ function AdminApparel() {
                                     <p className="font-medium text-wa-navy">
                                         {product.product_name}
                                     </p>
+                                    {/* Low stock badge — shown when any variant is below its threshold */}
                                     {isLowStock(product) && (
                                         <span className="text-xs text-red-500 font-medium">
                                             Low Stock
@@ -318,6 +349,7 @@ function AdminApparel() {
                 ))}
             </div>
 
+            {/* ApparelDetailsModal is always mounted; it handles a null product prop internally */}
             <ApparelDetailsModal
                 product={selectedProduct}
                 onClose={() => setSelectedProduct(null)}

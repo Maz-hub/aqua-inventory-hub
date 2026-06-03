@@ -1,10 +1,49 @@
-/**
- * AdminRequests Component
- *
- * Displays all Item Requests for the preparation team.
- * Allows status updates, item modifications, and notes.
- * Used inside the Admin Panel sidebar section.
- */
+// AdminRequests renders the requests management view inside the Admin Panel.
+// No props — it fetches its own data on mount.
+//
+// State overview:
+//   requests       - full list of all item requests fetched from the API
+//   loading        - shows a loading message until the first fetch completes
+//   filterStatus   - the active status tab; "all" shows every request
+//   expandedId     - ID of the currently expanded request; null means all collapsed
+//   adminNotes     - object keyed by request ID holding textarea values before saving
+//                    (avoids saving on every keystroke)
+//   updating       - ID of the request currently having its status changed (disables
+//                    the status dropdown during the API call)
+//   addingItemTo   - ID of the request currently showing the inline add-item form;
+//                    null means no form is open
+//
+// Add-item form state (only relevant when addingItemTo is set):
+//   newItemCategory - "gift" or "apparel"; drives which endpoint is queried
+//   newItemId       - ID of the selected item within the chosen category
+//   newItemQty      - quantity to add
+//   newItemNotes    - optional notes for the line item
+//   categoryItems   - list fetched from the API when newItemCategory changes
+//   loadingItems    - true while categoryItems is being fetched
+//
+// NEXT_STATUSES maps each current status to the statuses an admin can move it to.
+// STATUS_ACTION_LABELS provides the human-readable label shown in the dropdown option.
+//
+// Request expand/collapse:
+//   Clicking the request header toggles expandedId between the request's ID and null.
+//   Only one request can be expanded at a time.
+//
+// Quantity display per line item:
+//   quantity_requested is shown as read-only text — it records what the user asked for
+//   and should never be changed by admin.
+//   quantity_confirmed is an editable input prefilled with quantity_confirmed (or
+//   quantity_requested if not yet confirmed). On blur it calls PATCH /confirm/ and
+//   updates stock accordingly. An amber diff label appears when confirmed != requested.
+//
+// Adding an item to a request:
+//   fetchCategoryItems is called when the category dropdown changes. It populates
+//   categoryItems with gifts or apparel variants depending on the selection.
+//   handleAddItem validates the selection and POSTs to the add-item endpoint.
+//   The unit_price is read from the selected item's data, not entered manually.
+//
+// Admin notes:
+//   adminNotes[requestId] holds the current textarea value locally.
+//   saveAdminNotes sends a PATCH with admin_notes and then refetches.
 
 import { useState, useEffect } from "react";
 import api from "../../api";
@@ -78,6 +117,8 @@ function AdminRequests() {
             });
     };
 
+    // Fetches gifts or apparel variants when admin selects a category in the add-item form.
+    // Resets the selected item each time the category changes.
     const fetchCategoryItems = (category) => {
         setLoadingItems(true);
         setNewItemId("");
@@ -105,6 +146,8 @@ function AdminRequests() {
             });
     };
 
+    // Validates the add-item form, checks stock, then POSTs the new line item.
+    // unit_price is taken from the selected item's data so it is always accurate.
     const handleAddItem = (requestId) => {
         if (!newItemCategory || !newItemId || newItemQty < 1) {
             alert("Please select a category, item and quantity.");
@@ -144,6 +187,8 @@ function AdminRequests() {
             });
     };
 
+    // Sends a status change to the backend and refetches once it completes.
+    // updating is set to the request ID during the call to disable the dropdown.
     const updateStatus = (requestId, newStatus) => {
         setUpdating(requestId);
         api.patch(`/api/requests/${requestId}/status/`, { status: newStatus })
@@ -158,6 +203,7 @@ function AdminRequests() {
             });
     };
 
+    // Saves the admin notes textarea value for a specific request.
     const saveAdminNotes = (requestId) => {
         api.patch(`/api/requests/${requestId}/`, {
             admin_notes: adminNotes[requestId] || "",
@@ -172,6 +218,7 @@ function AdminRequests() {
             });
     };
 
+    // filteredRequests is derived from requests using the active tab filter.
     const filteredRequests = requests.filter((r) =>
         filterStatus === "all" ? true : r.status === filterStatus,
     );
@@ -186,7 +233,7 @@ function AdminRequests() {
 
     return (
         <div>
-            {/* Status Filter Tabs */}
+            {/* Status Filter Tabs — each tab shows a count of requests in that status */}
             <div className="flex flex-wrap gap-2 mb-6">
                 {[
                     "all",
@@ -229,7 +276,7 @@ function AdminRequests() {
                             key={request.id}
                             className="bg-white rounded-2xl shadow overflow-hidden"
                         >
-                            {/* Request Header — always visible */}
+                            {/* Request Header — clicking anywhere here expands or collapses the detail section */}
                             <div
                                 className="p-5 cursor-pointer hover:bg-gray-50 transition-colors"
                                 onClick={() =>
@@ -282,7 +329,7 @@ function AdminRequests() {
                                     </p>
                                 </div>
 
-                                {/* Bottom row: total + item count + expand hint */}
+                                {/* Bottom row: total cost, item count, expand hint */}
                                 <div className="flex items-center justify-between">
                                     <p className="text-lg font-bold text-wa-navy whitespace-nowrap">
                                         ${" "}
@@ -306,7 +353,7 @@ function AdminRequests() {
                                 </div>
                             </div>
 
-                            {/* Expanded Details */}
+                            {/* Expanded Details — only rendered when this request is active */}
                             {expandedId === request.id && (
                                 <div className="border-t border-gray-100 p-5">
                                     {/* Line Items */}
@@ -374,7 +421,11 @@ function AdminRequests() {
                                                         💬 {item.notes}
                                                     </p>
                                                 )}
-                                                {/* Row 3: Qty (requested read-only + confirmed editable) and price */}
+                                                {/* Row 3: Qty (requested read-only + confirmed editable) and price.
+                                                    quantity_requested is what the user asked for — never editable by admin.
+                                                    quantity_confirmed input calls PATCH /confirm/ on blur and adjusts
+                                                    stock if the value differs from what was previously deducted.
+                                                    The amber diff label appears when confirmed != requested. */}
                                                 <div className="flex items-center justify-between gap-3 flex-wrap">
                                                     <div className="flex items-center gap-3 flex-wrap">
                                                         <span className="text-xs text-gray-500">
@@ -436,7 +487,9 @@ function AdminRequests() {
                                         ))}
                                     </ul>
 
-                                    {/* Add Item Section */}
+                                    {/* Add Item — inline form that appears within the expanded request.
+                                        Category selection triggers an API fetch to populate the item dropdown.
+                                        The form resets and collapses on successful submission or cancel. */}
                                     {addingItemTo === request.id ? (
                                         <div className="bg-blue-50 rounded-xl p-4 mb-4 overflow-hidden">
                                             <p className="text-sm font-semibold text-wa-navy mb-3">
@@ -469,7 +522,9 @@ function AdminRequests() {
                                                     </select>
                                                 </div>
 
-                                                {/* Item selector */}
+                                                {/* Item selector — only shown once a category is chosen.
+                                                    Apparel options include product name, size, colour, gender,
+                                                    and current stock count. */}
                                                 {newItemCategory && (
                                                     <div className="w-full">
                                                         <select
@@ -593,7 +648,7 @@ function AdminRequests() {
                                         </button>
                                     )}
 
-                                    {/* Requester Notes */}
+                                    {/* Requester Notes — read-only, shown only when present */}
                                     {request.notes && (
                                         <div className="bg-yellow-50 rounded-xl px-4 py-3 mb-6">
                                             <p className="text-xs font-semibold text-yellow-700 mb-1">
@@ -605,7 +660,7 @@ function AdminRequests() {
                                         </div>
                                     )}
 
-                                    {/* Admin Notes */}
+                                    {/* Admin Notes — saved explicitly via the Save Notes button, not on change */}
                                     <div className="mb-6">
                                         <label className="block text-sm font-semibold text-gray-700 mb-2">
                                             Internal Notes
@@ -636,7 +691,7 @@ function AdminRequests() {
                                         </button>
                                     </div>
 
-                                    {/* Status Actions */}
+                                    {/* Status Actions — dropdown shows all valid next statuses for the current one */}
                                     {NEXT_STATUSES[request.status]?.length >
                                         0 && (
                                         <div>

@@ -1,8 +1,35 @@
-/**
- * Add Apparel Product Form Component
- *
- * Creates a base apparel product and optional size/color variants in one step.
- */
+// AddApparelProductForm is the admin modal for creating a new apparel product
+// along with its initial size variants in a single submit flow.
+//
+// Props:
+//   onSuccess - called after successful creation; parent uses it to refetch and clear filters
+//   onClose   - called when the user cancels or clicks X
+//
+// State overview:
+//   Product fields  - productName, categoryId, primaryColorId, unitPrice, material,
+//                     description, productImage, and all customs/supplier/notes fields
+//   variants        - array of new variant rows, each { size_id, gender, qty_stock }
+//   variantErrors   - parallel array of { size_id: bool, qty_stock: bool } for field highlighting
+//   variantDuplicates - parallel boolean array; true for rows involved in a duplicate
+//   duplicateError  - error message string shown below the variants section
+//   variantRowRefs  - ref array used to scroll to the first problem row on submit
+//
+// Colour architecture:
+//   One colour per product. primaryColorId is set at the product level, not per variant.
+//   All variant POSTs use primaryColorId as color_id. Duplicate detection uses
+//   size_id-gender as the key (colour is shared across all variants of a product).
+//
+// Duplicate detection:
+//   Runs on submit before any API calls. Marks ALL rows that share a key (not just one).
+//   Sets variantDuplicates flags and scrolls to the first duplicate row.
+//   Clearing any field in a duplicate row removes that row's flag.
+//
+// Submit flow:
+//   1. Validate incomplete rows (missing size_id or qty_stock).
+//   2. Run duplicate key check.
+//   3. POST the product record with FormData (multipart for image upload).
+//   4. POST each variant using the returned product ID and shared primaryColorId.
+//   5. Call onSuccess().
 
 import { useState, useEffect, useRef } from "react";
 import api from "../api";

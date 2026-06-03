@@ -1,10 +1,33 @@
-/**
- * AdminGifts Component
- *
- * Shopify-style table view of all gifts for admin users.
- * Supports checkbox selection, inline stock adjustment,
- * and product editing. Used inside the Admin Panel.
- */
+// AdminGifts renders the gifts inventory table inside the Admin Panel.
+// No props — it fetches its own data on mount.
+//
+// State overview:
+//   gifts           - full list fetched from the API
+//   loading         - shows a loading message until the first fetch completes
+//   selected        - array of gift IDs with checkboxes ticked (for bulk actions)
+//   searchQuery     - live text filter applied to product names
+//   selectedCategory - category ID filter; empty string means "all"
+//   categories      - list for the category dropdown
+//   selectedGift    - when set to a gift object, opens GiftDetailsModal
+//   historyGift     - when set to a gift object, opens TransactionHistoryModal
+//   adjustGift      - when set to a gift object, opens StockAdjustmentModal
+//   showAddForm     - controls visibility of the GiftForm modal
+//   showLowStockOnly - when true, only shows gifts at or below minimum_stock_level
+//   adjustReasons   - pre-fetched list of stock adjustment reasons (for future use)
+//
+// filteredGifts is derived from gifts on every render by applying all three
+// active filters. No separate state is needed for the filtered list.
+//
+// filtersActive is true when any filter is set; used to conditionally show
+// the Clear button so it only appears when there is something to clear.
+//
+// Modal pattern:
+//   GiftDetailsModal is always mounted — it handles a null gift prop internally.
+//   TransactionHistoryModal, StockAdjustmentModal, and GiftForm are only mounted
+//   when their trigger state is truthy, to avoid unnecessary API calls.
+//
+// After adding a new gift, GiftForm's onSuccess clears the search and category
+// filters and refetches, so the new item is visible in an unfiltered list.
 
 import { useState, useEffect } from "react";
 import api from "../../api";
@@ -54,12 +77,14 @@ function AdminGifts() {
             .catch(err => console.error("Failed to load adjustment reasons:", err));
     };
 
+    // Toggles a single gift in/out of the selected array.
     const toggleSelect = (id) => {
         setSelected(prev =>
             prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
         );
     };
 
+    // Selects all visible (filtered) gifts, or clears selection if all are already selected.
     const toggleSelectAll = () => {
         if (selected.length === filteredGifts.length) {
             setSelected([]);
@@ -68,6 +93,7 @@ function AdminGifts() {
         }
     };
 
+    // Applies all active filters to produce the list shown in the table/cards.
     const filteredGifts = gifts.filter(gift => {
         const matchesSearch = gift.product_name
             .toLowerCase()
@@ -79,6 +105,7 @@ function AdminGifts() {
         return matchesSearch && matchesCategory && matchesLowStock;
     });
 
+    // True when any filter is active — used to show the Clear button.
     const filtersActive = searchQuery !== "" || selectedCategory !== "" || showLowStockOnly;
 
     const clearFilters = () => {
@@ -151,7 +178,7 @@ function AdminGifts() {
                 </div>
             </div>
 
-            {/* Selected actions bar */}
+            {/* Selected actions bar — shown when at least one row is ticked */}
             {selected.length > 0 && (
                 <div className="bg-wa-blue/10 border border-wa-blue/20 rounded-xl px-4 py-3 mb-4 flex items-center justify-between">
                     <p className="text-sm font-medium text-wa-navy">
@@ -211,6 +238,7 @@ function AdminGifts() {
                                 </td>
                                 <td className="px-4 py-3">
                                     <p className="font-medium text-wa-navy">{gift.product_name}</p>
+                                    {/* Low stock badge appears when qty is at or below the minimum threshold */}
                                     {gift.qty_stock <= gift.minimum_stock_level && (
                                         <span className="text-xs text-red-500 font-medium">Low Stock</span>
                                     )}
@@ -317,6 +345,7 @@ function AdminGifts() {
                 ))}
             </div>
 
+            {/* GiftDetailsModal is always mounted; it handles a null gift prop internally */}
             <GiftDetailsModal
                 gift={selectedGift}
                 onClose={() => setSelectedGift(null)}

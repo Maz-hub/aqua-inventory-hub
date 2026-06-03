@@ -3,16 +3,15 @@ from django.contrib.auth.models import User
 from core.models import TakeReason, Department
 
 
+# ItemRequest is the top-level record for a staff member's request.
+# One request covers all the items a person needs in a single submission,
+# regardless of which inventory category those items come from.
+# The request moves through a fixed status workflow:
+#   draft -> pending -> in_preparation -> ready -> completed (or cancelled at any point)
+# Stock is deducted when the request is submitted (moves to pending) and
+# restored if the request is cancelled.
+# updated_by tracks the last admin to touch the record for audit purposes.
 class ItemRequest(models.Model):
-    """
-    Represents a staff member's request for inventory items.
-
-    A single request can contain items from multiple inventory
-    categories (Gifts, Apparel, etc.) submitted in one go.
-    Status tracks the request through its lifecycle.
-    All admin modifications are logged for audit trail.
-    """
-
     STATUS_CHOICES = [
         ('draft',          'Draft'),
         ('pending',        'Pending'),
@@ -65,16 +64,14 @@ class ItemRequest(models.Model):
         help_text="Additional context or instructions from the requester"
     )
 
-    # Internal notes from preparation team
+    # Internal notes from preparation team — not shown to the requester
     admin_notes = models.TextField(
         blank=True,
         help_text="Internal notes from the preparation team (not visible to requester)"
     )
 
-    # Audit fields — creation
     created_at = models.DateTimeField(auto_now_add=True)
 
-    # Audit fields — last modification
     updated_at = models.DateTimeField(auto_now=True)
     updated_by = models.ForeignKey(
         User,
@@ -95,25 +92,25 @@ class ItemRequest(models.Model):
 
     @property
     def total_cost(self):
-        """
-        Calculates total estimated cost of all items in this request.
-        Used for budget tracking and department reporting.
-        """
+        # Sums estimated_cost across all line items.
+        # Used for budget display in both the user-facing request list and the admin panel.
         return sum(item.estimated_cost for item in self.items.all())
 
 
+# ItemRequestItem is a single line in a request, equivalent to one row in an order.
+# Because requests can include items from different inventory models (gifts, apparel, etc.),
+# we use a generic item_type + item_id pattern instead of separate FK fields per model.
+# item_type tells us which model to look in; item_id is the PK in that model.
+# There is no database-level FK constraint on item_id by design, since the referenced
+# model varies per row.
+#
+# quantity_confirmed is set by the preparation team when they process the request.
+# It may be less than quantity_requested if stock ran short. Until confirmed,
+# estimated_cost uses quantity_requested.
+#
+# unit_price is captured at the time of the request as a snapshot so that cost
+# calculations remain accurate even if the product price changes later.
 class ItemRequestItem(models.Model):
-    """
-    A single line item within an ItemRequest.
-
-    Uses a flexible item_type + item_id pattern to support
-    items from any inventory category (Gifts, Apparel,
-    Executive Office, IT Assets, Office/Events).
-
-    quantity_confirmed may differ from quantity_requested
-    if the preparation team made adjustments.
-    """
-
     ITEM_TYPE_CHOICES = [
         ('gift',      'Gift'),
         ('apparel',   'Apparel Variant'),
@@ -122,7 +119,7 @@ class ItemRequestItem(models.Model):
         ('office',    'Office & Events Item'),
     ]
 
-    # Which request this item belongs to
+    # Deleting a request cascades to remove all its line items.
     request = models.ForeignKey(
         ItemRequest,
         on_delete=models.CASCADE,
@@ -130,31 +127,29 @@ class ItemRequestItem(models.Model):
         help_text="The parent request this item belongs to"
     )
 
-    # Which category this item comes from
+    # item_type determines which inventory model item_id points to.
     item_type = models.CharField(
         max_length=20,
         choices=ITEM_TYPE_CHOICES,
         help_text="Which inventory category this item comes from"
     )
 
-    # The ID of the specific item in its category's model
     item_id = models.PositiveIntegerField(
         help_text="Primary key of the item in its respective inventory model"
     )
 
-    # How many the requester asked for
     quantity_requested = models.PositiveIntegerField(
         help_text="Quantity originally requested by the staff member"
     )
 
-    # How many were actually prepared (admin may adjust)
+    # Null until the preparation team confirms the quantity.
     quantity_confirmed = models.PositiveIntegerField(
         null=True,
         blank=True,
         help_text="Quantity confirmed by preparation team (may differ from requested)"
     )
 
-    # Unit price at time of request (snapshot for budget reporting)
+    # Price snapshot taken at request time, not recalculated from the live product price.
     unit_price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -162,7 +157,6 @@ class ItemRequestItem(models.Model):
         help_text="Unit price captured at time of request for budget calculations"
     )
 
-    # Optional item-level notes
     notes = models.TextField(
         blank=True,
         help_text="Item-specific notes or special instructions"
@@ -174,10 +168,7 @@ class ItemRequestItem(models.Model):
 
     @property
     def estimated_cost(self):
-        """
-        Calculates cost for this line item.
-        Uses confirmed quantity if available, otherwise requested quantity.
-        """
+        # Uses confirmed quantity when available, otherwise falls back to requested.
         qty = self.quantity_confirmed or self.quantity_requested
         return self.unit_price * qty
 

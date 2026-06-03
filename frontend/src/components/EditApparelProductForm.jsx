@@ -1,3 +1,38 @@
+// EditApparelProductForm is the admin modal for editing an existing apparel product
+// and managing its variants (delete existing, add new).
+//
+// Props:
+//   product   - the full product object pre-populated from the parent; includes variants array
+//   onSuccess - called after a successful save; closes the modal and triggers a refetch
+//   onClose   - called when the user cancels without saving
+//
+// State overview:
+//   Product fields    - all pre-populated from the product prop on mount
+//   existingVariants  - copy of product.variants; deleting a variant removes it from this list
+//                       immediately (DELETE is called on the backend before state updates)
+//   newVariants       - array of new rows the user adds during this edit session
+//   variantErrors     - parallel array for field-level validation highlighting on newVariants
+//   variantRowRefs    - ref array used to scroll to the first error row on submit
+//
+// Colour architecture — same as AddApparelProductForm:
+//   primaryColorId is set at the product level. All new variant POSTs use it as color_id.
+//   Duplicate key is size_id-gender (colour is shared).
+//
+// deleteExistingVariant:
+//   Calls DELETE immediately on confirm. Updates existingVariants state on success.
+//   This is destructive and cannot be undone without a page reload.
+//
+// Duplicate check on submit:
+//   Seeds a Set from remaining existingVariants, then checks newVariants against it.
+//   Shows an alert on the first duplicate found (no row-level highlighting in this form).
+//
+// Submit flow:
+//   1. Validate incomplete new variant rows.
+//   2. Run duplicate key check against existing + new variants.
+//   3. PATCH the product record with FormData.
+//   4. POST each new variant using the existing product ID and shared primaryColorId.
+//   5. Call onSuccess().
+
 import { useState, useEffect, useRef } from "react";
 import api from "../api";
 
@@ -6,7 +41,7 @@ function EditApparelProductForm({ product, onSuccess, onClose }) {
   const [colors, setColors] = useState([]);
   const [sizes, setSizes] = useState([]);
 
-  // Product fields — pre-populated from product prop
+  // Product fields - pre-populated from product prop
   const [productName, setProductName] = useState(product.product_name);
   const [categoryId, setCategoryId] = useState(product.category.id);
   const [primaryColorId, setPrimaryColorId] = useState(product.primary_color?.id || "");
@@ -460,7 +495,7 @@ function EditApparelProductForm({ product, onSuccess, onClose }) {
             <div>
               <label htmlFor="standardisedProductId" className="block text-sm font-medium text-gray-700 mb-2">
                 Standardised Product ID
-                <span className="text-gray-400 font-normal"> (GTIN, EAN, ISBN — enter NO if not applicable)</span>
+                <span className="text-gray-400 font-normal"> (Enter NO if not applicable)</span>
               </label>
               <input
                 type="text"

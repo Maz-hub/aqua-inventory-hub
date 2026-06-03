@@ -1,3 +1,23 @@
+// TransactionHistoryModal shows the full stock movement history for a single gift.
+// It is a read-only view — no actions are available inside it.
+//
+// Props:
+//   gift    - the gift object; gift.id is used to fetch transactions and gift.product_name
+//             is shown in the modal header
+//   onClose - called when the user clicks Close or the X button
+//
+// State:
+//   transactions - list fetched from the API on mount, ordered newest first
+//   loading      - true while the fetch is in progress
+//
+// Data is fetched once when the component mounts (gift.id is in the dependency array
+// so it would refetch if a different gift were passed without unmounting, though in
+// practice this modal is always unmounted and remounted between uses).
+//
+// The table shows: date/time, transaction type (red for take, green for return),
+// quantity, reason, free-text notes, and the username of who performed it.
+// Rows with no reason or notes show a dash.
+
 import { useState, useEffect } from "react";
 import api from "../api";
 
@@ -33,6 +53,7 @@ function TransactionHistoryModal({ gift, onClose }) {
                     </button>
                 </div>
 
+                {/* Scrollable table body */}
                 <div className="overflow-y-auto flex-1 p-6">
                     {loading ? (
                         <p className="text-sm text-gray-400">Loading...</p>
@@ -57,6 +78,7 @@ function TransactionHistoryModal({ gift, onClose }) {
                                             <span className="block">{new Date(tx.created_at).toLocaleDateString("en-GB")}</span>
                                             <span className="block text-xs text-gray-400">{new Date(tx.created_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}</span>
                                         </td>
+                                        {/* Type is coloured: red for take, green for return */}
                                         <td className="py-3 pr-4">
                                             <span className={`font-medium capitalize ${tx.transaction_type === "take" ? "text-red-500" : "text-green-600"}`}>
                                                 {tx.transaction_type}
@@ -66,10 +88,10 @@ function TransactionHistoryModal({ gift, onClose }) {
                                             {tx.quantity}
                                         </td>
                                         <td className="py-3 pr-4 text-gray-600">
-                                            {tx.reason ?? "—"}
+                                            {tx.reason ?? "-"}
                                         </td>
                                         <td className="py-3 pr-4 text-gray-600">
-                                            {tx.notes || "—"}
+                                            {tx.notes || "-"}
                                         </td>
                                         <td className="py-3 text-gray-500">
                                             {tx.created_by}

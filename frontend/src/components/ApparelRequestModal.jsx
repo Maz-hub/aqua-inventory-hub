@@ -39,7 +39,7 @@ function ApparelRequestModal({ product, onClose }) {
         addItem({
             item_type: "apparel",
             item_id: selectedVariant.id,
-            name: `${product.product_name} — ${selectedVariant.size.size_value} ${selectedVariant.color.color_name}`,
+            name: `${product.product_name} - ${selectedVariant.size.size_value} ${selectedVariant.color.color_name}`,
             unit_price: parseFloat(product.unit_price),
             quantity: parseInt(quantity),
             max_quantity: selectedVariant.qty_stock,
@@ -93,8 +93,8 @@ function ApparelRequestModal({ product, onClose }) {
                                             key={variant.id}
                                             value={variant.id}
                                         >
-                                            {variant.size.size_value} —{" "}
-                                            {variant.color.color_name} —{" "}
+                                            {variant.size.size_value} -{" "}
+                                            {variant.color.color_name} -{" "}
                                             {variant.gender === "U"
                                                 ? "Unisex"
                                                 : variant.gender === "M"

@@ -1,10 +1,28 @@
-/**
- * StockAdjustmentModal Component
- *
- * Allows admin to manually adjust stock quantity for a gift.
- * Creates a transaction record with reason for full audit trail.
- * Used exclusively in the Admin Panel.
- */
+// StockAdjustmentModal is the admin form for manually adjusting stock on a single gift.
+// It is used from both AdminGifts (table row button) and GiftDetailsModal (Adjust Stock button).
+//
+// Props:
+//   gift      - the gift whose stock is being adjusted
+//   onClose   - called when the user cancels or dismisses without saving
+//   onSuccess - called after a successful adjustment so the parent can refetch
+//
+// State:
+//   action   - "take" (reduce stock) or "return" (add stock); toggles via the button pair
+//   quantity - number of units; capped at minimum 1
+//   reason   - ID of the selected StockAdjustmentReason; required before submitting
+//   notes    - optional free-text context for the transaction record
+//   reasons  - list of StockAdjustmentReasons fetched on mount
+//   loading  - true while the PATCH request is in flight; disables the Save button
+//
+// newTotal is derived on every render from action and quantity.
+// It is displayed as a preview pill (green when valid, red when the result would go below 0).
+//
+// Validation in handleSubmit:
+//   1. A reason must be selected.
+//   2. For "take", quantity must not exceed current stock.
+// Both checks show an alert and abort before making any API call.
+//
+// On success, onSuccess() is called first (triggers parent refetch), then onClose().
 
 import { useState, useEffect } from "react";
 import api from "../api";
@@ -23,6 +41,7 @@ function StockAdjustmentModal({ gift, onClose, onSuccess }) {
             .catch((err) => console.error("Failed to load reasons:", err));
     }, []);
 
+    // Preview of what the stock count will be after the adjustment.
     const newTotal = action === "take"
         ? gift.qty_stock - quantity
         : gift.qty_stock + quantity;
@@ -92,7 +111,7 @@ function StockAdjustmentModal({ gift, onClose, onSuccess }) {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Action toggle */}
+                    {/* Action toggle — Take reduces stock, Return adds stock */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1.5">
                             Action *
@@ -123,7 +142,7 @@ function StockAdjustmentModal({ gift, onClose, onSuccess }) {
                         </div>
                     </div>
 
-                    {/* Quantity */}
+                    {/* Quantity — preview pill updates live as the value changes */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1.5">
                             Quantity *
@@ -146,7 +165,7 @@ function StockAdjustmentModal({ gift, onClose, onSuccess }) {
                         </div>
                     </div>
 
-                    {/* Reason */}
+                    {/* Reason — required; options come from StockAdjustmentReason in the backend */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1.5">
                             Reason *
@@ -183,7 +202,7 @@ function StockAdjustmentModal({ gift, onClose, onSuccess }) {
                         />
                     </div>
 
-                    {/* Buttons */}
+                    {/* Buttons — Save is disabled while the request is in flight */}
                     <div className="flex gap-3 pt-1">
                         <button
                             type="button"

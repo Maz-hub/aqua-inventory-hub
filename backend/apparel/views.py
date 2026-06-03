@@ -18,94 +18,86 @@ from core.models import StockAdjustmentReason
 
 
 # ============================================
-# APPAREL INVENTORY VIEWS
+# REFERENCE DATA VIEWS
 # ============================================
 
+# The three views below return the reference tables used to populate
+# dropdowns in the Add/Edit product and variant forms.
+
+# Returns all sizes, ordered by size_type then display_order.
+# GET /api/apparel/sizes/
 class ApparelSizeList(generics.ListAPIView):
-    """
-    API endpoint to fetch all apparel sizes
-    GET /api/apparel/sizes/
-    Used to populate size dropdowns when creating variants
-    """
     serializer_class = ApparelSizeSerializer
     permission_classes = [HasApparelAccess]
     queryset = ApparelSize.objects.all()
 
 
+# Returns all colours, ordered alphabetically.
+# GET /api/apparel/colors/
 class ApparelColorList(generics.ListAPIView):
-    """
-    API endpoint to fetch all apparel colors
-    GET /api/apparel/colors/
-    Used to populate color dropdowns when creating variants
-    """
     serializer_class = ApparelColorSerializer
     permission_classes = [HasApparelAccess]
     queryset = ApparelColor.objects.all()
 
 
+# Returns all apparel categories, ordered alphabetically.
+# GET /api/apparel/categories/
 class ApparelCategoryList(generics.ListAPIView):
-    """
-    API endpoint to fetch all apparel categories
-    GET /api/apparel/categories/
-    Used to populate category dropdowns and filtering
-    """
     serializer_class = ApparelCategorySerializer
     permission_classes = [HasApparelAccess]
     queryset = ApparelCategory.objects.all()
 
 
+# ============================================
+# APPAREL PRODUCT VIEWS
+# ============================================
+
+# Lists all products or creates a new one.
+# GET  /api/apparel/products/  - returns every product with its nested variants.
+# POST /api/apparel/products/  - creates a new product, setting created_by automatically.
+# Each product record is the base item (name, price, image, customs data).
+# Stock is tracked per variant, not at the product level.
 class ApparelProductListCreate(generics.ListCreateAPIView):
-    """
-    API endpoint that handles:
-    - GET: List all apparel products with their variants
-    - POST: Create a new apparel product
-    """
     serializer_class = ApparelProductSerializer
     permission_classes = [HasApparelAccess]
     queryset = ApparelProduct.objects.all()
 
     def perform_create(self, serializer):
-        """
-        Automatically set created_by field when creating product
-        """
         if serializer.is_valid():
             serializer.save(created_by=self.request.user)
         else:
             print(serializer.errors)
 
 
+# Retrieves, updates, or deletes a single product.
+# GET    /api/apparel/products/{id}/  - returns product details with all variants.
+# PATCH  /api/apparel/products/{id}/  - partial update of product fields.
+# DELETE /api/apparel/products/{id}/  - permanently deletes the product and all its variants (CASCADE).
+# updated_by is recorded on every PATCH.
 class ApparelProductDetail(generics.RetrieveUpdateDestroyAPIView):
-    """
-    API endpoint for single product operations:
-    - GET: Retrieve product details with variants
-    - PATCH: Update product information
-    - DELETE: Delete product (and all its variants via CASCADE)
-    """
     serializer_class = ApparelProductSerializer
     permission_classes = [HasApparelAccess]
     queryset = ApparelProduct.objects.all()
 
     def perform_update(self, serializer):
-        """
-        Automatically set updated_by field when updating product
-        """
         serializer.save(updated_by=self.request.user)
 
 
+# ============================================
+# APPAREL VARIANT VIEWS
+# ============================================
+
+# Lists all variants or creates a new one.
+# GET  /api/apparel/variants/            - returns all variants across all products.
+# GET  /api/apparel/variants/?product_id=5  - returns only variants for a specific product.
+# POST /api/apparel/variants/            - creates a new size/colour/gender variant for a product.
+# The product_id filter is used by the admin item-add dropdown to list
+# available variants when adding apparel to a request.
 class ApparelVariantListCreate(generics.ListCreateAPIView):
-    """
-    API endpoint that handles:
-    - GET: List all variants (with optional product filtering)
-    - POST: Create a new size/color variant for a product
-    """
     serializer_class = ApparelVariantSerializer
     permission_classes = [HasApparelAccess]
 
     def get_queryset(self):
-        """
-        Optionally filter variants by product_id query parameter
-        Example: /api/apparel/variants/?product_id=5
-        """
         queryset = ApparelVariant.objects.all()
         product_id = self.request.query_params.get('product_id')
         if product_id:
@@ -113,43 +105,38 @@ class ApparelVariantListCreate(generics.ListCreateAPIView):
         return queryset
 
     def perform_create(self, serializer):
-        """
-        Automatically set created_by field when creating variant
-        """
         if serializer.is_valid():
             serializer.save(created_by=self.request.user)
         else:
             print(serializer.errors)
 
 
+# Retrieves, updates, or deletes a single variant.
+# GET    /api/apparel/variants/{id}/  - returns variant details.
+# PATCH  /api/apparel/variants/{id}/  - partial update (e.g. correcting stock manually).
+# DELETE /api/apparel/variants/{id}/  - removes the variant. Also deletes its transaction history (CASCADE).
+# updated_by is recorded on every PATCH.
 class ApparelVariantDetail(generics.RetrieveUpdateDestroyAPIView):
-    """
-    API endpoint for single variant operations:
-    - GET: Retrieve variant details
-    - PATCH: Update variant (e.g., adjust stock manually)
-    - DELETE: Delete variant
-    """
     serializer_class = ApparelVariantSerializer
     permission_classes = [HasApparelAccess]
     queryset = ApparelVariant.objects.all()
 
     def perform_update(self, serializer):
-        """
-        Automatically set updated_by field when updating variant
-        """
         serializer.save(updated_by=self.request.user)
 
 
+# Handles manual stock adjustments from the admin stock adjust modal.
+# PATCH /api/apparel/variants/update-stock/{id}/
+#
+# action must be 'take' (reduce stock) or 'return' (add stock).
+# Takes are blocked if the requested quantity exceeds current stock.
+# Every successful adjustment writes an ApparelTransaction record for the audit trail.
+# reason is optional here: the frontend always sends one for manual adjustments,
+# but automated movements (request submissions) do not provide a reason_id.
+# updated_by is set on the variant so the record reflects who last touched it.
 @api_view(['PATCH'])
 @permission_classes([HasApparelAccess])
 def update_apparel_stock(request, pk):
-    """
-    Updates apparel variant stock quantity for Take/Return actions
-    PATCH /api/apparel/variants/update-stock/{id}/
-
-    Creates ApparelTransaction record for audit trail
-    """
-    # Try to find the variant by ID
     try:
         variant = ApparelVariant.objects.get(pk=pk)
     except ApparelVariant.DoesNotExist:
@@ -158,20 +145,17 @@ def update_apparel_stock(request, pk):
             status=status.HTTP_404_NOT_FOUND
         )
 
-    # Get action, quantity, reason, and notes from request
     action = request.data.get('action')  # 'take' or 'return'
     quantity = request.data.get('quantity')
-    reason_id = request.data.get('reason')  # TakeReason ID
+    reason_id = request.data.get('reason')
     notes = request.data.get('notes', '')
 
-    # Validate required fields
     if not action or not quantity:
         return Response(
             {"error": "Action and quantity required"},
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    # Convert quantity to integer and validate
     try:
         quantity = int(quantity)
     except ValueError:
@@ -180,10 +164,8 @@ def update_apparel_stock(request, pk):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    # Record stock level before change
     stock_before = variant.qty_stock
 
-    # Handle 'take' action - reduce stock
     if action == 'take':
         if variant.qty_stock < quantity:
             return Response(
@@ -192,25 +174,20 @@ def update_apparel_stock(request, pk):
             )
         variant.qty_stock -= quantity
 
-    # Handle 'return' action - increase stock
     elif action == 'return':
         variant.qty_stock += quantity
 
-    # Invalid action provided
     else:
         return Response(
             {"error": "Invalid action. Use 'take' or 'return'"},
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    # Record stock level after change
     stock_after = variant.qty_stock
 
-    # Save the updated variant
     variant.updated_by = request.user
     variant.save()
 
-    # Create transaction record for audit trail
     take_reason = None
     if reason_id:
         try:
@@ -229,30 +206,28 @@ def update_apparel_stock(request, pk):
         stock_after=stock_after
     )
 
-    # Return success response with new stock level
     return Response({
         "message": "Stock updated successfully",
         "new_stock": variant.qty_stock
     }, status=status.HTTP_200_OK)
 
 
-class ApparelTransactionList(generics.ListAPIView):
-    """
-    API endpoint to fetch apparel transaction history
-    GET /api/apparel/transactions/
+# ============================================
+# APPAREL TRANSACTION VIEWS
+# ============================================
 
-    Supports filtering by variant, product, or date range
-    """
+# Returns the transaction history for apparel stock movements.
+# GET /api/apparel/transactions/
+#
+# Supports two optional query filters:
+#   ?variant_id=5    - history for a single size/colour variant
+#   ?product_id=3    - history for all variants of a product (used by the History modal)
+# Results are ordered newest first (from model's Meta.ordering).
+class ApparelTransactionList(generics.ListAPIView):
     serializer_class = ApparelTransactionSerializer
     permission_classes = [HasApparelAccess]
 
     def get_queryset(self):
-        """
-        Optionally filter transactions by query parameters
-        Examples:
-        - /api/apparel/transactions/?variant_id=5
-        - /api/apparel/transactions/?product_id=3
-        """
         queryset = ApparelTransaction.objects.all()
 
         variant_id = self.request.query_params.get('variant_id')

@@ -15,12 +15,10 @@ from apparel.models import ApparelVariant, ApparelTransaction
 # DEPARTMENT VIEWS
 # ============================================
 
+# Returns all departments for the request form dropdown.
+# GET /api/requests/departments/
+# Accessible to all authenticated users so the form can be populated.
 class DepartmentList(generics.ListAPIView):
-    """
-    Returns all departments for dropdown population.
-    GET /api/requests/departments/
-    Accessible to all authenticated users.
-    """
     serializer_class = DepartmentSerializer
     permission_classes = [IsAuthenticated]
     queryset = Department.objects.all()
@@ -30,70 +28,57 @@ class DepartmentList(generics.ListAPIView):
 # ITEM REQUEST VIEWS
 # ============================================
 
+# Lists requests or creates a new one.
+# GET  /api/requests/  - admins see all requests; regular users see only their own.
+# POST /api/requests/  - any authenticated user can create a request.
+#                        requested_by and status='draft' are set automatically.
 class ItemRequestListCreate(generics.ListCreateAPIView):
-    """
-    GET  /api/requests/          → Admin sees ALL requests
-    POST /api/requests/          → Any user creates a new request
-    """
     serializer_class = ItemRequestSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        """
-        Admin sees all requests.
-        Regular users only see their own requests.
-        """
         user = self.request.user
         if user.is_superuser or user.groups.filter(name='admin').exists():
             return ItemRequest.objects.all()
         return ItemRequest.objects.filter(requested_by=user)
 
     def perform_create(self, serializer):
-        """
-        Automatically sets the requester to the logged-in user.
-        New requests always start as Draft.
-        """
         serializer.save(
             requested_by=self.request.user,
             status='draft'
         )
 
 
+# Retrieves, updates, or deletes a single request.
+# GET    /api/requests/{id}/  - admins can view any request; users can only view their own.
+# PATCH  /api/requests/{id}/  - used to save admin notes; updated_by is recorded automatically.
+# DELETE /api/requests/{id}/  - intended for admin use to remove a request entirely.
 class ItemRequestDetail(generics.RetrieveUpdateDestroyAPIView):
-    """
-    GET    /api/requests/<id>/  → View request details
-    PATCH  /api/requests/<id>/  → Update request
-    DELETE /api/requests/<id>/  → Delete request (admin only)
-    """
     serializer_class = ItemRequestSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        """
-        Admin can access any request.
-        Regular users can only access their own.
-        """
         user = self.request.user
         if user.is_superuser or user.groups.filter(name='admin').exists():
             return ItemRequest.objects.all()
         return ItemRequest.objects.filter(requested_by=user)
 
     def perform_update(self, serializer):
-        """
-        Records who last updated the request.
-        """
         serializer.save(updated_by=self.request.user)
 
 
+# Moves a Draft request to Pending and deducts stock for all line items.
+# PATCH /api/requests/{id}/submit/
+#
+# Only the requester can submit their own request.
+# Stock check runs as all-or-nothing BEFORE any deductions: if any item
+# has insufficient stock, the whole submission is rejected with a clear error.
+# This prevents partial deductions where some items succeed and others fail.
+# Once all checks pass, stock is deducted for each item and a transaction
+# record is written (gift or apparel) with notes referencing the request ID.
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
 def submit_request(request, pk):
-    """
-    Moves a Draft request to Pending status.
-    PATCH /api/requests/<id>/submit/
-    Checks stock for all line items, deducts stock, creates transaction
-    records, then sets status to pending.
-    """
     item_request = get_object_or_404(ItemRequest, pk=pk)
 
     if item_request.requested_by != request.user:
@@ -181,15 +166,20 @@ def submit_request(request, pk):
     )
 
 
+# Cancels a Pending request and restores stock for all line items.
+# PATCH /api/requests/{id}/cancel/
+#
+# Both the original requester and any admin can cancel.
+# Only Pending requests can be cancelled. Draft requests haven't deducted
+# stock yet and should be deleted instead.
+# Stock is restored item by item. If a product or variant was deleted after
+# the request was submitted, that item is skipped silently rather than
+# blocking the cancellation of the whole request.
+# A 'return' transaction is written for each item successfully restored,
+# with notes referencing the request ID.
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
 def cancel_request(request, pk):
-    """
-    Cancels a Pending request and restores stock.
-    PATCH /api/requests/<id>/cancel/
-    Only the requester or an admin can cancel. Only pending requests
-    can be cancelled (draft requests should just be deleted).
-    """
     item_request = get_object_or_404(ItemRequest, pk=pk)
 
     is_admin = (
@@ -256,14 +246,14 @@ def cancel_request(request, pk):
     )
 
 
+# Allows admin to move a request to any status in the workflow.
+# PATCH /api/requests/{id}/status/
+# This is a direct status override, separate from the submit and cancel flows
+# which also handle stock. This view only changes the status field.
+# Requires IsAdminUser permission.
 @api_view(['PATCH'])
 @permission_classes([IsAdminUser])
 def update_request_status(request, pk):
-    """
-    Admin updates request status through the workflow.
-    PATCH /api/requests/<id>/status/
-    Only admin can change status (except submit which is done by requester).
-    """
     item_request = get_object_or_404(ItemRequest, pk=pk)
     new_status = request.data.get('status')
 
@@ -289,14 +279,14 @@ def update_request_status(request, pk):
 # ITEM REQUEST LINE ITEMS
 # ============================================
 
+# Adds a new line item to an existing request.
+# POST /api/requests/{id}/items/add/
+# Only the request owner or an admin can add items.
+# No status restriction is enforced here, allowing admins to add items
+# to requests that are already in progress.
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def add_item_to_request(request, pk):
-    """
-    Adds a line item to an existing Draft request.
-    POST /api/requests/<id>/items/add/
-    Only works on Draft requests.
-    """
     item_request = get_object_or_404(ItemRequest, pk=pk)
 
     # Only owner or admin can add items
@@ -316,15 +306,17 @@ def add_item_to_request(request, pk):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# Updates or removes a single line item from a request.
+# PATCH  /api/requests/{id}/items/{item_id}/  - updates fields on the line item.
+# DELETE /api/requests/{id}/items/{item_id}/  - removes the line item entirely.
+#
+# Admins can modify items regardless of request status.
+# Regular users can only modify items on their own requests while still in Draft.
+# Note: this endpoint does NOT adjust stock. Stock is only touched during
+# submit, cancel, and confirm operations.
 @api_view(['PATCH', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def manage_request_item(request, pk, item_pk):
-    """
-    PATCH  /api/requests/<id>/items/<item_id>/  → Update a line item
-    DELETE /api/requests/<id>/items/<item_id>/  → Remove a line item
-    Admin can modify at any status.
-    Requester can only modify their own Draft requests.
-    """
     item_request = get_object_or_404(ItemRequest, pk=pk)
     item = get_object_or_404(ItemRequestItem, pk=item_pk, request=item_request)
 
@@ -359,17 +351,23 @@ def manage_request_item(request, pk, item_pk):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# Admin sets or adjusts quantity_confirmed on a single line item.
+# PATCH /api/requests/{id}/items/{item_id}/confirm/
+# Requires IsAdminUser permission.
+#
+# Stock is reconciled against the previously deducted quantity:
+#   previously_deducted = quantity_confirmed (if already set) or quantity_requested
+#   diff = new_qty - previously_deducted
+#
+# If diff > 0: more stock is needed, deducted immediately (blocked if insufficient).
+# If diff < 0: excess stock is returned and a 'return' transaction is written.
+# If diff = 0: quantity_confirmed is updated but no stock movement occurs.
+#
+# This design allows admins to re-confirm a quantity multiple times
+# and always get the correct net stock movement.
 @api_view(['PATCH'])
 @permission_classes([IsAdminUser])
 def confirm_request_item(request, pk, item_pk):
-    """
-    Admin sets or updates quantity_confirmed on a line item.
-    PATCH /api/requests/<id>/items/<item_id>/confirm/
-    Reconciles stock against the previously deducted quantity:
-      - new qty < old qty → return the difference to stock
-      - new qty > old qty → deduct the difference (400 if insufficient)
-      - no change         → just save, no stock movement
-    """
     item_request = get_object_or_404(ItemRequest, pk=pk)
     item = get_object_or_404(ItemRequestItem, pk=item_pk, request=item_request)
 

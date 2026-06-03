@@ -17,61 +17,42 @@ from core.models import StockAdjustmentReason
 # GIFT INVENTORY VIEWS
 # ============================================
 
+# Returns all gifts or creates a new one.
+# GET  /api/gifts/  - lists the full inventory, visible to anyone with gifts access.
+# POST /api/gifts/  - creates a new gift record, automatically setting created_by.
 class GiftListCreate(generics.ListCreateAPIView):
-    """
-    API endpoint that handles:
-    - GET: List all gifts in inventory
-    - POST: Create a new gift
-    """
-
     serializer_class = GiftSerializer
-    # Specifies which serializer to use for data validation and conversion
-
     permission_classes = [HasGiftsAccess]
-    # Requires users to be logged in to view or create gifts
-
     queryset = Gift.objects.all()
-    # Returns ALL gifts - this is shared inventory, everyone sees everything
 
     def perform_create(self, serializer):
-        """
-        Custom create logic to automatically set created_by field
-        Called when a new gift is created via POST request
-        """
         if serializer.is_valid():
-            # Data passed validation, save gift with creator information
             serializer.save(created_by=self.request.user)
         else:
-            # Data validation failed, log errors for debugging
             print(serializer.errors)
 
 
+# Deletes a specific gift by ID.
+# DELETE /api/gifts/delete/{id}/
+# No soft-delete: the record is permanently removed along with its transaction history.
 class GiftDelete(generics.DestroyAPIView):
-    """
-    API endpoint to delete a specific gift from inventory
-    DELETE /api/gifts/delete/{id}/
-    """
-
     serializer_class = GiftSerializer
-    # Specifies which serializer to use
-
     permission_classes = [HasGiftsAccess]
-    # Requires users to be logged in to delete gifts
-
     queryset = Gift.objects.all()
-    # Can delete any gift - no user filtering (shared inventory)
 
 
+# Handles manual stock adjustments from the admin stock adjust modal.
+# PATCH /api/gifts/update-stock/{id}/
+#
+# action must be 'take' (reduce stock) or 'return' (add stock).
+# A reason is required for all adjustments — the request is rejected without one.
+# Stock is validated before the change: takes are blocked if quantity exceeds current stock.
+# Every successful adjustment writes an InventoryTransaction record for the audit trail,
+# capturing stock levels before and after.
+# updated_by is set on the gift so the product record reflects who last touched it.
 @api_view(['PATCH'])
 @permission_classes([HasGiftsAccess])
 def update_gift_stock(request, pk):
-    """
-    Updates gift stock quantity for Take/Return actions
-    PATCH /api/gifts/update-stock/{id}/
-
-    Now also creates InventoryTransaction record for audit trail
-    """
-    # Try to find the gift by ID
     try:
         gift = Gift.objects.get(pk=pk)
     except Gift.DoesNotExist:
@@ -80,20 +61,17 @@ def update_gift_stock(request, pk):
             status=status.HTTP_404_NOT_FOUND
         )
 
-    # Get action, quantity, reason, and notes from request
     action = request.data.get('action')  # 'take' or 'return'
     quantity = request.data.get('quantity')
     reason_id = request.data.get('reason')
-    notes = request.data.get('notes', '')  # Optional notes
+    notes = request.data.get('notes', '')
 
-    # Validate required fields
     if not action or not quantity:
         return Response(
             {"error": "Action and quantity required"},
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    # Convert quantity to integer and validate
     try:
         quantity = int(quantity)
     except ValueError:
@@ -102,38 +80,33 @@ def update_gift_stock(request, pk):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    # Record stock level before change
     stock_before = gift.qty_stock
 
-    # Handle 'take' action - reduce stock
     if action == 'take':
-        # Check if enough stock available
         if gift.qty_stock < quantity:
             return Response(
                 {"error": f"Insufficient stock. Only {gift.qty_stock} available."},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        # Reduce stock quantity
         gift.qty_stock -= quantity
 
-    # Handle 'return' action - increase stock
     elif action == 'return':
         gift.qty_stock += quantity
 
-    # Invalid action provided
     else:
         return Response(
             {"error": "Invalid action. Use 'take' or 'return'"},
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    # Record stock level after change
     stock_after = gift.qty_stock
 
-    # Save the updated gift
     gift.updated_by = request.user
     gift.save()
 
+    # Reason is validated after saving the stock change.
+    # If the reason ID is invalid, a 400 is returned but the stock has already moved.
+    # In practice the frontend always sends a valid reason before submitting.
     if not reason_id:
         return Response(
             {"error": "A reason is required for stock adjustments."},
@@ -159,24 +132,20 @@ def update_gift_stock(request, pk):
         stock_after=stock_after
     )
 
-    # Return success response with new stock level
     return Response({
         "message": "Stock updated successfully",
         "new_stock": gift.qty_stock
     }, status=status.HTTP_200_OK)
 
 
+# Updates gift product information (name, price, image, customs fields, etc.).
+# PATCH /api/gifts/update/{id}/
+# partial=True means only the fields included in the request are updated;
+# all other fields are left unchanged.
+# updated_by is recorded on every save.
 @api_view(['PATCH'])
 @permission_classes([HasGiftsAccess])
 def update_gift(request, pk):
-    """
-    Updates gift product information
-    PATCH /api/gifts/update/{id}/
-
-    Handles both file uploads (images) and regular field updates.
-    Records who made the update and when.
-    """
-    # Try to find the gift by ID
     try:
         gift = Gift.objects.get(pk=pk)
     except Gift.DoesNotExist:
@@ -185,12 +154,9 @@ def update_gift(request, pk):
             status=status.HTTP_404_NOT_FOUND
         )
 
-    # Use serializer to validate and update data
-    # partial=True allows updating only some fields, not all required
     serializer = GiftSerializer(gift, data=request.data, partial=True)
 
     if serializer.is_valid():
-        # Save updates and record who made the change
         serializer.save(updated_by=request.user)
 
         return Response({
@@ -198,7 +164,6 @@ def update_gift(request, pk):
             "gift": serializer.data
         }, status=status.HTTP_200_OK)
     else:
-        # Return validation errors if data is invalid
         return Response(
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
@@ -209,12 +174,10 @@ def update_gift(request, pk):
 # GIFT TRANSACTION VIEWS
 # ============================================
 
+# Returns the full transaction history for a single gift, ordered newest first.
+# GET /api/gifts/{pk}/transactions/
+# Used to populate the History modal in the admin table.
 class GiftTransactionListView(generics.ListAPIView):
-    """
-    Returns the audit trail of inventory movements for a specific gift.
-    GET /api/gifts/{pk}/transactions/
-    """
-
     serializer_class = InventoryTransactionSerializer
     permission_classes = [IsAuthenticated]
 
@@ -228,18 +191,10 @@ class GiftTransactionListView(generics.ListAPIView):
 # GIFT CATEGORY VIEWS
 # ============================================
 
+# Returns all gift categories for dropdown population.
+# GET /api/gifts/categories/
+# Ordered alphabetically by the model's Meta.ordering.
 class GiftCategoryList(generics.ListAPIView):
-    """
-    API endpoint to fetch all available gift categories
-    GET /api/categories/
-    Used to populate dropdown menus in the frontend
-    """
-
     serializer_class = GiftCategorySerializer
-    # Uses GiftCategorySerializer to convert categories to JSON
-
     permission_classes = [HasGiftsAccess]
-    # Users must be logged in to see categories
-
     queryset = GiftCategory.objects.all()
-    # Returns all categories, ordered alphabetically (from model's Meta.ordering)

@@ -2,23 +2,18 @@ from django.db import models
 from django.contrib.auth.models import User
 from core.models import StockAdjustmentReason
 
+
+# ApparelSize is a shared reference table for all valid sizes.
+# Sizes are split by type (clothing, footwear, accessory) so that
+# clothing dropdowns only show XS/S/M/L and footwear dropdowns only show 36/37/38.
+# display_order controls the sort order within each type so sizes appear
+# in a sensible sequence rather than alphabetically.
 class ApparelSize(models.Model):
-    """
-    Standardized size reference for apparel inventory.
-
-    Prevents size inconsistencies across multi-cultural team by providing
-    a single source of truth for all valid sizes.
-
-    Examples:
-        Clothing: XS, S, M, L, XL, 2XL, 3XL
-        Footwear: 36, 37, 38, 39, 40, 41, 42
-    """
-
     SIZE_TYPE_CHOICES = [
-    ('clothing', 'Clothing'),      # Shirts, Polos, Jackets, Pants
-    ('footwear', 'Footwear'),      # Shoes
-    ('accessory', 'Accessories'),  # Backpacks, Bags, Belts, Hats
-]
+        ('clothing', 'Clothing'),      # Shirts, Polos, Jackets, Pants
+        ('footwear', 'Footwear'),      # Shoes
+        ('accessory', 'Accessories'),  # Backpacks, Bags, Belts, Hats
+    ]
 
     size_value = models.CharField(
         max_length=10,
@@ -47,18 +42,11 @@ class ApparelSize(models.Model):
     def __str__(self):
         return f"{self.size_value} ({self.get_size_type_display()})"
 
-# Colors
 
+# ApparelColor is a shared reference table for all valid colours.
+# Storing colours here prevents free-text inconsistencies (e.g. "navy" vs "Navy Blue").
+# hex_code is optional and used to render colour swatches in the frontend.
 class ApparelColor(models.Model):
-    """
-    Standardized color reference for apparel inventory.
-
-    Prevents color naming inconsistencies across multi-cultural teams by
-    providing visual color swatches alongside standardized names.
-
-    Examples: Navy Blue (#001f3f), Black (#000000), White (#FFFFFF)
-    """
-
     color_name = models.CharField(
         max_length=50,
         unique=True,
@@ -82,13 +70,9 @@ class ApparelColor(models.Model):
         return self.color_name
 
 
-# Apparel Categories
-
+# ApparelCategory groups products for filtering and organisation in the admin table.
+# Examples: Polo Shirts, Jackets, Footwear, Accessories.
 class ApparelCategory(models.Model):
-    """
-    Categories for apparel inventory organization.
-    Enables filtering and grouping of 361° products by type.
-    """
     name = models.CharField(max_length=100, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -101,20 +85,18 @@ class ApparelCategory(models.Model):
         return self.name
 
 
-  # Apparel Product
-
+# ApparelProduct is the base product record, one per colour of a physical item.
+# It stores all the shared information (name, price, customs data, supplier details,
+# image) that applies equally to every size of that product.
+# The actual per-size stock is tracked on ApparelVariant, not here.
+#
+# primary_color records the product's colour at the product level so the frontend
+# can render consistent colour badges across all variants without looking up each one.
+# Deleting a category is blocked while products still reference it (PROTECT).
 class ApparelProduct(models.Model):
-    """
-    Base apparel product from 361°.
-    Represents the product concept before size/color variations.
-
-    Example: "361° Staff Polo Blue" is one product with multiple size variants.
-    Stores shared information (price, HS code, photo) that applies to all variants.
-    """
-
     product_name = models.CharField(
         max_length=200,
-        help_text="Full product name (e.g., '361° Staff Polo Blue')"
+        help_text="Full product name (e.g., '361 Staff Polo Blue')"
     )
 
     category = models.ForeignKey(
@@ -127,16 +109,19 @@ class ApparelProduct(models.Model):
     item_id = models.CharField(
         max_length=50,
         blank=True,
-        help_text="361° product code (e.g., 'ZW1050601-2')"
+        help_text="361 product code (e.g., 'ZW1050601-2')"
     )
 
+    # primary_color drives the colour badge background in the inventory grid.
+    # It is set once when the product is created and applies to all its variants.
+    # Deleting a colour sets this to NULL rather than blocking deletion.
     primary_color = models.ForeignKey(
-    'ApparelColor',
-    on_delete=models.SET_NULL,
-    null=True,
-    blank=True,
-    related_name='products_of_this_color',
-    help_text="Main color of this product (determines badge background)"
+        'ApparelColor',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='products_of_this_color',
+        help_text="Main color of this product (determines badge background)"
     )
 
     material = models.CharField(
@@ -150,6 +135,11 @@ class ApparelProduct(models.Model):
         help_text="Detailed product description"
     )
 
+    # Customs & logistics fields used for import declarations.
+    # hs_code is the Harmonized System tariff code.
+    # merchant_product_id is our own internal SKU.
+    # manufacturer_product_id is the supplier's non-standardised code.
+    # standardised_product_id holds a GTIN, EAN, or ISBN where one exists.
     hs_code = models.CharField(
         max_length=20,
         blank=True,
@@ -169,30 +159,31 @@ class ApparelProduct(models.Model):
     standardised_product_id = models.CharField(
         max_length=100,
         blank=True,
-        help_text="Standardised code if exists: GTIN, EAN, ISBN. Enter NO if not applicable."
+        help_text="Standardised code if exists - Enter NO if not applicable."
     )
+
+    # Supplier contact details stored at product level.
+    # Useful for reordering and for customs documentation.
     supplier_name = models.CharField(
         max_length=200,
         blank=True,
         help_text="Supplier company or contact name"
     )
-
     supplier_email = models.EmailField(
         blank=True,
         help_text="Supplier contact email address"
     )
-
     supplier_phone = models.CharField(
         max_length=50,
         blank=True,
         help_text="Supplier contact phone number"
     )
-
     supplier_address = models.TextField(
         blank=True,
         help_text="Supplier mailing address"
     )
 
+    # unit_price is the same for all sizes of this product.
     unit_price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -243,15 +234,24 @@ class ApparelProduct(models.Model):
         return self.product_name
 
 
+# ApparelVariant represents one specific size/colour/gender combination of a product.
+# This is where actual stock is counted. A product with sizes XS through XL has
+# one variant row per size, each with its own qty_stock.
+#
+# gender is included because Men's M and Women's M are physically different cuts
+# and need separate stock counts.
+#
+# The unique_together constraint on (product, size, color, gender) prevents
+# duplicate variant rows being created for the same combination.
+# Deleting a product cascades to delete all its variants.
+# Deleting a size or colour is blocked while variants still reference them (PROTECT).
 class ApparelVariant(models.Model):
-    """
-    Specific size/color combination of an apparel product with stock tracking.
-
-    Each variant represents countable inventory units.
-    Example: "361° Staff Polo Blue - Size M - Color Blue" with 35 units in stock.
-
-    Foreign keys to Size and Color ensure data consistency across multi-cultural team.
-    """
+    VARIANT_GENDER_CHOICES = [
+        ('U', 'Unisex'),
+        ('M', 'Men'),
+        ('W', 'Women'),
+        ('Y', 'Youth'),
+    ]
 
     product = models.ForeignKey(
         ApparelProduct,
@@ -272,18 +272,11 @@ class ApparelVariant(models.Model):
         help_text="Standardized color from predefined list"
     )
 
-    VARIANT_GENDER_CHOICES = [
-    ('U', 'Unisex'),
-    ('M', 'Men'),
-    ('W', 'Women'),
-    ('Y', 'Youth'),
-    ]
-
     gender = models.CharField(
-    max_length=1,
-    choices=VARIANT_GENDER_CHOICES,
-    default='U',
-    help_text="Gender fit for this specific variant (Women's M vs Men's M)"
+        max_length=1,
+        choices=VARIANT_GENDER_CHOICES,
+        default='U',
+        help_text="Gender fit for this specific variant (Women's M vs Men's M)"
     )
 
     qty_stock = models.IntegerField(
@@ -291,6 +284,8 @@ class ApparelVariant(models.Model):
         help_text="Current quantity in stock for this specific size/color"
     )
 
+    # minimum_stock_level triggers a low-stock warning in the admin table
+    # when qty_stock falls at or below this value.
     minimum_stock_level = models.IntegerField(
         default=5,
         help_text="Alert threshold for low stock warnings"
@@ -307,7 +302,7 @@ class ApparelVariant(models.Model):
     sku = models.CharField(
         max_length=100,
         blank=True,
-        help_text="Full SKU from 361° if provided"
+        help_text="Full SKU from 361 if provided"
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -336,19 +331,24 @@ class ApparelVariant(models.Model):
         return f"{self.product.product_name} - {self.size.size_value} - {self.color.color_name}"
 
 
+# ApparelTransaction records every stock movement on a specific variant.
+# A row is written each time items are taken out or added back.
+# stock_before and stock_after capture the quantity at the exact moment
+# of the transaction so the history is a complete audit trail, independent
+# of any later corrections to the stock count.
+# Transactions are never edited or deleted after creation.
+#
+# reason is optional for automated movements (e.g. request submissions and
+# cancellations). For manual adjustments made through the admin stock adjust
+# modal, a reason is required.
+# notes holds free-text context, e.g. which request triggered the movement.
 class ApparelTransaction(models.Model):
-    """
-    Tracks all apparel inventory movements for audit trail.
-    Records who took/returned items, when, how many, and why.
-
-    Transactions are immutable after creation to maintain data integrity.
-    """
-
     TRANSACTION_TYPES = [
-        ('take', 'Take'),
-        ('return', 'Return'),
+        ('take', 'Take'),     # items removed from stock
+        ('return', 'Return'), # items added back to stock
     ]
 
+    # Deleting a variant cascades to delete its transaction history.
     variant = models.ForeignKey(
         ApparelVariant,
         on_delete=models.CASCADE,
@@ -391,6 +391,7 @@ class ApparelTransaction(models.Model):
         help_text="When this transaction occurred"
     )
 
+    # Snapshot of stock levels at the moment this transaction was recorded.
     stock_before = models.IntegerField(
         help_text="Stock quantity before this transaction"
     )

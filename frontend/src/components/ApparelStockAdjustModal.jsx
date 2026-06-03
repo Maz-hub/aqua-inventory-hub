@@ -1,7 +1,39 @@
+// ApparelStockAdjustModal is the admin form for manually adjusting stock on an apparel variant.
+// Because apparel stock is tracked per size/colour/gender variant (not at the product level),
+// the admin must first choose which variant to adjust before entering a quantity.
+//
+// Props:
+//   product   - the apparel product object, including its nested variants array
+//   onClose   - called when the user cancels or dismisses without saving
+//   onSuccess - called after a successful adjustment so the parent can refetch
+//
+// State:
+//   selectedVariantId - ID of the chosen variant; pre-selected automatically when the
+//                       product has exactly one variant (saves a click in the common case)
+//   action            - "take" (reduce stock) or "return" (add stock)
+//   quantity          - number of units; capped at minimum 1
+//   reason            - ID of the selected StockAdjustmentReason; required before submitting
+//   notes             - optional free-text context for the transaction record
+//   reasons           - list of StockAdjustmentReasons fetched on mount
+//   loading           - true while the PATCH request is in flight; disables the Save button
+//
+// selectedVariant is derived from the product's variants array using selectedVariantId.
+// newTotal is derived from selectedVariant.qty_stock, action, and quantity.
+// The preview pill is red when action is "take" and green when "return", regardless
+// of whether newTotal goes below zero (the error text handles that case separately).
+//
+// genderLabel maps the single-character gender code to a readable string for the dropdown.
+//
+// Validation in handleSubmit:
+//   1. A variant must be selected.
+//   2. A reason must be selected.
+//   3. For "take", quantity must not exceed the variant's current stock.
+
 import { useState, useEffect } from "react";
 import api from "../api";
 
 function ApparelStockAdjustModal({ product, onClose, onSuccess }) {
+    // Pre-select the only variant if there is just one, otherwise leave blank.
     const [selectedVariantId, setSelectedVariantId] = useState(
         product.variants?.length === 1 ? String(product.variants[0].id) : ""
     );
@@ -21,10 +53,12 @@ function ApparelStockAdjustModal({ product, onClose, onSuccess }) {
     const genderLabel = (g) =>
         g === "U" ? "Unisex" : g === "M" ? "Men" : g === "W" ? "Women" : "Youth";
 
+    // The currently selected variant object, used for stock display and validation.
     const selectedVariant = product.variants?.find(
         (v) => v.id === parseInt(selectedVariantId)
     );
 
+    // Preview of the resulting stock count.
     const newTotal =
         selectedVariant !== undefined
             ? action === "take"
@@ -82,7 +116,7 @@ function ApparelStockAdjustModal({ product, onClose, onSuccess }) {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Variant selector */}
+                    {/* Variant selector — each option shows colour, size, gender, and current stock */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1.5">
                             Variant *
@@ -96,13 +130,13 @@ function ApparelStockAdjustModal({ product, onClose, onSuccess }) {
                             <option value="">Select a variant...</option>
                             {product.variants?.map((v) => (
                                 <option key={v.id} value={v.id}>
-                                    {v.color.color_name} – {v.size.size_value} ({genderLabel(v.gender)}) — Stock: {v.qty_stock}
+                                    {v.color.color_name} – {v.size.size_value} ({genderLabel(v.gender)}) - Stock: {v.qty_stock}
                                 </option>
                             ))}
                         </select>
                     </div>
 
-                    {/* Current stock */}
+                    {/* Current stock — shown once a variant is selected */}
                     {selectedVariant && (
                         <div className="bg-gray-50 rounded-xl px-4 py-3">
                             <p className="text-sm text-gray-600">
@@ -114,7 +148,7 @@ function ApparelStockAdjustModal({ product, onClose, onSuccess }) {
                         </div>
                     )}
 
-                    {/* Action toggle */}
+                    {/* Action toggle — Take reduces stock, Add increases it */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1.5">
                             Action *
@@ -145,7 +179,7 @@ function ApparelStockAdjustModal({ product, onClose, onSuccess }) {
                         </div>
                     </div>
 
-                    {/* Quantity */}
+                    {/* Quantity — preview pill colour is based on action, not result validity */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1.5">
                             Quantity *
@@ -175,7 +209,7 @@ function ApparelStockAdjustModal({ product, onClose, onSuccess }) {
                         )}
                     </div>
 
-                    {/* Reason */}
+                    {/* Reason — required; options come from StockAdjustmentReason in the backend */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1.5">
                             Reason *
@@ -209,7 +243,7 @@ function ApparelStockAdjustModal({ product, onClose, onSuccess }) {
                         />
                     </div>
 
-                    {/* Buttons */}
+                    {/* Buttons — Save is disabled while the request is in flight */}
                     <div className="flex gap-3 pt-1">
                         <button
                             type="button"

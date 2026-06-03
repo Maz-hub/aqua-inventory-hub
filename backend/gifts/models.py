@@ -2,8 +2,11 @@ from django.db import models
 from django.contrib.auth.models import User
 from core.models import StockAdjustmentReason
 
+
+# GiftCategory groups gifts into logical buckets (e.g. Pins, Bags, Clothing).
+# Categories are managed through Django admin and protected from deletion
+# if any gifts are still assigned to them.
 class GiftCategory(models.Model):
-    # Stores available gift categories - editable through Django admin
     name = models.CharField(max_length=100, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -14,6 +17,12 @@ class GiftCategory(models.Model):
         verbose_name_plural = "Gift Categories"
         ordering = ['name']
 
+
+# Gift is the main product record for the gifts inventory.
+# Each gift belongs to a category and tracks current stock, pricing,
+# customs data, and supplier contact details in one place.
+# The created_by and updated_by fields record which staff member
+# added or last modified the record.
 class Gift(models.Model):
     # Visual identification
     product_image = models.ImageField(upload_to='gift_images/', blank=True, null=True)
@@ -29,6 +38,10 @@ class Gift(models.Model):
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
 
     # Customs & logistics
+    # hs_code is the Harmonized System tariff code used for international shipments.
+    # merchant_product_id is our own internal SKU.
+    # manufacturer_product_id is the supplier's non-standardised code.
+    # standardised_product_id holds a GTIN, EAN, or ISBN if one exists.
     hs_code = models.CharField(max_length=20, blank=True)
     merchant_product_id = models.CharField(
         max_length=100,
@@ -64,7 +77,8 @@ class Gift(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='gifts_updated')
 
-    # Optional inventory management
+    # minimum_stock_level triggers a low-stock warning in the admin table
+    # when qty_stock falls at or below this value.
     minimum_stock_level = models.IntegerField(default=10, blank=True)
     notes = models.TextField(blank=True)
 
@@ -72,43 +86,43 @@ class Gift(models.Model):
         return self.product_name
 
 
+# InventoryTransaction records every stock movement for a gift.
+# A row is written each time items are taken out or returned.
+# stock_before and stock_after capture the quantity at the moment
+# of the transaction so the history is a complete audit trail,
+# independent of any later stock corrections.
+# Transactions are never deleted or edited after creation.
 class InventoryTransaction(models.Model):
-    """
-    Tracks all inventory movements (takes and returns)
-    Records who, what, when, how many, and why for audit trail
-    """
-    # Transaction types
     TRANSACTION_TYPES = [
-        ('take', 'Take'),
-        ('return', 'Return'),
+        ('take', 'Take'),    # items removed from stock
+        ('return', 'Return'), # items added back to stock
     ]
 
-    # Core transaction info
+    # The gift this transaction belongs to. Deleting a gift also removes its history.
     gift = models.ForeignKey(Gift, on_delete=models.CASCADE, related_name='transactions')
 
     transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPES)
 
     quantity = models.IntegerField()
 
+    # reason is optional for automated transactions (e.g. request submissions).
+    # For manual adjustments made through the admin stock adjust modal, a reason is required.
     reason = models.ForeignKey(
-    StockAdjustmentReason,
-    on_delete=models.PROTECT,
-    blank=True,
-    null=True,
-    help_text="Reason for transaction (from standardized list)"
-)
-    # New dynamic reason (temporary during migration)
+        StockAdjustmentReason,
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+        help_text="Reason for transaction (from standardized list)"
+    )
 
+    # notes holds free-text context, e.g. which request triggered the movement.
     notes = models.TextField(blank=True)
 
-    # Audit fields
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-
     created_at = models.DateTimeField(auto_now_add=True)
 
-    # Stock levels at time of transaction (for audit trail)
+    # Snapshot of stock levels at the moment this transaction was recorded.
     stock_before = models.IntegerField()
-
     stock_after = models.IntegerField()
 
     def __str__(self):

@@ -1,9 +1,31 @@
-/**
- * Gift Details Modal Component
- *
- * Displays full product information in a modal overlay.
- * Shows all fields from the Gift model including customs and supplier data.
- */
+// GiftDetailsModal shows the full product record for a single gift in a modal overlay.
+//
+// Props:
+//   gift      - the gift object to display; returns null immediately if not provided
+//   onClose   - called when the user clicks Close or the X button
+//   onSuccess - called after a successful edit or delete so the parent can refetch
+//   isAdmin   - when true, shows supplier info, internal notes, and the Edit/Delete/Adjust buttons
+//
+// State:
+//   showEditForm   - when true, the modal swaps its content entirely for EditGiftForm
+//   showStockModal - when true, StockAdjustmentModal is rendered on top of this modal
+//
+// Edit behaviour:
+//   Setting showEditForm to true replaces the details view with EditGiftForm.
+//   On success, the edit form calls onSuccess() and onClose() to close everything.
+//   On cancel, it sets showEditForm back to false and returns to the details view.
+//
+// Delete behaviour:
+//   handleDelete prompts for confirmation, then calls the DELETE endpoint.
+//   On success it calls onSuccess() to trigger a refetch in the parent, then onClose().
+//
+// Stock adjustment:
+//   The Adjust Stock button opens StockAdjustmentModal as a second overlay.
+//   On success it closes both the stock modal and this details modal.
+//
+// All sections in the details view (Customs, Supplier, Notes) are conditionally
+// rendered and only appear when at least one field in that group has a value.
+// Supplier information is additionally gated behind isAdmin.
 
 import { useState } from "react";
 import api from "../api";
@@ -26,7 +48,7 @@ function GiftDetailsModal({ gift, onClose, onSuccess, isAdmin = false }) {
         onClose();
     };
 
-    // If edit form is open, show it instead of details
+    // When editing, replace the entire modal content with the edit form.
     if (showEditForm) {
         return (
             <EditGiftForm
@@ -141,7 +163,7 @@ function GiftDetailsModal({ gift, onClose, onSuccess, isAdmin = false }) {
                                 )}
                             </div>
 
-                            {/* Customs & Logistics */}
+                            {/* Customs & Logistics — only shown when at least one field has a value */}
                             {(gift.hs_code || gift.country_of_origin || gift.merchant_product_id || gift.manufacturer_product_id || gift.standardised_product_id) && (
                                 <div>
                                     <h3 className="text-lead font-semibold text-wa-navy mb-3 border-b pb-2">
@@ -207,7 +229,7 @@ function GiftDetailsModal({ gift, onClose, onSuccess, isAdmin = false }) {
                                 </div>
                             )}
 
-                            {/* Supplier Information — admin only */}
+                            {/* Supplier Information — admin only, shown when at least one field has a value */}
                             {isAdmin &&
                                 (gift.supplier_name ||
                                     gift.supplier_email ||
@@ -279,7 +301,7 @@ function GiftDetailsModal({ gift, onClose, onSuccess, isAdmin = false }) {
 
                         </div>
 
-                        {/* Action Buttons */}
+                        {/* Action Buttons — Edit, Delete, and Adjust Stock are admin-only */}
                         <div className="mt-6 flex gap-3">
                             <button onClick={onClose} className="btn_cancel">
                                 Close
@@ -311,6 +333,7 @@ function GiftDetailsModal({ gift, onClose, onSuccess, isAdmin = false }) {
                 </div>
             </div>
 
+            {/* StockAdjustmentModal is layered on top when the Adjust Stock button is clicked */}
             {showStockModal && (
                 <StockAdjustmentModal
                     gift={gift}

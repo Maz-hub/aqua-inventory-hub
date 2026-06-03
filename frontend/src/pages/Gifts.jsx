@@ -1,3 +1,31 @@
+// Gifts is the public-facing gifts inventory page for all authenticated users.
+// No props — it fetches its own data on mount.
+//
+// State overview:
+//   gifts                  - full list of gifts from the API
+//   loading                - shows nothing until the first fetch completes
+//   selectedGift           - when set, opens GiftDetailsModal (no isAdmin flag here,
+//                            so admin actions are not shown in this view)
+//   searchQuery            - live text filter on product name
+//   selectedCategory       - category ID filter; empty string means "all"
+//   categories             - list for the category dropdown
+//   showFilters            - toggled by the mobile Filters button; hides the filter
+//                            controls on small screens when false
+//   selectionOpen          - controls SelectionDrawer visibility
+//   showRequestModal       - controls GiftRequestModal visibility
+//   selectedGiftForRequest - the gift passed to GiftRequestModal when opened
+//
+// filteredGifts is derived on every render by applying the search and category filters.
+//
+// GiftDetailsModal is always mounted and handles a null gift prop internally.
+// GiftRequestModal is mounted only when showRequestModal is true.
+//
+// "Add to Request" button:
+//   Disabled and shows "Out of Stock" when qty_stock is 0.
+//   On click, opens GiftRequestModal for the selected gift.
+//   When the request modal closes, it also opens the SelectionDrawer so the
+//   user can immediately see what they've added to their basket.
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
@@ -9,7 +37,7 @@ import GiftRequestModal from "../components/GiftRequestModal";
 function Gifts() {
   const [gifts, setGifts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedGift, setSelectedGift] = useState(null); // Tracks which gift is selected for viewing details
+  const [selectedGift, setSelectedGift] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [categories, setCategories] = useState([]);
@@ -46,13 +74,12 @@ function Gifts() {
       .catch((err) => alert(err));
   };
 
+  // Applies search and category filters to produce the visible grid.
   const filteredGifts = gifts.filter((gift) => {
-    // Search filter - matches product name
     const matchesSearch = gift.product_name
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
 
-    // Category filter - shows all or specific category
     const matchesCategory =
       selectedCategory === "" ||
       gift.category.id === parseInt(selectedCategory);
@@ -187,7 +214,7 @@ function Gifts() {
                       <span className="text-gray-600">
                         Stock: <strong>{gift.qty_stock}</strong>
                       </span>
-                      {/* Low Stock Badge */}
+                      {/* Low Stock badge — shown when qty is at or below minimum threshold */}
                       {gift.qty_stock <= gift.minimum_stock_level && (
                         <span className="badge_low">LOW</span>
                       )}
@@ -199,6 +226,7 @@ function Gifts() {
 
                   {/* Action Buttons */}
                   <div className="space-y-2">
+                    {/* Add to Request is disabled when out of stock */}
                     <button
                       onClick={() => {
                         setSelectedGiftForRequest(gift);
@@ -227,7 +255,7 @@ function Gifts() {
             ))}
           </div>
         )}
-        {/* Gift Details Modal */}
+        {/* GiftDetailsModal is always mounted; it handles a null gift prop internally */}
         <GiftDetailsModal
           gift={selectedGift}
           onClose={() => setSelectedGift(null)}
@@ -235,6 +263,8 @@ function Gifts() {
         />
 
       </div>
+      {/* GiftRequestModal opens when the user clicks Add to Request on a card.
+          On close, also opens the SelectionDrawer so the user can review their basket. */}
       {showRequestModal && selectedGiftForRequest && (
         <GiftRequestModal
           gift={selectedGiftForRequest}

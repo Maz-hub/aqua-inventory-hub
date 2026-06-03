@@ -3,80 +3,77 @@ from rest_framework import serializers
 from gifts.models import Gift, GiftCategory, InventoryTransaction
 
 
+# GiftCategorySerializer is used wherever categories need to appear as nested objects
+# in API responses (e.g. inside GiftSerializer). Returns only id and name.
 class GiftCategorySerializer(serializers.ModelSerializer):
-    # Converts GiftCategory model to/from JSON format for API responses
-
     class Meta:
         model = GiftCategory
-        # Specifies which model this serializer works with
-
         fields = ["id", "name"]
-        # Only include category ID and name in API responses
 
 
+# GiftSerializer handles both reading and writing gift records.
+#
+# The dual-field pattern is used for category:
+#   category    (read, nested) - returned in responses as {"id": 1, "name": "Pins"}
+#   category_id (write, PK)    - accepted in POST/PATCH requests as a plain integer
+# This avoids needing to POST the full nested object when creating or updating a gift.
+#
+# Audit fields (created_at, created_by, updated_at, updated_by) are all read_only.
+# created_by and updated_by are set in the view's perform_create/perform_update,
+# not here.
 class GiftSerializer(serializers.ModelSerializer):
-    # Converts Gift model to/from JSON format with nested category information
-
     category = GiftCategorySerializer(read_only=True)
-    # For READ operations: shows full category details {"id": 1, "name": "Apparel"}
-    # read_only=True means this field only appears in responses, not accepted in requests
-
     category_id = serializers.PrimaryKeyRelatedField(
         queryset=GiftCategory.objects.all(),
         source='category',
         write_only=True
     )
-    # For WRITE operations: accepts just the category ID when creating/updating gifts
-    # queryset validates that the category ID exists in database
-    # source='category' links this to the actual category field in the model
-    # write_only=True means this field is only accepted in requests, not shown in responses
 
     class Meta:
         model = Gift
-        # Specifies which model this serializer works with
-
         fields = [
-            "id",                    # Unique identifier for each gift
-            "product_image",         # Path to uploaded product image
-            "product_name",          # Name of the product
-            "category",              # Full category object (read-only, for display)
-            "category_id",           # Category ID (write-only, for creating/updating)
-            "qty_stock",             # Current stock quantity
-            "description",           # Product description
-            "material",              # Material composition
-            "unit_price",            # Price per unit
-            "hs_code",               # Harmonized System code for customs
-            "country_of_origin",     # Manufacturing country
-            "supplier_name",         # Supplier company name
-            "supplier_email",        # Supplier contact email
-            "supplier_phone",        # Supplier contact phone number
-            "supplier_address",      # Supplier physical address
-            "merchant_product_id",       # Your unique product code / SKU for customs declarations
-            "manufacturer_product_id",   # Supplier's non-standardised product code
-            "standardised_product_id",   # Standardised code (GTIN, EAN, ISBN)
-            "created_at",            # Timestamp when record was created
-            "created_by",            # User who created the record
-            "updated_at",            # Timestamp of last modification
-            "updated_by",            # User who last modified the record
-            "minimum_stock_level",   # Alert threshold for low stock
-            "notes",                 # Additional internal notes
+            "id",
+            "product_image",
+            "product_name",
+            "category",              # read: full nested object
+            "category_id",           # write: integer ID
+            "qty_stock",
+            "description",
+            "material",
+            "unit_price",
+            "hs_code",
+            "country_of_origin",
+            "supplier_name",
+            "supplier_email",
+            "supplier_phone",
+            "supplier_address",
+            "merchant_product_id",
+            "manufacturer_product_id",
+            "standardised_product_id",
+            "created_at",
+            "created_by",
+            "updated_at",
+            "updated_by",
+            "minimum_stock_level",
+            "notes",
         ]
 
         extra_kwargs = {
             "created_at": {"read_only": True},
-            # Timestamp automatically set by Django, users cannot modify
-
             "created_by": {"read_only": True},
-            # User automatically captured from request, users cannot set manually
-
             "updated_at": {"read_only": True},
-            # Timestamp automatically updated by Django on every save
-
             "updated_by": {"read_only": True},
-            # User automatically captured from request on updates
         }
 
 
+# InventoryTransactionSerializer is used by the gift stock history endpoint.
+# It is entirely read-only — transactions are never created or modified through this serializer.
+#
+# created_by uses SlugRelatedField to return the username string directly instead of
+# the user's integer ID, so the history table can display a name without a second lookup.
+#
+# reason uses SlugRelatedField to return the StockAdjustmentReason's name string
+# rather than its ID.
 class InventoryTransactionSerializer(serializers.ModelSerializer):
     created_by = serializers.SlugRelatedField(slug_field="username", read_only=True)
     reason = serializers.SlugRelatedField(slug_field="name", read_only=True)

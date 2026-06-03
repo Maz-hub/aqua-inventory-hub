@@ -1,9 +1,21 @@
-/**
- * Gift Form Component
- *
- * Reusable form for creating and editing gifts.
- * Handles all gift fields including product info, customs, and supplier data.
- */
+// GiftForm is the admin form for creating a new gift product.
+// It is used from AdminGifts via the "+ Add New Gift" button.
+// Editing an existing gift is handled by EditGiftForm, not this component.
+//
+// Props:
+//   onSuccess - called after the gift is successfully created; triggers a refetch in the parent
+//   onClose   - called when the user cancels or clicks the X button
+//
+// All fields are independent state variables rather than a single form object.
+// minimumStockLevel defaults to "10" to match the model's default value.
+//
+// createGift uses FormData and multipart/form-data because of the optional image upload.
+// All fields are always appended to FormData, even optional ones; the backend handles
+// blank strings gracefully.
+// productImage is only appended when the user has selected a file.
+//
+// On success, shows a confirmation alert and then calls onSuccess() so the parent
+// refetches and shows the new item.
 
 import { useState, useEffect } from "react";
 import api from "../api";
@@ -41,6 +53,8 @@ function GiftForm({ onSuccess, onClose }) {
       .catch((err) => alert(err));
   };
 
+  // Builds a FormData payload and POSTs to create the gift.
+  // multipart/form-data is required because of the optional image upload.
   const createGift = (e) => {
     e.preventDefault();
 
@@ -199,6 +213,7 @@ function GiftForm({ onSuccess, onClose }) {
               />
             </div>
 
+            {/* minimumStockLevel defaults to 10 to match the model default */}
             <div>
               <label
                 htmlFor="minimumStockLevel"

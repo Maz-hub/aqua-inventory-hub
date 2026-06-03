@@ -1,9 +1,25 @@
-/**
- * My Requests Page
- *
- * Shows all Item Requests submitted by the logged-in user.
- * Displays status, items, total cost and date needed.
- */
+// MyRequests shows all item requests submitted by the logged-in user.
+// No props — the backend endpoint filters to the current user automatically.
+//
+// State overview:
+//   requests      - list of the user's own requests, ordered newest first by the backend
+//   loading       - shows a loading message until the first fetch completes
+//   selectionOpen - controls SelectionDrawer visibility (accessible via the Header)
+//
+// STATUS_STYLES and STATUS_LABELS map each status code to a Tailwind colour class
+// and a human-readable label for the badge shown on each request card.
+//
+// cancelRequest:
+//   Prompts for confirmation, then calls PATCH /cancel/ which also restores stock.
+//   Only available for requests in "pending" or "draft" status.
+//   Pending requests have stock deducted; cancelling them restores it.
+//   Draft requests never deducted stock, so cancellation is simply a status change.
+//
+// Per line item, the quantity display uses quantity_confirmed when set, otherwise
+// quantity_requested. If the admin confirmed a different quantity, the original
+// requested amount is shown in amber as "(requested: X)" so the user knows it changed.
+//
+// The empty state shows a Browse Inventory button when the user has no requests yet.
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -52,6 +68,8 @@ function MyRequests() {
             });
     };
 
+    // Cancels a pending or draft request after confirmation.
+    // For pending requests, stock is restored on the backend before status changes.
     const cancelRequest = (requestId) => {
         if (window.confirm("Are you sure you want to cancel this request?")) {
             api.patch(`/api/requests/${requestId}/cancel/`)
@@ -101,7 +119,7 @@ function MyRequests() {
                             {requests.map(request => (
                                 <div key={request.id} className="bg-white rounded-2xl shadow p-4 md:p-6">
 
-                                    {/* Status badge — full width on mobile */}
+                                    {/* Status badge */}
                                     <div className="flex items-center justify-between mb-3">
                                         <p className="text-sm font-semibold text-gray-400">
                                             Request #{request.id}
@@ -150,6 +168,7 @@ function MyRequests() {
                                                             <p className="text-gray-400 text-xs">
                                                                 Unit price: $ {parseFloat(item.unit_price).toFixed(2)}
                                                             </p>
+                                                            {/* Shows confirmed qty if set; highlights in amber when it differs from requested */}
                                                             <p className="text-gray-500 text-xs">
                                                                 x{item.quantity_confirmed ?? item.quantity_requested}
                                                                 {item.quantity_confirmed !== null &&
@@ -168,7 +187,8 @@ function MyRequests() {
                                         </div>
                                     )}
 
-                                    {/* Total + Cancel button row */}
+                                    {/* Total + Cancel button row.
+                                        Cancel is only available on pending and draft requests. */}
                                     <div className="flex items-center justify-between border-t border-gray-100 pt-4">
                                         <p className="text-lg font-bold text-wa-navy whitespace-nowrap">
                                             $ {parseFloat(request.total_cost).toFixed(2)}
@@ -183,7 +203,7 @@ function MyRequests() {
                                         )}
                                     </div>
 
-                                    {/* Notes */}
+                                    {/* Notes from requester */}
                                     {request.notes && (
                                         <div className="mt-3">
                                             <p className="text-xs text-gray-400 italic">📝 {request.notes}</p>

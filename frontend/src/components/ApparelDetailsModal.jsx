@@ -1,9 +1,32 @@
-/**
- * Apparel Details Modal Component
- *
- * Displays full product information with all size/color variants.
- * Shows product details, customs info, and variant stock levels.
- */
+// ApparelDetailsModal shows the full product record for a single apparel product,
+// including all size/colour/gender variants with their current stock counts.
+//
+// Props:
+//   product   - the product object to display (including nested variants array);
+//               returns null immediately if not provided
+//   onClose   - called when the user dismisses the modal
+//   onSuccess - called after a successful edit so the parent can refetch
+//   isAdmin   - when true, shows supplier info, internal notes, and the Edit Product button
+//
+// State:
+//   isEditing - when true, swaps the entire modal content for EditApparelProductForm
+//
+// Edit behaviour:
+//   Setting isEditing to true replaces the details view with EditApparelProductForm.
+//   On success, it calls onSuccess() and onClose() to close everything.
+//   On cancel, it sets isEditing back to false and returns to the details view.
+//
+// Unlike GiftDetailsModal, there is no Delete button here.
+// Product deletion is handled directly in AdminApparel via the table row button.
+//
+// Variant display:
+//   Each variant card shows colour, size, gender, and current stock.
+//   Cards with stock at or below minimum_stock_level get a red border and LOW badge.
+//   GENDER_LABELS maps the single-character code to a readable label.
+//
+// All optional sections (Customs, Supplier, Notes) are conditionally rendered and
+// only appear when at least one field in that group has a value.
+// Supplier information and Notes are additionally gated behind isAdmin.
 
 import { useState } from "react";
 import EditApparelProductForm from "./EditApparelProductForm";
@@ -15,6 +38,7 @@ function ApparelDetailsModal({ product, onClose, onSuccess, isAdmin = false }) {
 
   if (!product) return null;
 
+  // When editing, replace the entire modal content with the edit form.
   if (isEditing) {
     return (
       <EditApparelProductForm
@@ -104,7 +128,7 @@ function ApparelDetailsModal({ product, onClose, onSuccess, isAdmin = false }) {
               )}
             </div>
 
-            {/* Variants / Stock Levels */}
+            {/* Variants / Stock Levels — each card is highlighted red when at or below minimum */}
             <div>
               <h3 className="text-lg font-semibold text-wa-navy mb-3 border-b pb-2">
                 Size/Color Variants & Stock
@@ -148,7 +172,7 @@ function ApparelDetailsModal({ product, onClose, onSuccess, isAdmin = false }) {
               )}
             </div>
 
-            {/* Customs & Logistics */}
+            {/* Customs & Logistics — only shown when at least one field has a value */}
             {(product.item_id ||
               product.hs_code ||
               product.country_of_origin ||
@@ -223,7 +247,7 @@ function ApparelDetailsModal({ product, onClose, onSuccess, isAdmin = false }) {
               </div>
             )}
 
-            {/* Supplier Information — admin only */}
+            {/* Supplier Information — admin only, shown when at least one field has a value */}
             {isAdmin &&
               (product.supplier_name ||
                 product.supplier_email ||
@@ -284,7 +308,7 @@ function ApparelDetailsModal({ product, onClose, onSuccess, isAdmin = false }) {
             )}
           </div>
 
-          {/* Action Buttons */}
+          {/* Action Buttons — Edit Product is admin-only */}
           <div className="mt-6 flex gap-3">
             <button onClick={onClose} className="btn_cancel">
               Close

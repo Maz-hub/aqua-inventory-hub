@@ -1,9 +1,41 @@
-/**
- * Apparel Inventory Page
- *
- * Displays apparel products with size/color variant management.
- * Shows available stock for each size/color combination.
- */
+// Apparel is the public-facing apparel inventory page for all authenticated users.
+// No props — it fetches its own data on mount.
+//
+// State overview:
+//   products                   - full list of apparel products, each with nested variants
+//   loading                    - shows a loading card until the first fetch completes
+//   searchTerm                 - live text filter on product name
+//   selectedCategory           - category ID filter
+//   selectedColor              - colour ID filter; matches if any variant has that colour
+//   selectedClothingSize       - clothing size ID filter; matches if any variant has that size
+//   selectedFootwearSize       - footwear size ID filter; matches if any variant has that size
+//   selectedGender             - gender code filter (U/M/W/Y); matched against product.gender
+//   categories / colors        - reference lists for filter dropdowns
+//   clothingSizes / footwearSizes - sizes split by type from a single API call so each
+//                                  filter dropdown only shows relevant sizes
+//   showFilters                - toggles the filter panel on mobile
+//   showDetailsModal + selectedProductForDetails - controls ApparelDetailsModal
+//   showRequestModal + selectedProductForRequest - controls ApparelRequestModal
+//   selectionOpen              - controls SelectionDrawer visibility
+//
+// fetchSizes splits the single /api/apparel/sizes/ response into two arrays using
+// size_type so the clothing and footwear dropdowns stay separate.
+//
+// filteredProducts is derived on every render from all six active filters.
+// Colour, clothing size, and footwear size filters check across a product's variants,
+// so a product passes the colour filter if ANY of its variants match.
+//
+// Variants display:
+//   Variants are grouped by gender (U, M, W, Y) and sorted by display_order within
+//   each group. Gender groups with no variants are skipped entirely.
+//   Each size badge shows the size value and stock count in parentheses.
+//   Badges at or below minimum_stock_level get a red border and background.
+//   In-stock badges use product.primary_color.hex_code at 40% opacity for the background.
+//   White products get a gray border instead to keep the badge visible.
+//
+// "Add to Request" button:
+//   Disabled (and shows "Out of Stock") when every variant has qty_stock === 0.
+//   On close, ApparelRequestModal also opens the SelectionDrawer.
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -37,7 +69,6 @@ function Apparel() {
   const [selectedGender, setSelectedGender] = useState("");
   const [showFilters, setShowFilters] = useState(false);
 
-  // Fetch data on component mount
   useEffect(() => {
     fetchProducts();
     fetchCategories();
@@ -82,11 +113,12 @@ function Apparel() {
       });
   };
 
+  // Splits the single sizes response into two arrays so the two filter
+  // dropdowns (clothing vs footwear) only show relevant options.
   const fetchSizes = () => {
     api
       .get("/api/apparel/sizes/")
       .then((res) => {
-        // Separate clothing and footwear sizes
         const clothing = res.data.filter((s) => s.size_type === "clothing");
         const footwear = res.data.filter((s) => s.size_type === "footwear");
         setClothingSizes(clothing);
@@ -97,27 +129,25 @@ function Apparel() {
       });
   };
 
-  // Filter products based on all criteria
+  // Applies all six active filters to produce the visible product grid.
+  // Colour and size filters check across variants — a product passes if ANY variant matches.
   const filteredProducts = products.filter((product) => {
-    // Search filter
     const matchesSearch = product.product_name
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
 
-    // Category filter
     const matchesCategory =
       !selectedCategory || product.category.id === parseInt(selectedCategory);
 
-    // Gender filter
     const matchesGender = !selectedGender || product.gender === selectedGender;
 
-    // Color filter - check if product has any variant with selected color
+    // Colour filter checks whether any variant has the selected colour.
     const matchesColor =
       !selectedColor ||
       (product.variants &&
         product.variants.some((v) => v.color.id === parseInt(selectedColor)));
 
-    // Clothing size filter
+    // Clothing size filter checks whether any variant has the selected size.
     const matchesClothingSize =
       !selectedClothingSize ||
       (product.variants &&
@@ -125,7 +155,7 @@ function Apparel() {
           (v) => v.size.id === parseInt(selectedClothingSize),
         ));
 
-    // Footwear size filter
+    // Footwear size filter checks whether any variant has the selected size.
     const matchesFootwearSize =
       !selectedFootwearSize ||
       (product.variants &&
@@ -345,6 +375,7 @@ function Apparel() {
                     <span className="text-sm text-wa-blue">
                       {product.category.name}
                     </span>
+                    {/* Show unique colour names across all variants */}
                     <span className="text-sm text-gray-600">
                       {product.variants && product.variants.length > 0
                         ? [...new Set(product.variants.map((v) => v.color.color_name))].join(", ")
@@ -352,14 +383,15 @@ function Apparel() {
                     </span>
                   </div>
 
-                  {/* Variants Display - Grouped by Gender */}
+                  {/* Variants grouped by gender (U, M, W, Y order), each group
+                      sorted by size display_order. Groups with no variants are skipped.
+                      Low-stock badges get red; in-stock badges use the product's primary colour. */}
                   <div className="border-t pt-3 mt-3 flex-1">
                     <p className="text-xs font-semibold text-gray-700 mb-2">
                       Available Sizes:
                     </p>
                     {product.variants && product.variants.length > 0 ? (
                       <div className="space-y-3">
-                        {/* Group variants by gender */}
                         {["U", "M", "W", "Y"].map((genderCode) => {
                           const genderVariants = product.variants
                             .filter((v) => v.gender === genderCode)
@@ -386,7 +418,8 @@ function Apparel() {
                                 {genderLabel}:
                               </p>
 
-                              {/* Size Badges */}
+                              {/* Size Badges — red when at/below minimum, coloured otherwise.
+                                  White products get a gray border so the badge stays visible. */}
                               <div className="flex flex-wrap gap-1 mb-2">
                                 {genderVariants.map((variant) => (
                                   <span
@@ -450,7 +483,7 @@ function Apparel() {
                     )}
                   </div>
 
-                  {/* Action Buttons */}
+                  {/* Action Buttons — Add to Request is disabled when all variants are out of stock */}
                   <div className="space-y-2 mt-auto">
                     <button
                       onClick={() => {
@@ -499,7 +532,7 @@ function Apparel() {
           onSuccess={fetchProducts}
         />
       )}
-      {/* Apparel Request Modal */}
+      {/* ApparelRequestModal — on close also opens SelectionDrawer so user can review basket */}
       {showRequestModal && selectedProductForRequest && (
         <ApparelRequestModal
           product={selectedProductForRequest}
