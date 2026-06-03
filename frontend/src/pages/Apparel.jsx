@@ -139,7 +139,7 @@ function Apparel() {
     const matchesCategory =
       !selectedCategory || product.category.id === parseInt(selectedCategory);
 
-    const matchesGender = !selectedGender || product.gender === selectedGender;
+    const matchesGender = !selectedGender || (product.variants && product.variants.some(v => v.gender === selectedGender));
 
     // Colour filter checks whether any variant has the selected colour.
     const matchesColor =
