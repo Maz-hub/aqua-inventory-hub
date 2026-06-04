@@ -83,18 +83,16 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 
-# Edit 7.6 — Use PostgreSQL on Azure (via Service Connector), SQLite locally
-if 'AZURE_POSTGRESQL_CONNECTIONSTRING' in os.environ:
-    conn_str = os.environ['AZURE_POSTGRESQL_CONNECTIONSTRING']
-    conn_str_params = {p.split('=')[0]: p.split('=')[1] for p in conn_str.split(' ')}
+# Edit 7.6 — Use PostgreSQL on Azure (via Service Connector Format B), SQLite locally
+if 'AZURE_POSTGRESQL_HOST' in os.environ:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': conn_str_params['dbname'],
-            'HOST': conn_str_params['host'],
-            'USER': conn_str_params['user'],
-            'PASSWORD': conn_str_params['password'],
-            'PORT': conn_str_params.get('port', '5432'),
+            'NAME': os.environ['AZURE_POSTGRESQL_NAME'],
+            'HOST': os.environ['AZURE_POSTGRESQL_HOST'],
+            'USER': os.environ['AZURE_POSTGRESQL_USER'],
+            'PASSWORD': os.environ['AZURE_POSTGRESQL_PASSWORD'],
+            'PORT': '5432',
         }
     }
 else:
