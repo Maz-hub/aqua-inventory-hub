@@ -90,7 +90,7 @@ function GiftDetailsModal({ gift, onClose, onSuccess, isAdmin = false }) {
                                         "",
                                     )}
                                     alt={gift.product_name}
-                                    className="w-full h-64 object-cover rounded-lg"
+                                    className="w-full h-64 object-contain rounded-lg bg-gray-100"
                                 />
                             </div>
                         )}
