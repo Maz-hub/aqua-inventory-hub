@@ -243,7 +243,7 @@ function AdminApparel() {
                                     $ {parseFloat(product.unit_price).toFixed(2)}
                                 </td>
                                 <td className="px-4 py-3">
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2 justify-between">
                                         <button
                                             onClick={() => setSelectedProduct(product)}
                                             className="text-wa-blue hover:text-wa-ocean border border-wa-blue hover:border-wa-ocean text-xs font-medium cursor-pointer transition-colors px-2 py-0.5 rounded"
