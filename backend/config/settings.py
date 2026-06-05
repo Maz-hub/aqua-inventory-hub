@@ -145,6 +145,8 @@ CORS_ALLOW_CREDENTIALS = True
 # In development: static served normally, media served from local filesystem
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+# Include the React build's assets so collectstatic picks them up
+STATICFILES_DIRS = [BASE_DIR / 'frontend' / 'dist']
 
 if 'AZURE_STORAGE_CONNECTION_STRING' in os.environ:
     STORAGES = {
