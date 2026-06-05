@@ -14,8 +14,14 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'unsafe-fallback-key-for-local-dev-onl
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 # Edit 7.2 — ALLOWED_HOSTS uses Azure's automatic WEBSITE_HOSTNAME env var in production
-ALLOWED_HOSTS = [os.environ.get('WEBSITE_HOSTNAME', 'localhost')]
-CSRF_TRUSTED_ORIGINS = ['https://' + os.environ.get('WEBSITE_HOSTNAME', 'localhost')]
+ALLOWED_HOSTS = [
+    os.environ.get('WEBSITE_HOSTNAME', 'localhost'),
+    'inventory.worldaquatics.com',
+]
+CSRF_TRUSTED_ORIGINS = [
+    'https://' + os.environ.get('WEBSITE_HOSTNAME', 'localhost'),
+    'https://inventory.worldaquatics.com',
+]
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
