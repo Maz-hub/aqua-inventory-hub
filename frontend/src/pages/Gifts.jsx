@@ -193,7 +193,7 @@ function Gifts() {
                           "",
                         )}
                         alt={gift.product_name}
-                        className="w-full h-full object-contain"
+                        className="w-full h-full object-contain p-2"
                         onError={(e) => {
                           e.target.style.display = "none";
                         }}
