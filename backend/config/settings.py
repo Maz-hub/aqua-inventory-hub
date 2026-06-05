@@ -147,6 +147,10 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 # Include the React build's assets so collectstatic picks them up
 STATICFILES_DIRS = [BASE_DIR / 'frontend' / 'dist']
+# Serve React build files (e.g. /assets/index.js, /vite.svg) at the root URL path.
+# WhiteNoise handles these before Django routing runs, so they are never caught
+# by the React catch-all URL pattern.
+WHITENOISE_ROOT = BASE_DIR / 'frontend' / 'dist'
 
 if 'AZURE_STORAGE_CONNECTION_STRING' in os.environ:
     STORAGES = {
