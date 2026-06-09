@@ -114,6 +114,19 @@ function AdminGifts() {
         setShowLowStockOnly(false);
     };
 
+    const handleDelete = async (gift) => {
+        const confirmed = window.confirm(
+            `Are you sure you want to delete "${gift.product_name}"? This cannot be undone.`
+        );
+        if (!confirmed) return;
+        try {
+            await api.delete(`/api/gifts/${gift.id}/`);
+            fetchGifts();
+        } catch (err) {
+            alert(err.response?.data?.error || "Failed to delete gift.");
+        }
+    };
+
     if (loading) {
         return (
             <div className="text-center py-12">
@@ -272,6 +285,12 @@ function AdminGifts() {
                                         >
                                             History
                                         </button>
+                                        <button
+                                            onClick={() => handleDelete(gift)}
+                                            className="text-red-400 hover:text-red-600 border border-red-300 hover:border-red-500 text-xs font-medium cursor-pointer transition-colors px-2 py-0.5 rounded"
+                                        >
+                                            Delete
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -338,6 +357,12 @@ function AdminGifts() {
                                     className="text-gray-400 hover:text-wa-navy border border-gray-300 hover:border-wa-navy text-xs font-medium cursor-pointer transition-colors px-2 py-0.5 rounded"
                                 >
                                     History
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(gift)}
+                                    className="text-red-400 hover:text-red-600 border border-red-300 hover:border-red-500 text-xs font-medium cursor-pointer transition-colors px-2 py-0.5 rounded"
+                                >
+                                    Delete
                                 </button>
                             </div>
                         </div>
