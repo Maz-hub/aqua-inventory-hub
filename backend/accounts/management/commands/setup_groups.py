@@ -19,6 +19,7 @@ class Command(BaseCommand):
             'apparel_viewer',     # Read-only access to Apparel inventory
             'executive_viewer',   # Read-only access to Executive Office inventory
             'it_viewer',          # Read-only access to IT Assets inventory
+            'office_access',      # Full access to Office & Events inventory
             'office_viewer',      # Read-only access to Office & Events inventory
             'requests_access',    # Access to Requests management in admin panel
             'dashboard_access',   # Access to Dashboard in admin panel
