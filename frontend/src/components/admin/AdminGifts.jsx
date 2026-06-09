@@ -93,7 +93,7 @@ function AdminGifts() {
         );
         if (!confirmed) return;
         try {
-            await api.delete(`/api/gifts/${gift.id}/`);
+            await api.delete(`/api/gifts/delete/${gift.id}/`);
             fetchGifts();
         } catch (err) {
             alert(err.response?.data?.error || "Failed to delete gift.");
