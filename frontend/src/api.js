@@ -22,8 +22,7 @@
 import axios from "axios";
 // HTTP client library for making API requests to Django backend
 
-import { ACCESS_TOKEN } from "./constants";
-// Import the localStorage key name for the access token
+import { ACCESS_TOKEN, REFRESH_TOKEN } from "./constants";
 
 const api = axios.create({
   // Creates a customized axios instance with pre-configured settings
@@ -62,6 +61,35 @@ api.interceptors.request.use(
   }
 );
 
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const original = error.config;
+
+    if (error.response?.status === 401 && !original._retry) {
+      original._retry = true;
+      const refreshToken = localStorage.getItem(REFRESH_TOKEN);
+
+      if (refreshToken) {
+        try {
+          const { data } = await axios.post(
+            `${import.meta.env.VITE_API_URL}/api/token/refresh/`,
+            { refresh: refreshToken }
+          );
+          localStorage.setItem(ACCESS_TOKEN, data.access);
+          original.headers.Authorization = `Bearer ${data.access}`;
+          return api(original);
+        } catch {
+          // Refresh failed — fall through to logout
+        }
+      }
+
+      localStorage.clear();
+      window.location.href = "/login";
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 export default api;
-// Exports the configured axios instance for use throughout the app
-// Import in other files: import api from "./api"

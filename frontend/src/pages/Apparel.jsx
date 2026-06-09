@@ -178,12 +178,6 @@ function Apparel() {
       <Header onSelectionOpen={() => setSelectionOpen(true)} />
       <div className="p-4 md:p-8">
       <div className="max-w-7xl mx-auto mb-8">
-        <button
-          onClick={() => navigate("/")}
-          className="mb-4 text-wa-blue hover:text-wa-ocean flex items-center gap-2 cursor-pointer font-medium transition-colors"
-        >
-          ← Back to Home
-        </button>
 
         <div className="flex justify-center items-center mb-8">
           <div>
