@@ -2,18 +2,16 @@
 // No props — it fetches its own data on mount.
 //
 // State overview:
-//   gifts           - full list fetched from the API
-//   loading         - shows a loading message until the first fetch completes
-//   selected        - array of gift IDs with checkboxes ticked (for bulk actions)
-//   searchQuery     - live text filter applied to product names
+//   gifts            - full list fetched from the API
+//   loading          - shows a loading message until the first fetch completes
+//   searchQuery      - live text filter applied to product names
 //   selectedCategory - category ID filter; empty string means "all"
-//   categories      - list for the category dropdown
-//   selectedGift    - when set to a gift object, opens GiftDetailsModal
-//   historyGift     - when set to a gift object, opens TransactionHistoryModal
-//   adjustGift      - when set to a gift object, opens StockAdjustmentModal
-//   showAddForm     - controls visibility of the GiftForm modal
+//   categories       - list for the category dropdown
+//   selectedGift     - when set to a gift object, opens GiftDetailsModal
+//   historyGift      - when set to a gift object, opens TransactionHistoryModal
+//   adjustGift       - when set to a gift object, opens StockAdjustmentModal
+//   showAddForm      - controls visibility of the GiftForm modal
 //   showLowStockOnly - when true, only shows gifts at or below minimum_stock_level
-//   adjustReasons   - pre-fetched list of stock adjustment reasons (for future use)
 //
 // filteredGifts is derived from gifts on every render by applying all three
 // active filters. No separate state is needed for the filtered list.
@@ -39,7 +37,6 @@ import GiftForm from "../GiftForm";
 function AdminGifts() {
     const [gifts, setGifts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [selected, setSelected] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("");
     const [categories, setCategories] = useState([]);
@@ -48,12 +45,10 @@ function AdminGifts() {
     const [adjustGift, setAdjustGift] = useState(null);
     const [showAddForm, setShowAddForm] = useState(false);
     const [showLowStockOnly, setShowLowStockOnly] = useState(false);
-    const [adjustReasons, setAdjustReasons] = useState([]);
 
     useEffect(() => {
         fetchGifts();
         fetchCategories();
-        fetchAdjustReasons();
     }, []);
 
     const fetchGifts = () => {
@@ -69,28 +64,6 @@ function AdminGifts() {
         api.get("/api/gifts/categories/")
             .then(res => setCategories(res.data))
             .catch(err => console.error("Failed to load categories:", err));
-    };
-
-    const fetchAdjustReasons = () => {
-        api.get("/api/stock-adjustment-reasons/")
-            .then(res => setAdjustReasons(res.data))
-            .catch(err => console.error("Failed to load adjustment reasons:", err));
-    };
-
-    // Toggles a single gift in/out of the selected array.
-    const toggleSelect = (id) => {
-        setSelected(prev =>
-            prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
-        );
-    };
-
-    // Selects all visible (filtered) gifts, or clears selection if all are already selected.
-    const toggleSelectAll = () => {
-        if (selected.length === filteredGifts.length) {
-            setSelected([]);
-        } else {
-            setSelected(filteredGifts.map(g => g.id));
-        }
     };
 
     // Applies all active filters to produce the list shown in the table/cards.
@@ -139,7 +112,7 @@ function AdminGifts() {
         <div>
             {/* Toolbar */}
             <div className="flex flex-col gap-3 mb-6">
-                {/* Row 1: Search + Category (stacked on mobile, side-by-side on desktop) */}
+                {/* Row 1: Search + Category */}
                 <div className="flex flex-col xl:flex-row gap-3">
                     <input
                         type="text"
@@ -160,7 +133,7 @@ function AdminGifts() {
                     </select>
                 </div>
 
-                {/* Row 2: Add New Gift (left) | Low Stock + Clear (right) — stacked on mobile */}
+                {/* Row 2: Add button (left) | Low Stock + Clear (right) */}
                 <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-2">
                     <button
                         onClick={() => setShowAddForm(true)}
@@ -191,34 +164,26 @@ function AdminGifts() {
                 </div>
             </div>
 
-            {/* Selected actions bar — shown when at least one row is ticked */}
-            {selected.length > 0 && (
-                <div className="bg-wa-blue/10 border border-wa-blue/20 rounded-xl px-4 py-3 mb-4 flex items-center justify-between">
-                    <p className="text-sm font-medium text-wa-navy">
-                        {selected.length} item{selected.length !== 1 ? "s" : ""} selected
-                    </p>
-                    {/* Export to Excel button will go here */}
-                </div>
-            )}
-
             {/* Table — desktop */}
             <div className="hidden xl:block bg-white rounded-2xl shadow overflow-hidden">
                 <table className="w-full text-sm">
                     <thead className="bg-gray-50 border-b border-gray-100">
                         <tr>
-                            <th className="px-4 py-3 text-left">
-                                <input
-                                    type="checkbox"
-                                    checked={selected.length === filteredGifts.length && filteredGifts.length > 0}
-                                    onChange={toggleSelectAll}
-                                    className="cursor-pointer"
-                                />
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">
+                                Image
                             </th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Image</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Product</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Category</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Stock</th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Price</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">
+                                Product
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">
+                                Category
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">
+                                Stock
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">
+                                Price
+                            </th>
                             <th className="px-4 py-3"></th>
                         </tr>
                     </thead>
@@ -226,16 +191,8 @@ function AdminGifts() {
                         {filteredGifts.map(gift => (
                             <tr
                                 key={gift.id}
-                                className={`hover:bg-gray-50 transition-colors ${selected.includes(gift.id) ? "bg-blue-50" : ""}`}
+                                className="hover:bg-gray-50 transition-colors"
                             >
-                                <td className="px-4 py-3">
-                                    <input
-                                        type="checkbox"
-                                        checked={selected.includes(gift.id)}
-                                        onChange={() => toggleSelect(gift.id)}
-                                        className="cursor-pointer"
-                                    />
-                                </td>
                                 <td className="px-4 py-3">
                                     <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
                                         {gift.product_image ? (
@@ -250,13 +207,19 @@ function AdminGifts() {
                                     </div>
                                 </td>
                                 <td className="px-4 py-3">
-                                    <p className="font-medium text-wa-navy">{gift.product_name}</p>
-                                    {/* Low stock badge appears when qty is at or below the minimum threshold */}
+                                    <p className="font-medium text-wa-navy">
+                                        {gift.product_name}
+                                    </p>
+                                    {/* Low stock badge — shown when qty is at or below its threshold */}
                                     {gift.qty_stock <= gift.minimum_stock_level && (
-                                        <span className="text-xs text-red-500 font-medium">Low Stock</span>
+                                        <span className="text-xs text-red-500 font-medium">
+                                            Low Stock
+                                        </span>
                                     )}
                                 </td>
-                                <td className="px-4 py-3 text-gray-600">{gift.category.name}</td>
+                                <td className="px-4 py-3 text-gray-600">
+                                    {gift.category.name}
+                                </td>
                                 <td className="px-4 py-3">
                                     <span className={`font-semibold ${gift.qty_stock <= gift.minimum_stock_level ? "text-red-500" : "text-wa-navy"}`}>
                                         {gift.qty_stock}
@@ -266,7 +229,7 @@ function AdminGifts() {
                                     $ {parseFloat(gift.unit_price).toFixed(2)}
                                 </td>
                                 <td className="px-4 py-3">
-                                    <div className="flex gap-3">
+                                    <div className="flex gap-2 justify-between">
                                         <button
                                             onClick={() => setSelectedGift(gift)}
                                             className="text-wa-blue hover:text-wa-ocean border border-wa-blue hover:border-wa-ocean text-xs font-medium cursor-pointer transition-colors px-2 py-0.5 rounded"
@@ -304,15 +267,9 @@ function AdminGifts() {
                 {filteredGifts.map(gift => (
                     <div
                         key={gift.id}
-                        className={`bg-white rounded-2xl shadow p-4 ${selected.includes(gift.id) ? "ring-2 ring-wa-blue" : ""}`}
+                        className="bg-white rounded-2xl shadow p-4"
                     >
                         <div className="flex items-start gap-3">
-                            <input
-                                type="checkbox"
-                                checked={selected.includes(gift.id)}
-                                onChange={() => toggleSelect(gift.id)}
-                                className="cursor-pointer mt-1"
-                            />
                             <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-100 flex items-center justify-center shrink-0">
                                 {gift.product_image ? (
                                     <img
@@ -325,18 +282,22 @@ function AdminGifts() {
                                 )}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="font-semibold text-wa-navy truncate">{gift.product_name}</p>
-                                <p className="text-xs text-gray-400 mt-0.5">{gift.category.name}</p>
-                                <div className="flex items-center gap-3 mt-2">
-                                    <span className={`text-sm font-semibold ${gift.qty_stock <= gift.minimum_stock_level ? "text-red-500" : "text-wa-navy"}`}>
-                                        Stock: {gift.qty_stock}
-                                    </span>
-                                    <span className="text-sm text-gray-500">
-                                        $ {parseFloat(gift.unit_price).toFixed(2)}
-                                    </span>
-                                </div>
+                                <p className="font-semibold text-wa-navy truncate">
+                                    {gift.product_name}
+                                </p>
+                                <p className="text-xs text-gray-400 mt-0.5">
+                                    {gift.category.name}
+                                </p>
+                                <p className="text-sm text-gray-600 mt-2">
+                                    Stock: {gift.qty_stock}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                    $ {parseFloat(gift.unit_price).toFixed(2)}
+                                </p>
                                 {gift.qty_stock <= gift.minimum_stock_level && (
-                                    <span className="text-xs text-red-500 font-medium">Low Stock</span>
+                                    <span className="text-xs text-red-500 font-medium">
+                                        Low Stock
+                                    </span>
                                 )}
                             </div>
                             <div className="flex flex-col gap-2 shrink-0">
