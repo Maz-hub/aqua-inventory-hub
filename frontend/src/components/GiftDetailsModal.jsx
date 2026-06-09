@@ -28,25 +28,12 @@
 // Supplier information is additionally gated behind isAdmin.
 
 import { useState } from "react";
-import api from "../api";
 import EditGiftForm from "./EditGiftForm";
-import StockAdjustmentModal from "./StockAdjustmentModal";
 
 function GiftDetailsModal({ gift, onClose, onSuccess, isAdmin = false }) {
     if (!gift) return null;
 
     const [showEditForm, setShowEditForm] = useState(false);
-    const [showStockModal, setShowStockModal] = useState(false);
-
-    const handleDelete = async () => {
-        const confirmed = window.confirm(
-            "Are you sure you want to delete this product? This action cannot be undone."
-        );
-        if (!confirmed) return;
-        await api.delete(`/api/gifts/delete/${gift.id}/`);
-        onSuccess();
-        onClose();
-    };
 
     // When editing, replace the entire modal content with the edit form.
     if (showEditForm) {
@@ -301,50 +288,21 @@ function GiftDetailsModal({ gift, onClose, onSuccess, isAdmin = false }) {
 
                         </div>
 
-                        {/* Action Buttons — Edit, Delete, and Adjust Stock are admin-only */}
+                        {/* Action Buttons — Edit Product is admin-only */}
                         <div className="mt-6 flex gap-3">
                             <button onClick={onClose} className="btn_cancel">
                                 Close
                             </button>
                             {isAdmin && (
-                                <>
-                                    <button
-                                        onClick={handleDelete}
-                                        className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-medium px-8 py-3 cursor-pointer transition-all"
-                                    >
-                                        Delete
-                                    </button>
-                                    <button
-                                        onClick={() => setShowStockModal(true)}
-                                        className="flex-1 bg-wa-cyan hover:bg-wa-ocean text-white rounded-md text-sm font-medium px-8 py-3 cursor-pointer transition-all"
-                                    >
-                                        Adjust Stock
-                                    </button>
-                                    <button
-                                        onClick={() => setShowEditForm(true)}
-                                        className="btn_confirm"
-                                    >
-                                        Edit Product
-                                    </button>
-                                </>
+                                <button onClick={() => setShowEditForm(true)} className="btn_confirm">
+                                    Edit Product
+                                </button>
                             )}
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* StockAdjustmentModal is layered on top when the Adjust Stock button is clicked */}
-            {showStockModal && (
-                <StockAdjustmentModal
-                    gift={gift}
-                    onClose={() => setShowStockModal(false)}
-                    onSuccess={() => {
-                        setShowStockModal(false);
-                        onSuccess();
-                        onClose();
-                    }}
-                />
-            )}
         </>
     );
 }
