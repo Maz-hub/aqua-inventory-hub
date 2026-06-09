@@ -28,7 +28,7 @@ function Header({ onSelectionOpen }) {
         <header className="bg-wa-navy text-white px-4 py-3 flex items-center justify-between shadow-lg sticky top-0 z-50">
             {/* LEFT — World Aquatics Logo */}
             <div
-                className="flex items-center"
+                className="flex items-center cursor-pointer"
                 onClick={() => navigate("/")}
                 title="Go to Home"
             >
@@ -44,7 +44,7 @@ function Header({ onSelectionOpen }) {
                 {/* Selection Icon with Badge */}
                 <button
                     onClick={onSelectionOpen}
-                    className="relative p-2 rounded-full hover:bg-wa-blue transition-colors"
+                    className="relative p-2 rounded-full hover:bg-wa-blue transition-colors cursor-pointer"
                     title="View your Selection"
                 >
                     {/* Basket icon */}
