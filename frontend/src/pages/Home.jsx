@@ -6,35 +6,17 @@
  * Access is determined by the user's group membership from UserContext.
  */
 
-import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import SelectionDrawer from "../components/SelectionDrawer";
 import { useUser } from "../context/UserContext";
+import { useState } from "react";
 
 function Home() {
-    const [gifts, setGifts] = useState([]);
-    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const { hasAccess, loadingUser } = useUser();
     const [selectionOpen, setSelectionOpen] = useState(false);
-
-    useEffect(() => {
-        // Fetch gift count for the tile subtext — available to both viewers and managers
-        if (hasAccess("gifts_viewer") || hasAccess("gifts_access")) {
-            getGifts();
-        }
-    }, []);
-
-    const getGifts = () => {
-        setLoading(true);
-        api.get("/api/gifts/")
-            .then((res) => setGifts(res.data))
-            .catch((err) => console.error(err))
-            .finally(() => setLoading(false));
-    };
 
     // CategoryCard accepts a pre-computed canAccess boolean so each tile can
     // express its own multi-group access logic at the call site.
@@ -105,44 +87,37 @@ function Home() {
                     <CategoryCard
                         emoji="🛍️"
                         title="Gifts"
-                        subtext={loading ? "Loading..." : `${gifts.length} items in stock`}
+                        subtext="Browse inventory"
                         canAccess={hasAccess("gifts_viewer") || hasAccess("gifts_access") || hasAccess("admin")}
                         route="/gifts"
                     />
                     <CategoryCard
                         emoji="👕"
                         title="Apparel"
-                        subtext="Manage Inventory"
+                        subtext="Browse inventory"
                         canAccess={hasAccess("apparel_viewer") || hasAccess("apparel_access") || hasAccess("admin")}
                         route="/apparel"
                     />
                     <CategoryCard
                         emoji="📋"
                         title="Office & Events"
-                        subtext="Manage Inventory"
+                        subtext="Browse inventory"
                         canAccess={hasAccess("office_viewer") || hasAccess("admin")}
                         route="/office"
                     />
                     <CategoryCard
                         emoji="💼"
                         title="Executive Office"
-                        subtext="Manage Inventory"
+                        subtext=""
                         canAccess={hasAccess("executive_viewer") || hasAccess("executive_access") || hasAccess("admin")}
                         route="/executive"
                     />
                     <CategoryCard
                         emoji="🖥️"
                         title="IT Assets"
-                        subtext="Manage Inventory"
+                        subtext=""
                         canAccess={hasAccess("it_viewer") || hasAccess("it_access") || hasAccess("admin")}
                         route="/it"
-                    />
-                    <CategoryCard
-                        emoji="📈"
-                        title="Dashboard"
-                        subtext="View Dashboard"
-                        canAccess={hasAccess("admin")}
-                        route="/dashboard"
                     />
                 </div>
             </div>

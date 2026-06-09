@@ -15,7 +15,6 @@ import { useSelection } from "../context/SelectionContext";
 function NewRequest() {
     const { items, totalCost, clearSelection } = useSelection();
     const navigate = useNavigate();
-    console.log('NewRequest rendered', items);
 
     const [reasons, setReasons] = useState([]);
     const [departments, setDepartments] = useState([]);
