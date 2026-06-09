@@ -256,19 +256,19 @@ function AdminGifts() {
                                     <div className="flex gap-3">
                                         <button
                                             onClick={() => setSelectedGift(gift)}
-                                            className="text-wa-blue hover:text-wa-ocean text-xs font-medium cursor-pointer transition-colors"
+                                            className="text-wa-blue hover:text-wa-ocean border border-wa-blue hover:border-wa-ocean text-xs font-medium cursor-pointer transition-colors px-2 py-0.5 rounded"
                                         >
                                             View
                                         </button>
                                         <button
                                             onClick={() => setAdjustGift(gift)}
-                                            className="text-wa-cyan hover:text-wa-ocean text-xs font-medium cursor-pointer transition-colors"
+                                            className="text-wa-cyan hover:text-wa-ocean border border-wa-cyan hover:border-wa-ocean text-xs font-medium cursor-pointer transition-colors px-2 py-0.5 rounded"
                                         >
                                             Adjust Stock
                                         </button>
                                         <button
                                             onClick={() => setHistoryGift(gift)}
-                                            className="text-gray-400 hover:text-wa-navy text-xs font-medium cursor-pointer transition-colors"
+                                            className="text-gray-400 hover:text-wa-navy border border-gray-300 hover:border-wa-navy text-xs font-medium cursor-pointer transition-colors px-2 py-0.5 rounded"
                                         >
                                             History
                                         </button>
@@ -323,19 +323,19 @@ function AdminGifts() {
                             <div className="flex flex-col gap-2 shrink-0">
                                 <button
                                     onClick={() => setSelectedGift(gift)}
-                                    className="text-wa-blue hover:text-wa-ocean text-xs font-medium cursor-pointer transition-colors"
+                                    className="text-wa-blue hover:text-wa-ocean border border-wa-blue hover:border-wa-ocean text-xs font-medium cursor-pointer transition-colors px-2 py-0.5 rounded"
                                 >
                                     View
                                 </button>
                                 <button
                                     onClick={() => setAdjustGift(gift)}
-                                    className="text-wa-cyan hover:text-wa-ocean text-xs font-medium cursor-pointer transition-colors"
+                                    className="text-wa-cyan hover:text-wa-ocean border border-wa-cyan hover:border-wa-ocean text-xs font-medium cursor-pointer transition-colors px-2 py-0.5 rounded"
                                 >
                                     Adjust Stock
                                 </button>
                                 <button
                                     onClick={() => setHistoryGift(gift)}
-                                    className="text-gray-400 hover:text-wa-navy text-xs font-medium cursor-pointer transition-colors"
+                                    className="text-gray-400 hover:text-wa-navy border border-gray-300 hover:border-wa-navy text-xs font-medium cursor-pointer transition-colors px-2 py-0.5 rounded"
                                 >
                                     History
                                 </button>
