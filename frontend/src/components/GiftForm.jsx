@@ -449,7 +449,7 @@ function GiftForm({ onSuccess, onClose }) {
                 Cancel
               </button>
               <button type="submit" className="btn_confirm">
-                Add Item to Inventory
+                Create Item
               </button>
             </div>
           </form>
