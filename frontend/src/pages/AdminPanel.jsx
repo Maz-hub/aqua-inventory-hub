@@ -17,6 +17,7 @@ import SelectionDrawer from "../components/SelectionDrawer";
 import AdminRequests from "../components/admin/AdminRequests";
 import AdminGifts from "../components/admin/AdminGifts";
 import AdminApparel from "../components/admin/AdminApparel";
+import AdminOffice from "../components/admin/AdminOffice";
 
 // Full list of sidebar sections. Access requirements are applied at render time.
 const NAV_ITEMS = [
@@ -53,7 +54,7 @@ const NAV_ITEMS = [
         label: "Office & Events",
         icon: "🗂️",
         description: "Manage office and event materials",
-        requiredGroup: "admin",
+        requiredGroup: "office_access",
     },
     {
         id: "it",
@@ -107,7 +108,13 @@ function AdminPanel() {
     }
 
     // Redirect anyone with no relevant access to home
-    if (!hasAccess("admin") && !hasAccess("gifts_access") && !hasAccess("apparel_access")) {
+    if (
+        !hasAccess("admin") &&
+        !hasAccess("gifts_access") &&
+        !hasAccess("apparel_access") &&
+        !hasAccess("office_access") &&
+        !hasAccess("requests_access")
+    ) {
         return <Navigate to="/" />;
     }
 
@@ -209,6 +216,8 @@ function AdminPanel() {
                             <AdminGifts />
                         ) : activeSection === "apparel" ? (
                             <AdminApparel />
+                        ) : activeSection === "office" ? (
+                            <AdminOffice />
                         ) : (
                             <div className="bg-white rounded-2xl shadow p-8 text-center">
                                 <div className="text-5xl mb-4">

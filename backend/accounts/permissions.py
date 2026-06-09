@@ -63,6 +63,20 @@ class HasITAccess(BasePermission):
         return False
 
 
+# HasOfficeAccess: read-only for office_viewer, full access for office_access or admin.
+class HasOfficeAccess(BasePermission):
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        if is_admin(request.user):
+            return True
+        if request.user.groups.filter(name='office_access').exists():
+            return True
+        if request.method in SAFE_METHODS:
+            return request.user.groups.filter(name='office_viewer').exists()
+        return False
+
+
 # IsAdminUser: admin group or superuser only — no viewer variant.
 class IsAdminUser(BasePermission):
     def has_permission(self, request, view):

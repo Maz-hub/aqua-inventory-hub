@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "apparel",
     "accounts",
     "item_requests",
+    "office",
     "rest_framework",
     'import_export',
 ]

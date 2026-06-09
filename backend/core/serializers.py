@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from core.models import TakeReason, StockAdjustmentReason
+from core.models import TakeReason, StockAdjustmentReason, Department
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -42,4 +42,10 @@ class StockAdjustmentReasonSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = StockAdjustmentReason
+        fields = ['id', 'name']
+
+
+class DepartmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Department
         fields = ['id', 'name']

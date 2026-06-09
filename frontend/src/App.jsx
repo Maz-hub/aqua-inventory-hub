@@ -21,6 +21,7 @@ import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import Gifts from "./pages/Gifts";
 import Apparel from "./pages/Apparel";
+import OfficeEvents from "./pages/OfficeEvents";
 import NewRequest from "./pages/NewRequest";
 import RequestConfirmation from "./pages/RequestConfirmation";
 import MyRequests from "./pages/MyRequests";
@@ -80,6 +81,15 @@ function App() {
           element={
             <ProtectedRoute>
               <Apparel />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/office"
+          element={
+            <ProtectedRoute requireGroups={["office_viewer", "office_access", "admin"]}>
+              <OfficeEvents />
             </ProtectedRoute>
           }
         />

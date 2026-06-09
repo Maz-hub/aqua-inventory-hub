@@ -48,6 +48,7 @@ urlpatterns = [
     path("api/gifts/", include("gifts.urls")),               # gifts inventory
     path("api/apparel/", include("apparel.urls")),           # apparel inventory
     path("api/requests/", include("item_requests.urls")),    # item requests
+    path("api/office/", include("office.urls")),             # office & events inventory
 
     # Catch-all — must be last. Serves React's index.html for all non-API routes.
     re_path(r'^(?!api/).*$', ReactAppView.as_view(), name='react-app'),
