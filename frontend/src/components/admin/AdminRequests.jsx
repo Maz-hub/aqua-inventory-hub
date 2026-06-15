@@ -127,6 +127,7 @@ function AdminRequests() {
         const endpoints = {
             gift: "/api/gifts/",
             apparel: "/api/apparel/variants/",
+            office: "/api/office/",
         };
 
         const endpoint = endpoints[category];
@@ -158,7 +159,8 @@ function AdminRequests() {
         const selectedItem = categoryItems.find(
             (i) => i.id === parseInt(newItemId),
         );
-        const unitPrice = selectedItem?.unit_price || 0;
+        const unitPrice =
+            newItemCategory === "office" ? 0 : selectedItem?.unit_price || 0;
 
         // Stock validation
         if (newItemQty > selectedItem?.qty_stock) {
@@ -519,6 +521,9 @@ function AdminRequests() {
                                                         <option value="apparel">
                                                             Apparel (Variants)
                                                         </option>
+                                                        <option value="office">
+                                                            Office & Events
+                                                        </option>
                                                     </select>
                                                 </div>
 
@@ -558,6 +563,9 @@ function AdminRequests() {
                                                                         {newItemCategory ===
                                                                         "gift"
                                                                             ? `${item.product_name.length > 30 ? item.product_name.substring(0, 30) + "..." : item.product_name} [stk: ${item.qty_stock}]`
+                                                                            : newItemCategory ===
+                                                                              "office"
+                                                                            ? `${item.item_name.length > 30 ? item.item_name.substring(0, 30) + "..." : item.item_name} [stk: ${item.qty_stock}]`
                                                                             : `${item.product_name?.length > 25 ? item.product_name.substring(0, 25) + "…" : item.product_name} — ${item.size?.size_value} - ${item.color?.color_name} - ${{ U: "Unisex", M: "Men", W: "Women", Y: "Youth" }[item.gender] ?? item.gender} [stk: ${item.qty_stock}]`}
                                                                     </option>
                                                                 ),
