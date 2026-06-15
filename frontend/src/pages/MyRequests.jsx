@@ -165,9 +165,15 @@ function MyRequests() {
                                                             )}
                                                         </div>
                                                         <div className="text-right shrink-0">
-                                                            <p className="text-gray-400 text-xs">
-                                                                Unit price: $ {parseFloat(item.unit_price).toFixed(2)}
-                                                            </p>
+                                                            {item.item_type === "office" ? (
+                                                                <p className="text-gray-400 text-xs">
+                                                                    —
+                                                                </p>
+                                                            ) : (
+                                                                <p className="text-gray-400 text-xs">
+                                                                    Unit price: $ {parseFloat(item.unit_price).toFixed(2)}
+                                                                </p>
+                                                            )}
                                                             {/* Shows confirmed qty if set; highlights in amber when it differs from requested */}
                                                             <p className="text-gray-500 text-xs">
                                                                 x{item.quantity_confirmed ?? item.quantity_requested}
@@ -177,9 +183,15 @@ function MyRequests() {
                                                                     <span className="text-amber-600 ml-1">(requested: {item.quantity_requested})</span>
                                                                 )}
                                                             </p>
-                                                            <p className="text-wa-blue font-medium text-sm whitespace-nowrap">
-                                                                $ {parseFloat(item.unit_price * item.quantity_requested).toFixed(2)}
-                                                            </p>
+                                                            {item.item_type === "office" ? (
+                                                                <p className="text-gray-400 font-medium text-sm whitespace-nowrap">
+                                                                    —
+                                                                </p>
+                                                            ) : (
+                                                                <p className="text-wa-blue font-medium text-sm whitespace-nowrap">
+                                                                    $ {parseFloat(item.unit_price * item.quantity_requested).toFixed(2)}
+                                                                </p>
+                                                            )}
                                                         </div>
                                                     </li>
                                                 ))}

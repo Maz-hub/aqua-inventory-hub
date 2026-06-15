@@ -20,6 +20,7 @@ import OfficeDetailsModal from "../components/OfficeDetailsModal";
 import SelectionDrawer from "../components/SelectionDrawer";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import OfficeRequestModal from "../components/OfficeRequestModal";
 
 function OfficeEvents() {
     const [items, setItems] = useState([]);
@@ -30,6 +31,8 @@ function OfficeEvents() {
     const [categories, setCategories] = useState([]);
     const [showFilters, setShowFilters] = useState(false);
     const [selectionOpen, setSelectionOpen] = useState(false);
+    const [showRequestModal, setShowRequestModal] = useState(false);
+    const [selectedItemForRequest, setSelectedItemForRequest] = useState(null);
 
     useEffect(() => {
         fetchItems();
@@ -179,12 +182,31 @@ function OfficeEvents() {
                                             </p>
                                         )}
 
-                                        <button
-                                            onClick={() => setSelectedItem(item)}
-                                            className="btn_main w-full"
-                                        >
-                                            View Details
-                                        </button>
+                                        {/* Action Buttons */}
+                                        <div className="space-y-2">
+                                            {/* Add to Request is disabled when out of stock */}
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedItemForRequest(item);
+                                                    setShowRequestModal(true);
+                                                }}
+                                                disabled={item.qty_stock === 0}
+                                                className={`w-full py-2 rounded-md font-medium transition-colors cursor-pointer
+                                                    ${item.qty_stock === 0
+                                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                        : 'bg-wa-cyan hover:bg-wa-ocean text-white'
+                                                    }`}
+                                            >
+                                                {item.qty_stock === 0 ? 'Out of Stock' : '+ Add to Request'}
+                                            </button>
+
+                                            <button
+                                                onClick={() => setSelectedItem(item)}
+                                                className="btn_main"
+                                            >
+                                                View Details
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
@@ -199,6 +221,18 @@ function OfficeEvents() {
                     />
                 </div>
             </div>
+            {/* OfficeRequestModal opens when the user clicks Add to Request on a card.
+                On close, also opens the SelectionDrawer so the user can review their basket. */}
+            {showRequestModal && selectedItemForRequest && (
+                <OfficeRequestModal
+                    item={selectedItemForRequest}
+                    onClose={() => {
+                        setShowRequestModal(false);
+                        setSelectedItemForRequest(null);
+                        setSelectionOpen(true);
+                    }}
+                />
+            )}
             <Footer />
             <SelectionDrawer
                 isOpen={selectionOpen}

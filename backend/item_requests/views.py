@@ -9,6 +9,7 @@ from accounts.permissions import IsAdminUser
 from core.models import Department
 from gifts.models import Gift, InventoryTransaction
 from apparel.models import ApparelVariant, ApparelTransaction
+from office.models import OfficeItem, OfficeTransaction
 
 
 # ============================================
@@ -125,6 +126,19 @@ def submit_request(request, pk):
                     {"error": f"Only {variant.qty_stock} units available for {item_name}"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+        elif item.item_type == 'office':
+            try:
+                office_item = OfficeItem.objects.get(pk=item.item_id)
+            except OfficeItem.DoesNotExist:
+                return Response(
+                    {"error": f"Office item #{item.item_id} no longer exists."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if item.quantity_requested > office_item.qty_stock:
+                return Response(
+                    {"error": f"Only {office_item.qty_stock} units available for {office_item.item_name}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
     # --- Deduct stock and record transactions ---
     for item in item_request.items.all():
@@ -154,6 +168,20 @@ def submit_request(request, pk):
                 created_by=request.user,
                 stock_before=stock_before,
                 stock_after=variant.qty_stock,
+                notes=f'Request #{item_request.id}',
+            )
+        elif item.item_type == 'office':
+            office_item = OfficeItem.objects.get(pk=item.item_id)
+            stock_before = office_item.qty_stock
+            office_item.qty_stock -= item.quantity_requested
+            office_item.save()
+            OfficeTransaction.objects.create(
+                item=office_item,
+                transaction_type='take',
+                quantity=item.quantity_requested,
+                created_by=request.user,
+                stock_before=stock_before,
+                stock_after=office_item.qty_stock,
                 notes=f'Request #{item_request.id}',
             )
 
@@ -235,6 +263,23 @@ def cancel_request(request, pk):
                 )
             except ApparelVariant.DoesNotExist:
                 pass  # Variant deleted after submission — skip stock restore
+        elif item.item_type == 'office':
+            try:
+                office_item = OfficeItem.objects.get(pk=item.item_id)
+                stock_before = office_item.qty_stock
+                office_item.qty_stock += item.quantity_requested
+                office_item.save()
+                OfficeTransaction.objects.create(
+                    item=office_item,
+                    transaction_type='return',
+                    quantity=item.quantity_requested,
+                    created_by=request.user,
+                    stock_before=stock_before,
+                    stock_after=office_item.qty_stock,
+                    notes=f'Request #{item_request.id}',
+                )
+            except OfficeItem.DoesNotExist:
+                pass  # Item deleted after submission — skip stock restore
 
     item_request.status = 'cancelled'
     item_request.updated_by = request.user
@@ -447,6 +492,31 @@ def confirm_request_item(request, pk, item_pk):
                 created_by=request.user,
                 stock_before=stock_before,
                 stock_after=variant.qty_stock,
+            )
+
+        elif item.item_type == 'office':
+            try:
+                office_item = OfficeItem.objects.get(pk=item.item_id)
+            except OfficeItem.DoesNotExist:
+                return Response(
+                    {"error": f"Office item #{item.item_id} no longer exists."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if diff > 0 and office_item.qty_stock < diff:
+                return Response(
+                    {"error": f"Only {office_item.qty_stock} units available for {office_item.item_name}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            stock_before = office_item.qty_stock
+            office_item.qty_stock -= diff
+            office_item.save()
+            OfficeTransaction.objects.create(
+                item=office_item,
+                transaction_type='return' if diff < 0 else 'take',
+                quantity=abs(diff),
+                created_by=request.user,
+                stock_before=stock_before,
+                stock_after=office_item.qty_stock,
             )
 
     item.quantity_confirmed = new_qty

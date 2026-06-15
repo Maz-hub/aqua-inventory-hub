@@ -187,16 +187,24 @@ function DrawerContent({
                                     <p className="text-xs text-gray-400 capitalize mt-1.5">
                                         {item.item_type}
                                     </p>
-                                    <p className="text-xs text-gray-400 mt-0.5">
-                                        $ {item.unit_price.toFixed(2)} / unit
-                                    </p>
-                                    <p className="text-xs font-medium text-wa-blue mt-0.5">
-                                        ${" "}
-                                        {(
-                                            item.unit_price * item.quantity
-                                        ).toFixed(2)}{" "}
-                                        total
-                                    </p>
+                                    {item.item_type === "office" ? (
+                                        <p className="text-xs text-gray-400 mt-0.5">
+                                            —
+                                        </p>
+                                    ) : (
+                                        <>
+                                            <p className="text-xs text-gray-400 mt-0.5">
+                                                $ {item.unit_price.toFixed(2)} / unit
+                                            </p>
+                                            <p className="text-xs font-medium text-wa-blue mt-0.5">
+                                                ${" "}
+                                                {(
+                                                    item.unit_price * item.quantity
+                                                ).toFixed(2)}{" "}
+                                                total
+                                            </p>
+                                        </>
+                                    )}
                                     {item.notes && (
                                         <p className="text-xs text-gray-400 italic mt-1">
                                             📝 {item.notes}
