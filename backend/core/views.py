@@ -99,10 +99,11 @@ class StockAdjustmentReasonList(generics.ListAPIView):
     """
     Returns all stock adjustment reasons.
     GET /api/stock-adjustment-reasons/
-    Admin only — not visible to standard users.
+    Available to any authenticated user — category managers (e.g. office_access,
+    gifts_access) need this to populate the reason dropdown when adjusting stock.
     """
     serializer_class = StockAdjustmentReasonSerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
     queryset = StockAdjustmentReason.objects.all()
 
 

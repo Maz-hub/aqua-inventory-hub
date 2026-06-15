@@ -109,7 +109,7 @@ function OfficeStockAdjustModal({ item, onClose, onSuccess }) {
                                         : "bg-white text-gray-500 hover:bg-gray-50"
                                 }`}
                             >
-                                Return
+                                Add
                             </button>
                         </div>
                     </div>

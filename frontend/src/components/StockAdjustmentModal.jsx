@@ -111,7 +111,7 @@ function StockAdjustmentModal({ gift, onClose, onSuccess }) {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Action toggle — Take reduces stock, Return adds stock */}
+                    {/* Action toggle — Take reduces stock, Add increases it */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1.5">
                             Action *
@@ -137,7 +137,7 @@ function StockAdjustmentModal({ gift, onClose, onSuccess }) {
                                         : "bg-white text-gray-500 hover:bg-gray-50"
                                 }`}
                             >
-                                Return
+                                Add
                             </button>
                         </div>
                     </div>
