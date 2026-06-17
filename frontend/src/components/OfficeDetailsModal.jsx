@@ -56,7 +56,7 @@ function OfficeDetailsModal({ item, onClose, onSuccess, isAdmin = false }) {
                             <img
                                 src={item.product_image.replace("http://localhost:8000", "")}
                                 alt={item.item_name}
-                                className="w-full h-64 object-contain rounded-lg bg-gray-100"
+                                className="w-full h-64 object-contain rounded-lg bg-white border border-gray-100 p-4"
                             />
                         </div>
                     )}
