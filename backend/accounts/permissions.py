@@ -85,3 +85,14 @@ class IsAdminUser(BasePermission):
             request.user.is_authenticated and
             is_admin(request.user)
         )
+
+
+# HasRequestsAccess: full access for admin, superuser, or requests_access group.
+class HasRequestsAccess(BasePermission):
+    def has_permission(self, request, view):
+        return bool(
+            request.user and
+            request.user.is_authenticated and
+            (is_admin(request.user) or
+             request.user.groups.filter(name='requests_access').exists())
+        )

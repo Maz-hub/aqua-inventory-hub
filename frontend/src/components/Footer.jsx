@@ -16,7 +16,7 @@ function Footer() {
           <div>
             <h3 className="text-xl font-bold mb-3">Aqua Inventory Hub</h3>
             <p className="text-gray-300 text-sm">
-              Inventory management system for World Aquatics gifts and apparel.
+              Inventory management system for World Aquatics.
             </p>
           </div>
 
@@ -38,7 +38,7 @@ function Footer() {
           <div>
             <h3 className="text-xl font-bold mb-3">System Info</h3>
             <p className="text-gray-300 text-sm">Version: 1.0.0</p>
-            <p className="text-gray-300 text-sm">Built with Django & React</p>
+            <p className="text-gray-300 text-sm">Built with Django REST API & React</p>
           </div>
         </div>
 

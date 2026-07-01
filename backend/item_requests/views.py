@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from .models import ItemRequest, ItemRequestItem
 from .serializers import ItemRequestSerializer, ItemRequestItemSerializer, DepartmentSerializer
-from accounts.permissions import IsAdminUser
+from accounts.permissions import HasRequestsAccess
 from core.models import Department
 from gifts.models import Gift, InventoryTransaction
 from apparel.models import ApparelVariant, ApparelTransaction
@@ -297,7 +297,7 @@ def cancel_request(request, pk):
 # which also handle stock. This view only changes the status field.
 # Requires IsAdminUser permission.
 @api_view(['PATCH'])
-@permission_classes([IsAdminUser])
+@permission_classes([HasRequestsAccess])
 def update_request_status(request, pk):
     item_request = get_object_or_404(ItemRequest, pk=pk)
     new_status = request.data.get('status')
@@ -411,7 +411,7 @@ def manage_request_item(request, pk, item_pk):
 # This design allows admins to re-confirm a quantity multiple times
 # and always get the correct net stock movement.
 @api_view(['PATCH'])
-@permission_classes([IsAdminUser])
+@permission_classes([HasRequestsAccess])
 def confirm_request_item(request, pk, item_pk):
     item_request = get_object_or_404(ItemRequest, pk=pk)
     item = get_object_or_404(ItemRequestItem, pk=item_pk, request=item_request)
