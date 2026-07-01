@@ -25,7 +25,7 @@ import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
 
 import { useUser } from "../context/UserContext";
 
-function Form({ route, method }) {
+function Form({ route, method, notice }) {
   // Receives route (API endpoint) and method (login/register) as props
 
   const [username, setUsername] = useState("");
@@ -95,6 +95,13 @@ function Form({ route, method }) {
         <div className="flex justify-center mb-6">
           <img src={logo} alt="World Aquatics" className="h-16 w-auto" />
         </div>
+
+        {/* Session / error notice — shown above the form title when set */}
+        {notice && (
+          <div className="bg-red-50 text-red-600 text-sm text-center rounded-lg px-4 py-3 mb-5">
+            {notice}
+          </div>
+        )}
 
         {/* Form Title (Login/Register) */}
         <h1 className="text-2xl font-medium text-wa-blue text-center mb-6">

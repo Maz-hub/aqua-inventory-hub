@@ -80,7 +80,10 @@ api.interceptors.response.use(
           original.headers.Authorization = `Bearer ${data.access}`;
           return api(original);
         } catch {
-          // Refresh failed — fall through to logout
+          sessionStorage.setItem('session_expired', '1');
+          localStorage.clear();
+          window.location.href = "/login";
+          return Promise.reject(error);
         }
       }
 

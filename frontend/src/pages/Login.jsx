@@ -5,16 +5,25 @@
  * On successful login, stores JWT tokens and redirects to home page.
  */
 
+import { useState, useEffect } from "react";
 import Form from "../components/Form";
-// Reusable form component handling both login and registration
 
 const Login = () => {
+  const [sessionExpired, setSessionExpired] = useState(false);
+
+  useEffect(() => {
+    if (sessionStorage.getItem('session_expired')) {
+      setSessionExpired(true);
+      sessionStorage.removeItem('session_expired');
+    }
+  }, []);
+
   return (
-    <>
-      <Form route="/api/token/" method="login" />
-      {/* route: Django API endpoint for obtaining JWT tokens */}
-      {/* method: Tells Form component to display "Login" and handle authentication */}
-    </>
+    <Form
+      route="/api/token/"
+      method="login"
+      notice={sessionExpired ? "Your session has expired. Please log in again." : null}
+    />
   );
 };
 
