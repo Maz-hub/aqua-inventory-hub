@@ -24,6 +24,8 @@ import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
 // localStorage key names for JWT tokens
 
 import { useUser } from "../context/UserContext";
+import { useMsal } from "@azure/msal-react";
+import { loginRequest } from "../authConfig";
 
 function Form({ route, method, notice }) {
   // Receives route (API endpoint) and method (login/register) as props
@@ -37,12 +39,27 @@ function Form({ route, method, notice }) {
   const [loading, setLoading] = useState(false);
   // Tracks form submission state to prevent duplicate requests
 
+  const [showPasswordLogin, setShowPasswordLogin] = useState(false);
+  // Toggles visibility of the username/password fields on the login form
+
   const navigate = useNavigate();
   // Router navigation function
 
   const { fetchUser } = useUser();
+  const { instance } = useMsal();
 
   const name = method === "login" ? "Login" : "Register";
+
+  const handleMicrosoftLogin = async () => {
+    try {
+      // Redirect mode sends the browser to Microsoft's login page and back —
+      // it doesn't return a result here. The response is picked up in main.jsx
+      // via handleRedirectPromise() once the browser returns to the app.
+      await instance.loginRedirect(loginRequest);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   // Dynamic label based on form purpose
 
   const handleSubmit = async (e) => {
@@ -108,31 +125,65 @@ function Form({ route, method, notice }) {
           {name}
         </h1>
 
-        <input
-          className="w-full px-4 py-2 border border-gray-300 rounded-md mb-6 font-termina focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          placeholder="Username"
-          disabled={loading}
-        />
+        {method === "login" && (
+          <button
+            type="button"
+            onClick={handleMicrosoftLogin}
+            className="cursor-pointer w-full bg-wa-blue text-white py-3 rounded-md font-medium hover:bg-wa-ocean focus:ring-4 focus:ring-wa-cyan focus:ring-opacity-50 transition-all duration-200"
+          >
+            Sign in with Microsoft
+          </button>
+        )}
 
-        <input
-          className="w-full px-4 py-2 border border-gray-300 rounded-md mb-6 font-termina focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          disabled={loading}
-        />
+        {method === "login" && !showPasswordLogin && (
+          <div className="text-center mt-5">
+            <button
+              type="button"
+              onClick={() => setShowPasswordLogin(true)}
+              className="cursor-pointer text-sm text-gray-500 hover:text-wa-blue underline transition-colors"
+            >
+              Use username and password instead
+            </button>
+          </div>
+        )}
 
-        <button
-          className="cursor-pointer w-full bg-wa-blue text-white py-3 rounded-md font-medium hover:bg-wa-ocean focus:ring-4 focus:ring-wa-cyan focus:ring-opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200"
-          type="submit"
-          disabled={loading}
-        >
-          {loading ? "Loading..." : name}
-        </button>
+        {(method === "register" || showPasswordLogin) && (
+          <>
+            {method === "login" && (
+              <div className="flex items-center gap-3 my-5">
+                <hr className="flex-1 border-gray-200" />
+                <span className="text-xs text-gray-400">or</span>
+                <hr className="flex-1 border-gray-200" />
+              </div>
+            )}
+
+            <input
+              className="w-full px-4 py-2 border border-gray-300 rounded-md mb-6 font-termina focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Username"
+              disabled={loading}
+            />
+
+            <input
+              className="w-full px-4 py-2 border border-gray-300 rounded-md mb-6 font-termina focus:outline-none focus:ring-2 focus:ring-wa-cyan focus:border-wa-cyan transition-colors"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              disabled={loading}
+            />
+
+            <button
+              className="cursor-pointer w-full bg-wa-blue text-white py-3 rounded-md font-medium hover:bg-wa-ocean focus:ring-4 focus:ring-wa-cyan focus:ring-opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200"
+              type="submit"
+              disabled={loading}
+            >
+              {loading ? "Loading..." : name}
+            </button>
+          </>
+        )}
       </form>
     </div>
   );

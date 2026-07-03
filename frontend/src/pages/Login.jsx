@@ -10,11 +10,18 @@ import Form from "../components/Form";
 
 const Login = () => {
   const [sessionExpired, setSessionExpired] = useState(false);
+  const [ssoError, setSsoError] = useState(null);
 
   useEffect(() => {
     if (sessionStorage.getItem('session_expired')) {
       setSessionExpired(true);
       sessionStorage.removeItem('session_expired');
+    }
+
+    const storedSsoError = sessionStorage.getItem('sso_error');
+    if (storedSsoError) {
+      setSsoError(storedSsoError);
+      sessionStorage.removeItem('sso_error');
     }
   }, []);
 
@@ -22,7 +29,11 @@ const Login = () => {
     <Form
       route="/api/token/"
       method="login"
-      notice={sessionExpired ? "Your session has expired. Please log in again." : null}
+      notice={
+        sessionExpired
+          ? "Your session has expired. Please log in again."
+          : ssoError
+      }
     />
   );
 };
