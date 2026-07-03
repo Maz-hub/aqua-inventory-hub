@@ -36,7 +36,9 @@ class MicrosoftLoginView(APIView):
         if not user:
             # No account yet — create one and give it read-only access to
             # Office & Events by default.
-            user = User.objects.create(username=email, email=email)
+            first_name = payload.get('given_name', '')
+            last_name = payload.get('family_name', '')
+            user = User.objects.create(username=email, email=email, first_name=first_name, last_name=last_name)
             office_viewer_group = Group.objects.get(name='office_viewer')
             user.groups.add(office_viewer_group)
 
