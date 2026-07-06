@@ -166,7 +166,7 @@ def submit_request(request, pk):
             )
             # Big category is the top-level inventory type (Gifts/Apparel/Office);
             # small category is the specific category within that inventory (e.g. Pins).
-            line = f"x{item.quantity_requested} - {gift.product_name} > Gifts / {gift.category.name}"
+            line = f"• x{item.quantity_requested} - {gift.product_name} > Gifts / {gift.category.name}"
             if item.notes:
                 line += f"\n  Note: {item.notes}"
             items_summary.append(line)
@@ -188,7 +188,7 @@ def submit_request(request, pk):
                 f"{variant.product.product_name} — "
                 f"{variant.size.size_value} {variant.color.color_name}"
             )
-            line = f"x{item.quantity_requested} - {item_name} > Apparel / {variant.product.category.name}"
+            line = f"• x{item.quantity_requested} - {item_name} > Apparel / {variant.product.category.name}"
             if item.notes:
                 line += f"\n  Note: {item.notes}"
             items_summary.append(line)
@@ -206,7 +206,7 @@ def submit_request(request, pk):
                 stock_after=office_item.qty_stock,
                 notes=f'Request #{item_request.id}',
             )
-            line = f"x{item.quantity_requested} - {office_item.item_name} > Office / {office_item.category.name}"
+            line = f"• x{item.quantity_requested} - {office_item.item_name} > Office / {office_item.category.name}"
             if item.notes:
                 line += f"\n  Note: {item.notes}"
             items_summary.append(line)
