@@ -180,3 +180,18 @@ else:
     }
     MEDIA_URL = '/media/'
     MEDIA_ROOT = BASE_DIR / 'media'
+
+# Email (SMTP) settings — used to send real emails via an SMTP server
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# Address of the SMTP server to connect to
+EMAIL_HOST = os.environ.get('EMAIL_HOST')
+# Port the SMTP server listens on (e.g. 587 for TLS)
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT'))
+# Whether to use a secure TLS connection when talking to the SMTP server
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS') == 'True'
+# Username used to log in to the SMTP server
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+# Password used to log in to the SMTP server
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+# Address shown as the sender on outgoing emails; same as the SMTP login user
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

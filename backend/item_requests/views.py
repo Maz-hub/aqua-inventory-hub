@@ -1,8 +1,11 @@
+import logging
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from django.core.mail import send_mail
+from django.conf import settings
 from .models import ItemRequest, ItemRequestItem
 from .serializers import ItemRequestSerializer, ItemRequestItemSerializer, DepartmentSerializer
 from accounts.permissions import HasRequestsAccess
@@ -10,6 +13,8 @@ from core.models import Department
 from gifts.models import Gift, InventoryTransaction
 from apparel.models import ApparelVariant, ApparelTransaction
 from office.models import OfficeItem, OfficeTransaction
+
+logger = logging.getLogger(__name__)
 
 
 # ============================================
@@ -141,6 +146,9 @@ def submit_request(request, pk):
                 )
 
     # --- Deduct stock and record transactions ---
+    # items_summary collects one line of plain text per item, reused below to
+    # build the body of the notification emails.
+    items_summary = []
     for item in item_request.items.all():
         if item.item_type == 'gift':
             gift = Gift.objects.get(pk=item.item_id)
@@ -156,6 +164,12 @@ def submit_request(request, pk):
                 stock_after=gift.qty_stock,
                 notes=f'Request #{item_request.id}',
             )
+            # Big category is the top-level inventory type (Gifts/Apparel/Office);
+            # small category is the specific category within that inventory (e.g. Pins).
+            line = f"x{item.quantity_requested} - {gift.product_name} > Gifts / {gift.category.name}"
+            if item.notes:
+                line += f"\n  Note: {item.notes}"
+            items_summary.append(line)
         elif item.item_type == 'apparel':
             variant = ApparelVariant.objects.get(pk=item.item_id)
             stock_before = variant.qty_stock
@@ -170,6 +184,14 @@ def submit_request(request, pk):
                 stock_after=variant.qty_stock,
                 notes=f'Request #{item_request.id}',
             )
+            item_name = (
+                f"{variant.product.product_name} — "
+                f"{variant.size.size_value} {variant.color.color_name}"
+            )
+            line = f"x{item.quantity_requested} - {item_name} > Apparel / {variant.product.category.name}"
+            if item.notes:
+                line += f"\n  Note: {item.notes}"
+            items_summary.append(line)
         elif item.item_type == 'office':
             office_item = OfficeItem.objects.get(pk=item.item_id)
             stock_before = office_item.qty_stock
@@ -184,9 +206,60 @@ def submit_request(request, pk):
                 stock_after=office_item.qty_stock,
                 notes=f'Request #{item_request.id}',
             )
+            line = f"x{item.quantity_requested} - {office_item.item_name} > Office / {office_item.category.name}"
+            if item.notes:
+                line += f"\n  Note: {item.notes}"
+            items_summary.append(line)
 
     item_request.status = 'pending'
     item_request.save()
+
+    # --- Email notifications ---
+    # Two emails are sent: one to the inventory team so they know a new
+    # request needs preparing, and one to the requester confirming submission.
+    # Email is a nice-to-have here, not a core requirement of submitting a
+    # request, so any failure (bad SMTP config, network issue, etc.) is caught
+    # and logged rather than allowed to break the response to the user.
+    try:
+        requester_name = item_request.requested_by.get_full_name() or item_request.requested_by.username
+        items_text = "\n".join(items_summary)
+        # Notes are optional, so show 'None' instead of leaving a blank line
+        notes_text = item_request.notes if item_request.notes else 'None'
+
+        # Email to the inventory team about the new request
+        send_mail(
+            subject=f"New request from {requester_name}",
+            message=(
+                f"A new item request has been submitted.\n\n"
+                f"Requester: {requester_name}\n"
+                f"Department: {item_request.department.name}\n"
+                f"Reason: {item_request.reason.reason_name}\n"
+                f"Date needed: {item_request.date_needed}\n"
+                f"Notes: {notes_text}\n\n"
+                f"Items requested:\n{items_text}"
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=['inventory@worldaquatics.com'],
+        )
+
+        # Confirmation email back to the requester
+        send_mail(
+            subject="Your item request has been submitted",
+            message=(
+                f"Hi {requester_name},\n\n"
+                f"Your request has been submitted successfully and is now pending preparation.\n\n"
+                f"Department: {item_request.department.name}\n"
+                f"Reason: {item_request.reason.reason_name}\n"
+                f"Date needed: {item_request.date_needed}\n"
+                f"Notes: {notes_text}\n\n"
+                f"Items requested:\n{items_text}"
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[item_request.requested_by.email],
+        )
+    except Exception as e:
+        # Never let an email failure block a successful request submission
+        logger.error(f"Failed to send request notification emails for request #{item_request.id}: {e}")
 
     return Response(
         {"message": "Request submitted successfully.", "status": "pending"},
