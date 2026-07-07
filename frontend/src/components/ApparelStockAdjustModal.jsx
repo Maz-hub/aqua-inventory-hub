@@ -44,11 +44,16 @@ function ApparelStockAdjustModal({ product, onClose, onSuccess }) {
     const [reasons, setReasons] = useState([]);
     const [loading, setLoading] = useState(false);
 
+    // Reasons are scoped to the current action (take vs. add) so the dropdown
+    // only shows relevant options. Refetch whenever the action toggles, and
+    // clear any previously selected reason since it may not apply anymore.
     useEffect(() => {
-        api.get("/api/stock-adjustment-reasons/")
+        const appliesTo = action === "take" ? "take" : "add";
+        api.get(`/api/stock-adjustment-reasons/?applies_to=${appliesTo}`)
             .then((res) => setReasons(res.data))
             .catch((err) => console.error("Failed to load reasons:", err));
-    }, []);
+        setReason("");
+    }, [action]);
 
     const genderLabel = (g) =>
         g === "U" ? "Unisex" : g === "M" ? "Men" : g === "W" ? "Women" : "Youth";

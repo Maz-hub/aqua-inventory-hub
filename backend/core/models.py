@@ -65,11 +65,24 @@ class Department(models.Model):
 # rather than why items were requested.
 # Only visible to admin users, not to regular staff.
 class StockAdjustmentReason(models.Model):
+    APPLIES_TO_CHOICES = [
+        ('add', 'Add'),
+        ('take', 'Take'),
+    ]
+
     name = models.CharField(
         max_length=100,
         unique=True,
         help_text="Reason for manual stock adjustment (e.g. 'Restock', 'Return from Event')"
     )
+
+    applies_to = models.CharField(
+        max_length=10,
+        choices=APPLIES_TO_CHOICES,
+        default='add',
+        help_text="Which stock direction this reason appears for: adding stock or taking stock"
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

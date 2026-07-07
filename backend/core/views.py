@@ -97,14 +97,22 @@ class CurrentUserView(APIView):
 
 class StockAdjustmentReasonList(generics.ListAPIView):
     """
-    Returns all stock adjustment reasons.
+    Returns stock adjustment reasons, optionally filtered by direction.
     GET /api/stock-adjustment-reasons/
+    GET /api/stock-adjustment-reasons/?applies_to=add
+    GET /api/stock-adjustment-reasons/?applies_to=take
     Available to any authenticated user — category managers (e.g. office_access,
     gifts_access) need this to populate the reason dropdown when adjusting stock.
     """
     serializer_class = StockAdjustmentReasonSerializer
     permission_classes = [IsAuthenticated]
-    queryset = StockAdjustmentReason.objects.all()
+
+    def get_queryset(self):
+        queryset = StockAdjustmentReason.objects.all()
+        applies_to = self.request.query_params.get('applies_to')
+        if applies_to:
+            queryset = queryset.filter(applies_to=applies_to)
+        return queryset
 
 
 class DepartmentListView(generics.ListAPIView):
