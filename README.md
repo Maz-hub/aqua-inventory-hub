@@ -1,39 +1,70 @@
 # Aqua Inventory Hub
 
-A full-stack inventory management system built for a sports federation. It tracks gifts, apparel, and equipment across multiple departments, handles staff item requests with a full approval workflow, and gives administrators a dedicated management panel.
+A full-stack internal inventory management system built for a sports federation, using Django REST Framework on the backend and React on the frontend. It manages promotional gifts, apparel, and office/events inventory, with a staff request workflow and role-based access control.
 
 ---
 
 ## What the app does
 
-Staff log in and browse inventory categories they have been granted access to. They can add items to a basket and submit a single request covering multiple products from different categories. The preparation team reviews incoming requests, confirms quantities, adjusts stock, and moves requests through a status workflow until items are collected.
+Staff log in (via Microsoft SSO or username/password) and browse the inventory categories they have access to. They can add items to a basket and submit a single request covering multiple products across different categories. The preparation team reviews incoming requests, confirms quantities, adjusts stock, and moves each request through a status workflow until the items are collected.
 
-Administrators manage products directly from the admin panel: adding stock, recording manual adjustments with reasons, viewing the full transaction history for any item, and editing product details including customs and supplier information.
+Administrators manage products directly from the admin panel: adjusting stock with a recorded reason, viewing the full transaction history for any item, and editing product details including customs and supplier information.
 
-Access to each section is controlled by permission groups assigned in Django admin. Viewer groups allow read-only browsing. Manager groups allow full inventory and request management. No user sees or can act on anything beyond what their groups permit.
+Access to each section is controlled by permission groups assigned in Django admin. Viewer groups allow read-only browsing. Manager groups allow full inventory and request management. Nobody sees or can act on anything beyond what their groups permit.
+
+---
+
+## Modules
+
+**Live:**
+- **Gifts** — promotional gift products, organised by category
+- **Apparel** — products with size, colour, and gender variants; stock tracked per variant
+- **Office & Events** — office and events supplies, organised by category, with an optional department field for cost tracking
+
+**Planned / future:**
+- Executive Office inventory
+- IT Assets inventory
+- Dashboard and Settings sections in the admin panel
+
+---
+
+## Key features
+
+- Three-tier role-based permissions: viewer groups (read-only), manager groups (full read/write for a category), and an admin group (full access everywhere)
+- Item request workflow: staff build a basket, submit as a draft, and stock is deducted in a single all-or-nothing operation on submission; cancelling a pending request restores stock
+- Full audit trail: every stock movement is recorded as a transaction with a reason, quantity, and before/after stock snapshot
+- Admin panel with sidebar navigation scoped to the logged-in user's permission groups
+- Microsoft SSO login (OIDC) alongside traditional username/password login; new SSO users are created automatically with baseline access
+- Email notifications on request submission, sent to the inventory team and to the requester as confirmation
+- Stock adjustment reasons split by direction (Add vs. Take), so the reason dropdown only shows relevant options depending on whether stock is being added or removed
 
 ---
 
 ## Tech stack
 
 **Backend**
-- Python 3.x
-- Django 5.x with Django REST Framework
+- Python
+- Django + Django REST Framework
 - SimpleJWT for authentication (access + refresh tokens)
-- SQLite in development, PostgreSQL in production
+- PyJWT for verifying Microsoft-issued tokens
+- PostgreSQL in production, SQLite in development
 - Pillow for image uploads
+- WhiteNoise for serving static files
+- django-storages (Azure backend) for media files in production
+- Gunicorn as the production WSGI server
 
 **Frontend**
-- React 18 with Vite
-- React Router v6
+- React + Vite
+- React Router
 - Axios for API requests
-- Tailwind CSS v4
+- Tailwind CSS
+- MSAL (`@azure/msal-browser`, `@azure/msal-react`) for Microsoft SSO
 
-**Deployment target**
-- Azure App Service (backend)
-- Azure Static Web Apps or App Service (frontend)
+**Deployment**
+- Azure App Service (backend, serving the built frontend as static files)
 - Azure Database for PostgreSQL
 - Azure Blob Storage for media files (product images)
+- GitHub Actions for CI/CD (builds the frontend, bundles it with the backend, and deploys to Azure App Service on push to `main`)
 
 ---
 
@@ -42,121 +73,65 @@ Access to each section is controlled by permission groups assigned in Django adm
 ```
 aqua-inventory-hub/
 ├── backend/
-│   ├── config/                  # Django project settings, root URLs, WSGI/ASGI
-│   ├── accounts/                # User profiles, permission classes, group setup
+│   ├── config/                  # Django project settings, root URLs, WSGI
+│   ├── accounts/                # User profiles, Microsoft SSO, permission classes, group setup
 │   │   ├── models.py            # UserProfile (extends Django User)
-│   │   ├── permissions.py       # Custom DRF permission classes
-│   │   ├── signals.py           # Auto-creates UserProfile on user creation
-│   │   ├── admin.py             # UserProfile inline on User admin page
+│   │   ├── microsoft_auth.py    # Verifies Microsoft-issued tokens against the tenant's JWKS
+│   │   ├── views.py             # MicrosoftLoginView — exchanges a Microsoft token for app JWTs
+│   │   ├── permissions.py       # Custom DRF permission classes per inventory category
+│   │   ├── signals.py           # Auto-creates/syncs UserProfile on user save
 │   │   └── management/commands/setup_groups.py
-│   ├── core/                    # Shared models and views
+│   ├── core/                    # Shared reference data
 │   │   ├── models.py            # TakeReason, Department, StockAdjustmentReason
-│   │   ├── serializers.py       # User, reason, department serializers
-│   │   └── views.py             # User registration, /api/user/me/, reasons
+│   │   ├── serializers.py
+│   │   └── views.py             # User registration, /api/user/me/, reasons, departments
 │   ├── gifts/                   # Gifts inventory app
 │   │   ├── models.py            # Gift, GiftCategory, InventoryTransaction
-│   │   ├── serializers.py
-│   │   ├── views.py
-│   │   └── urls.py
+│   │   ├── serializers.py / views.py / urls.py
 │   ├── apparel/                 # Apparel inventory app
-│   │   ├── models.py            # ApparelProduct, ApparelVariant, ApparelTransaction
-│   │   │                        # ApparelSize, ApparelColor, ApparelCategory
-│   │   ├── serializers.py
-│   │   ├── views.py
-│   │   └── urls.py
+│   │   ├── models.py            # ApparelProduct, ApparelVariant, ApparelSize, ApparelColor,
+│   │   │                        # ApparelCategory, ApparelTransaction
+│   │   ├── serializers.py / views.py / urls.py
+│   ├── office/                  # Office & Events inventory app
+│   │   ├── models.py            # OfficeItem, OfficeCategory, OfficeTransaction
+│   │   ├── serializers.py / views.py / urls.py
 │   ├── item_requests/           # Staff request workflow app
 │   │   ├── models.py            # ItemRequest, ItemRequestItem
-│   │   ├── serializers.py
-│   │   ├── views.py
+│   │   ├── serializers.py / views.py     # includes email notifications on submit
 │   │   └── urls.py
-│   ├── db.sqlite3               # Development database
 │   ├── manage.py
 │   └── requirements.txt
 │
 └── frontend/
     ├── src/
     │   ├── pages/
-    │   │   ├── Login.jsx
-    │   │   ├── Home.jsx          # Dashboard with category tiles
-    │   │   ├── Gifts.jsx         # Gifts inventory browsing
-    │   │   ├── Apparel.jsx       # Apparel inventory browsing
-    │   │   ├── NewRequest.jsx    # Multi-step request creation
+    │   │   ├── Login.jsx / Register.jsx
+    │   │   ├── Home.jsx              # Dashboard with category tiles
+    │   │   ├── Gifts.jsx / Apparel.jsx / OfficeEvents.jsx
+    │   │   ├── NewRequest.jsx        # Multi-step request creation
     │   │   ├── RequestConfirmation.jsx
-    │   │   ├── MyRequests.jsx    # User's own request history
-    │   │   └── AdminPanel.jsx    # Admin management interface
+    │   │   ├── MyRequests.jsx
+    │   │   ├── AdminPanel.jsx
+    │   │   └── NotFound.jsx
     │   ├── components/
-    │   │   ├── admin/
-    │   │   │   ├── AdminRequests.jsx
-    │   │   │   ├── AdminGifts.jsx
-    │   │   │   └── AdminApparel.jsx
-    │   │   ├── Header.jsx
-    │   │   ├── Footer.jsx
-    │   │   ├── ProtectedRoute.jsx
-    │   │   ├── SelectionDrawer.jsx
-    │   │   ├── GiftDetailsModal.jsx
-    │   │   ├── ApparelDetailsModal.jsx
-    │   │   ├── GiftForm.jsx
-    │   │   ├── AddApparelProductForm.jsx
-    │   │   ├── EditApparelProductForm.jsx
-    │   │   ├── StockAdjustmentModal.jsx
-    │   │   ├── ApparelStockAdjustModal.jsx
-    │   │   ├── TransactionHistoryModal.jsx
-    │   │   └── ApparelHistoryModal.jsx
+    │   │   ├── admin/                # AdminRequests, AdminGifts, AdminApparel, AdminOffice
+    │   │   ├── Header.jsx / Footer.jsx / ProtectedRoute.jsx / SelectionDrawer.jsx
+    │   │   ├── *DetailsModal.jsx      # Gift / Apparel / Office product detail views
+    │   │   ├── *RequestModal.jsx      # Add-to-request modals per category
+    │   │   ├── *Form.jsx              # Add / edit forms per category
+    │   │   ├── *StockAdjustModal.jsx  # Manual stock adjustment per category
+    │   │   └── *HistoryModal.jsx      # Transaction history per category
     │   ├── context/
-    │   │   ├── UserContext.jsx   # User info and hasAccess() helper
-    │   │   └── SelectionContext.jsx
-    │   ├── api.js                # Axios instance with JWT interceptor
+    │   │   ├── UserContext.jsx       # User info and hasAccess() helper
+    │   │   └── SelectionContext.jsx  # Request basket state
+    │   ├── api.js                    # Axios instance with JWT interceptor and refresh logic
+    │   ├── authConfig.js              # MSAL configuration for Microsoft SSO
     │   ├── constants.js
+    │   ├── main.jsx
     │   └── App.jsx
     ├── package.json
     └── vite.config.js
 ```
-
----
-
-## Features
-
-### Gifts inventory
-- Grid view with search and category filter
-- Stock count and low stock badge on each card
-- Add to request from the browsing page
-- Admin: create, edit, delete products including customs and supplier fields
-- Admin: manual stock adjustments with reason and notes
-- Admin: full transaction history per product
-
-### Apparel inventory
-- Products with multiple size, colour, and gender variants
-- Size badges grouped by gender, colour-coded using the product's primary colour
-- Filter by category, gender, colour, clothing size, and footwear size
-- Stock tracked per variant, not per product
-- Add to request from the browsing page
-- Admin: create and edit products with variants
-- Admin: manual stock adjustments per variant
-- Admin: full transaction history per product (all variants combined)
-
-### Item requests
-- Staff build a basket with items from any inventory category
-- Requests are created as drafts before submission
-- On submission, stock is checked and deducted in a single all-or-nothing operation
-- Requests move through: Draft, Pending, In Preparation, Ready, Completed, Cancelled
-- Admin can add or remove line items from any request
-- Admin can confirm quantities per line item, which adjusts stock if different from what was requested
-- Cancelling a pending request restores stock for all line items
-- Users see their own requests with status badges, confirmed quantities, and totals
-
-### Admin panel
-- Sidebar navigation scoped to the user's permission groups
-- Requests tab: expandable request cards, status workflow, admin notes, confirm quantities
-- Gifts tab: table view with inline stock adjust, history, and edit
-- Apparel tab: table view with low stock filter, per-variant stock adjust, history, and edit
-- Each section only appears in the sidebar if the user has the required group
-
-### Authentication and permissions
-- JWT authentication with automatic token refresh
-- Route-level protection via ProtectedRoute (checks token validity and group membership)
-- Group-based access: viewer groups for read-only, manager groups for full access
-- Admin panel link in the header only shows for users with at least one manager group
-- Superusers have all access regardless of group assignments
 
 ---
 
@@ -171,11 +146,12 @@ Run `python manage.py setup_groups` to create all groups in the database.
 | `admin` | Full access to everything including the admin panel |
 | `gifts_access` | Create, edit, and adjust stock in Gifts inventory |
 | `apparel_access` | Create, edit, and adjust stock in Apparel inventory |
-| `executive_access` | Manage Executive Office inventory (coming soon) |
-| `it_access` | Manage IT Assets inventory (coming soon) |
+| `office_access` | Create, edit, and adjust stock in Office & Events inventory |
 | `requests_access` | View and manage all requests in the admin panel |
-| `dashboard_access` | Access to Dashboard section (coming soon) |
-| `settings_access` | Access to Settings section (coming soon) |
+| `executive_access` | Manage Executive Office inventory (planned) |
+| `it_access` | Manage IT Assets inventory (planned) |
+| `dashboard_access` | Access to Dashboard section (planned) |
+| `settings_access` | Access to Settings section (planned) |
 
 ### Viewer groups (read-only access)
 
@@ -183,9 +159,9 @@ Run `python manage.py setup_groups` to create all groups in the database.
 |---|---|
 | `gifts_viewer` | Browse Gifts inventory, cannot create or edit |
 | `apparel_viewer` | Browse Apparel inventory, cannot create or edit |
-| `executive_viewer` | Browse Executive Office inventory (coming soon) |
-| `it_viewer` | Browse IT Assets inventory (coming soon) |
-| `office_viewer` | Browse Office and Events inventory (coming soon) |
+| `office_viewer` | Browse Office & Events inventory, cannot create or edit (default group for new SSO users) |
+| `executive_viewer` | Browse Executive Office inventory (planned) |
+| `it_viewer` | Browse IT Assets inventory (planned) |
 
 Viewer groups allow GET requests through the backend permission classes but block POST, PATCH, PUT, and DELETE. Staff with viewer groups can still submit item requests for any inventory they can browse.
 
@@ -214,6 +190,8 @@ python manage.py runserver
 
 The backend runs on `http://localhost:8000`.
 
+Create a `.env` file in `backend/` with the variables listed below before running the server.
+
 ### Frontend setup
 
 ```bash
@@ -227,8 +205,41 @@ The frontend runs on `http://localhost:5173`.
 ### First-time setup
 
 1. Log in to Django admin at `http://localhost:8000/admin/` with your superuser account
-2. Assign permission groups to users under Auth > Users
-3. Use `setup_groups` to ensure all groups exist before assigning them
+2. Run `setup_groups` to ensure all permission groups exist
+3. Assign permission groups to users under Auth > Users
+4. Add reference data (Departments, Take Reasons, Stock Adjustment Reasons, and category lists) via Django admin so the frontend dropdowns have content
+
+---
+
+## Environment variables
+
+Names only — set actual values in your local `.env` file or your hosting platform's application settings. Never commit real values.
+
+### Backend (`backend/.env`)
+
+| Variable | Purpose |
+|---|---|
+| `SECRET_KEY` | Django secret key |
+| `DEBUG` | Toggles debug mode |
+| `WEBSITE_HOSTNAME` | Azure-provided host name, added to `ALLOWED_HOSTS` in production |
+| `AZURE_POSTGRESQL_HOST` | Production database host |
+| `AZURE_POSTGRESQL_NAME` | Production database name |
+| `AZURE_POSTGRESQL_USER` | Production database user |
+| `AZURE_POSTGRESQL_PASSWORD` | Production database password |
+| `AZURE_STORAGE_CONNECTION_STRING` | Azure Blob Storage connection string for media files |
+| `MICROSOFT_CLIENT_ID` | Azure AD app registration client ID, used to verify SSO tokens |
+| `MICROSOFT_TENANT_ID` | Azure AD tenant ID, restricts SSO login to the organisation's tenant |
+| `EMAIL_HOST` | SMTP server host |
+| `EMAIL_PORT` | SMTP server port |
+| `EMAIL_USE_TLS` | Whether to use TLS for SMTP |
+| `EMAIL_HOST_USER` | SMTP login username / from-address for outgoing email |
+| `EMAIL_HOST_PASSWORD` | SMTP login password |
+
+### Frontend (`frontend/.env`)
+
+| Variable | Purpose |
+|---|---|
+| `VITE_API_URL` | Base URL of the backend API |
 
 ---
 
@@ -240,85 +251,48 @@ All endpoints are under `/api/`.
 |---|---|
 | `/api/gifts/` | Gifts inventory |
 | `/api/apparel/` | Apparel inventory |
-| `/api/requests/` | Item requests |
+| `/api/office/` | Office & Events inventory |
+| `/api/requests/` | Item requests (including `/api/requests/departments/`) |
+| `/api/auth/microsoft/` | Microsoft SSO login — exchanges a Microsoft token for app JWTs |
+| `/api/user/register/` | Create a new user account |
 | `/api/user/me/` | Current user info including groups |
 | `/api/token/` | Login (obtain JWT) |
 | `/api/token/refresh/` | Refresh access token |
-| `/api/reasons/` | Take reasons for request form |
-| `/api/stock-adjustment-reasons/` | Reasons for manual stock adjustments |
+| `/api/reasons/` | Take reasons for the request form |
+| `/api/stock-adjustment-reasons/` | Reasons for manual stock adjustments, filterable with `?applies_to=add` or `?applies_to=take` |
+| `/api/core/departments/` | Departments (general use) |
 
 ---
 
 ## Current status
 
-The following sections are live and in use:
-
-- Gifts inventory (full create, edit, adjust, history, requests)
-- Apparel inventory (full create, edit, adjust, history, requests)
-- Item requests (full workflow from draft to completed)
-- Admin panel with Requests, Gifts, and Apparel tabs
+Live and in use:
+- Gifts, Apparel, and Office & Events inventories (create, edit, stock adjustment, transaction history, requests)
+- Item requests (full workflow from draft to completed, with email notifications)
+- Admin panel with Requests, Gifts, Apparel, and Office tabs
 - Permission groups and group-based access control
+- Microsoft SSO login alongside username/password login
 
-The following sections are stubbed in the admin panel sidebar but not yet implemented:
-
+Stubbed in the admin panel sidebar but not yet implemented:
 - Executive Office inventory
-- Office and Events inventory
 - IT Assets inventory
 - Dashboard
 - Settings
 
 ---
 
-## Deployment (Azure)
+## Deployment
 
-### Backend on Azure App Service
+The app deploys as a single Azure App Service: the React frontend is built and copied into `backend/frontend/dist`, and Django serves it directly alongside the API (see `config/urls.py` and `startup.sh`).
 
-1. Create an Azure App Service with a Python 3.12 runtime
-2. Set the startup command to `gunicorn config.wsgi:application`
-3. Add the following environment variables in Application Settings:
+A GitHub Actions workflow (`.github/workflows/main_aquainventory.yml`) builds the frontend, installs backend dependencies, and deploys to Azure App Service on every push to `main`.
 
-| Variable | Value |
-|---|---|
-| `DJANGO_SETTINGS_MODULE` | `config.settings` |
-| `SECRET_KEY` | A long random string |
-| `DEBUG` | `False` |
-| `DATABASE_URL` | PostgreSQL connection string |
-| `ALLOWED_HOSTS` | Your App Service domain |
-| `AZURE_STORAGE_CONNECTION_STRING` | Blob Storage connection string |
-| `AZURE_STORAGE_CONTAINER` | Container name for uploaded images |
+`startup.sh` runs on deploy: applies migrations, collects static files, and starts Gunicorn.
 
-4. Run migrations and group setup via the App Service SSH console or a CI/CD pipeline:
+Media files (product images) are stored on Azure Blob Storage in production and on the local filesystem in development. The production database is Azure Database for PostgreSQL; SQLite is used locally.
+
+To set up permission groups on a fresh deployment, run once via the App Service console:
 
 ```bash
-python manage.py migrate
 python manage.py setup_groups
-```
-
-### Database on Azure Database for PostgreSQL
-
-Replace SQLite with the Azure PostgreSQL connection string. Install `psycopg2-binary` in requirements and configure `DATABASES` in settings to read from `DATABASE_URL`.
-
-### Media files on Azure Blob Storage
-
-Product images need persistent cloud storage in production. Install `django-storages[azure]` and configure the default file storage backend to use your Azure Blob container. The `AZURE_STORAGE_CONNECTION_STRING` and `AZURE_STORAGE_CONTAINER` environment variables feed into this configuration.
-
-### Frontend on Azure Static Web Apps
-
-Build the production bundle:
-
-```bash
-cd frontend
-npm run build
-```
-
-Deploy the `dist/` folder to Azure Static Web Apps. Set the API base URL to your App Service domain via an environment variable read into the Axios config.
-
-Add a `staticwebapp.config.json` at the root of the build output to redirect all paths to `index.html` so React Router handles client-side navigation correctly:
-
-```json
-{
-  "navigationFallback": {
-    "rewrite": "/index.html"
-  }
-}
 ```
