@@ -13,6 +13,7 @@ from core.models import Department
 from gifts.models import Gift, InventoryTransaction
 from apparel.models import ApparelVariant, ApparelTransaction
 from office.models import OfficeItem, OfficeTransaction
+from miscellaneous.models import MiscellaneousItem, MiscellaneousTransaction
 
 logger = logging.getLogger(__name__)
 
@@ -144,6 +145,19 @@ def submit_request(request, pk):
                     {"error": f"Only {office_item.qty_stock} units available for {office_item.item_name}"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+        elif item.item_type == 'miscellaneous':
+            try:
+                misc_item = MiscellaneousItem.objects.get(pk=item.item_id)
+            except MiscellaneousItem.DoesNotExist:
+                return Response(
+                    {"error": f"Miscellaneous item #{item.item_id} no longer exists."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if item.quantity_requested > misc_item.qty_stock:
+                return Response(
+                    {"error": f"Only {misc_item.qty_stock} units available for {misc_item.item_name}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
     # --- Deduct stock and record transactions ---
     # items_summary collects one line of plain text per item, reused below to
@@ -207,6 +221,24 @@ def submit_request(request, pk):
                 notes=f'Request #{item_request.id}',
             )
             line = f"• x{item.quantity_requested} - {office_item.item_name} > Office / {office_item.category.name}"
+            if item.notes:
+                line += f"\n  Note: {item.notes}"
+            items_summary.append(line)
+        elif item.item_type == 'miscellaneous':
+            misc_item = MiscellaneousItem.objects.get(pk=item.item_id)
+            stock_before = misc_item.qty_stock
+            misc_item.qty_stock -= item.quantity_requested
+            misc_item.save()
+            MiscellaneousTransaction.objects.create(
+                item=misc_item,
+                transaction_type='take',
+                quantity=item.quantity_requested,
+                created_by=request.user,
+                stock_before=stock_before,
+                stock_after=misc_item.qty_stock,
+                notes=f'Request #{item_request.id}',
+            )
+            line = f"• x{item.quantity_requested} - {misc_item.item_name} > Miscellaneous / {misc_item.category.name}"
             if item.notes:
                 line += f"\n  Note: {item.notes}"
             items_summary.append(line)
@@ -352,6 +384,23 @@ def cancel_request(request, pk):
                     notes=f'Request #{item_request.id}',
                 )
             except OfficeItem.DoesNotExist:
+                pass  # Item deleted after submission — skip stock restore
+        elif item.item_type == 'miscellaneous':
+            try:
+                misc_item = MiscellaneousItem.objects.get(pk=item.item_id)
+                stock_before = misc_item.qty_stock
+                misc_item.qty_stock += item.quantity_requested
+                misc_item.save()
+                MiscellaneousTransaction.objects.create(
+                    item=misc_item,
+                    transaction_type='return',
+                    quantity=item.quantity_requested,
+                    created_by=request.user,
+                    stock_before=stock_before,
+                    stock_after=misc_item.qty_stock,
+                    notes=f'Request #{item_request.id}',
+                )
+            except MiscellaneousItem.DoesNotExist:
                 pass  # Item deleted after submission — skip stock restore
 
     item_request.status = 'cancelled'
@@ -590,6 +639,31 @@ def confirm_request_item(request, pk, item_pk):
                 created_by=request.user,
                 stock_before=stock_before,
                 stock_after=office_item.qty_stock,
+            )
+
+        elif item.item_type == 'miscellaneous':
+            try:
+                misc_item = MiscellaneousItem.objects.get(pk=item.item_id)
+            except MiscellaneousItem.DoesNotExist:
+                return Response(
+                    {"error": f"Miscellaneous item #{item.item_id} no longer exists."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if diff > 0 and misc_item.qty_stock < diff:
+                return Response(
+                    {"error": f"Only {misc_item.qty_stock} units available for {misc_item.item_name}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            stock_before = misc_item.qty_stock
+            misc_item.qty_stock -= diff
+            misc_item.save()
+            MiscellaneousTransaction.objects.create(
+                item=misc_item,
+                transaction_type='return' if diff < 0 else 'take',
+                quantity=abs(diff),
+                created_by=request.user,
+                stock_before=stock_before,
+                stock_after=misc_item.qty_stock,
             )
 
     item.quantity_confirmed = new_qty

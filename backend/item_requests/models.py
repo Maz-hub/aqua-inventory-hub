@@ -117,6 +117,7 @@ class ItemRequestItem(models.Model):
         ('executive', 'Executive Office Item'),
         ('it',        'IT Asset'),
         ('office',    'Office & Events Item'),
+        ('miscellaneous', 'Miscellaneous Item'),
     ]
 
     # Deleting a request cascades to remove all its line items.

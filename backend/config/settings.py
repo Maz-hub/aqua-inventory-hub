@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "accounts",
     "item_requests",
     "office",
+    "miscellaneous",
     "rest_framework",
     'import_export',
 ]

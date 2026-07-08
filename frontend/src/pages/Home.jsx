@@ -106,6 +106,13 @@ function Home() {
                         route="/office"
                     />
                     <CategoryCard
+                        emoji="🧰"
+                        title="Miscellaneous"
+                        subtext="Browse inventory"
+                        canAccess={hasAccess("misc_viewer") || hasAccess("misc_access") || hasAccess("admin")}
+                        route="/miscellaneous"
+                    />
+                    <CategoryCard
                         emoji="💼"
                         title="Executive Office"
                         subtext=""

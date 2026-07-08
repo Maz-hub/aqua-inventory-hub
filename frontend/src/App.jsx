@@ -22,6 +22,7 @@ import NotFound from "./pages/NotFound";
 import Gifts from "./pages/Gifts";
 import Apparel from "./pages/Apparel";
 import OfficeEvents from "./pages/OfficeEvents";
+import Miscellaneous from "./pages/Miscellaneous";
 import NewRequest from "./pages/NewRequest";
 import RequestConfirmation from "./pages/RequestConfirmation";
 import MyRequests from "./pages/MyRequests";
@@ -90,6 +91,15 @@ function App() {
           element={
             <ProtectedRoute requireGroups={["office_viewer", "office_access", "admin"]}>
               <OfficeEvents />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/miscellaneous"
+          element={
+            <ProtectedRoute requireGroups={["misc_viewer", "misc_access", "admin"]}>
+              <Miscellaneous />
             </ProtectedRoute>
           }
         />

@@ -21,6 +21,8 @@ class Command(BaseCommand):
             'it_viewer',          # Read-only access to IT Assets inventory
             'office_access',      # Full access to Office & Events inventory
             'office_viewer',      # Read-only access to Office & Events inventory
+            'misc_access',        # Full access to Miscellaneous inventory
+            'misc_viewer',        # Read-only access to Miscellaneous inventory
             'requests_access',    # Access to Requests management in admin panel
             'dashboard_access',   # Access to Dashboard in admin panel
             'settings_access',    # Access to Settings in admin panel

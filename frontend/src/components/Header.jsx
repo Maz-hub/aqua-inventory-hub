@@ -113,7 +113,7 @@ function Header({ onSelectionOpen }) {
                             >
                                 My Requests
                             </button>
-                            {(hasAccess("admin") || hasAccess("gifts_access") || hasAccess("apparel_access") || hasAccess("executive_access") || hasAccess("it_access")) && (
+                            {(hasAccess("admin") || hasAccess("gifts_access") || hasAccess("apparel_access") || hasAccess("executive_access") || hasAccess("it_access") || hasAccess("misc_access")) && (
                                 <button
                                     onClick={() => {
                                         navigate("/admin-panel");

@@ -77,6 +77,20 @@ class HasOfficeAccess(BasePermission):
         return False
 
 
+# HasMiscellaneousAccess: read-only for misc_viewer, full access for misc_access or admin.
+class HasMiscellaneousAccess(BasePermission):
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        if is_admin(request.user):
+            return True
+        if request.user.groups.filter(name='misc_access').exists():
+            return True
+        if request.method in SAFE_METHODS:
+            return request.user.groups.filter(name='misc_viewer').exists()
+        return False
+
+
 # IsAdminUser: admin group or superuser only — no viewer variant.
 class IsAdminUser(BasePermission):
     def has_permission(self, request, view):
