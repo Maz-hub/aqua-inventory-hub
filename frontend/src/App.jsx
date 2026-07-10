@@ -23,6 +23,7 @@ import Gifts from "./pages/Gifts";
 import Apparel from "./pages/Apparel";
 import OfficeEvents from "./pages/OfficeEvents";
 import Miscellaneous from "./pages/Miscellaneous";
+import Executive from "./pages/Executive";
 import NewRequest from "./pages/NewRequest";
 import RequestConfirmation from "./pages/RequestConfirmation";
 import MyRequests from "./pages/MyRequests";
@@ -100,6 +101,15 @@ function App() {
           element={
             <ProtectedRoute requireGroups={["misc_viewer", "misc_access", "admin"]}>
               <Miscellaneous />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/executive"
+          element={
+            <ProtectedRoute requireGroups={["executive_viewer", "executive_access", "admin"]}>
+              <Executive />
             </ProtectedRoute>
           }
         />

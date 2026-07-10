@@ -19,6 +19,7 @@ import AdminGifts from "../components/admin/AdminGifts";
 import AdminApparel from "../components/admin/AdminApparel";
 import AdminOffice from "../components/admin/AdminOffice";
 import AdminMisc from "../components/admin/AdminMisc";
+import AdminExecutive from "../components/admin/AdminExecutive";
 
 // Full list of sidebar sections. Access requirements are applied at render time.
 const NAV_ITEMS = [
@@ -122,6 +123,7 @@ function AdminPanel() {
         !hasAccess("apparel_access") &&
         !hasAccess("office_access") &&
         !hasAccess("misc_access") &&
+        !hasAccess("executive_access") &&
         !hasAccess("requests_access")
     ) {
         return <Navigate to="/" />;
@@ -229,6 +231,8 @@ function AdminPanel() {
                             <AdminOffice />
                         ) : activeSection === "miscellaneous" ? (
                             <AdminMisc />
+                        ) : activeSection === "executive" ? (
+                            <AdminExecutive />
                         ) : (
                             <div className="bg-white rounded-2xl shadow p-8 text-center">
                                 <div className="text-5xl mb-4">

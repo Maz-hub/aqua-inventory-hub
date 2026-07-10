@@ -129,6 +129,7 @@ function AdminRequests() {
             apparel: "/api/apparel/variants/",
             office: "/api/office/",
             miscellaneous: "/api/miscellaneous/",
+            executive: "/api/executive/",
         };
 
         const endpoint = endpoints[category];
@@ -528,6 +529,9 @@ function AdminRequests() {
                                                         <option value="miscellaneous">
                                                             Miscellaneous
                                                         </option>
+                                                        <option value="executive">
+                                                            Executive Office
+                                                        </option>
                                                     </select>
                                                 </div>
 
@@ -572,6 +576,9 @@ function AdminRequests() {
                                                                             ? `${item.item_name.length > 30 ? item.item_name.substring(0, 30) + "..." : item.item_name} [stk: ${item.qty_stock}]`
                                                                             : newItemCategory ===
                                                                               "miscellaneous"
+                                                                            ? `${item.item_name.length > 30 ? item.item_name.substring(0, 30) + "..." : item.item_name} [stk: ${item.qty_stock}]`
+                                                                            : newItemCategory ===
+                                                                              "executive"
                                                                             ? `${item.item_name.length > 30 ? item.item_name.substring(0, 30) + "..." : item.item_name} [stk: ${item.qty_stock}]`
                                                                             : `${item.product_name?.length > 25 ? item.product_name.substring(0, 25) + "…" : item.product_name} — ${item.size?.size_value} - ${item.color?.color_name} - ${{ U: "Unisex", M: "Men", W: "Women", Y: "Youth" }[item.gender] ?? item.gender} [stk: ${item.qty_stock}]`}
                                                                     </option>

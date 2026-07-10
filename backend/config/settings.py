@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "office",
     "miscellaneous",
     "documents",
+    "executive",
     "rest_framework",
     'import_export',
 ]

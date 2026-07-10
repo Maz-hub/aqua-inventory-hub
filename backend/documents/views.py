@@ -10,6 +10,7 @@ from gifts.models import Gift
 from apparel.models import ApparelProduct
 from office.models import OfficeItem
 from miscellaneous.models import MiscellaneousItem
+from executive.models import ExecutiveItem
 
 
 # Maps the string identifier used by the frontend/API to the actual model class.
@@ -19,6 +20,7 @@ CONTENT_TYPE_MODELS = {
     'apparel': ApparelProduct,
     'office': OfficeItem,
     'miscellaneous': MiscellaneousItem,
+    'executive': ExecutiveItem,
 }
 
 

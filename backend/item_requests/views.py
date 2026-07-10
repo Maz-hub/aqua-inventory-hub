@@ -14,6 +14,7 @@ from gifts.models import Gift, InventoryTransaction
 from apparel.models import ApparelVariant, ApparelTransaction
 from office.models import OfficeItem, OfficeTransaction
 from miscellaneous.models import MiscellaneousItem, MiscellaneousTransaction
+from executive.models import ExecutiveItem, ExecutiveTransaction
 
 logger = logging.getLogger(__name__)
 
@@ -132,6 +133,19 @@ def submit_request(request, pk):
                     {"error": f"Only {variant.qty_stock} units available for {item_name}"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+        elif item.item_type == 'executive':
+            try:
+                executive_item = ExecutiveItem.objects.get(pk=item.item_id)
+            except ExecutiveItem.DoesNotExist:
+                return Response(
+                    {"error": f"Executive item #{item.item_id} no longer exists."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if item.quantity_requested > executive_item.qty_stock:
+                return Response(
+                    {"error": f"Only {executive_item.qty_stock} units available for {executive_item.item_name}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         elif item.item_type == 'office':
             try:
                 office_item = OfficeItem.objects.get(pk=item.item_id)
@@ -203,6 +217,24 @@ def submit_request(request, pk):
                 f"{variant.size.size_value} {variant.color.color_name}"
             )
             line = f"• x{item.quantity_requested} - {item_name} > Apparel / {variant.product.category.name}"
+            if item.notes:
+                line += f"\n  Note: {item.notes}"
+            items_summary.append(line)
+        elif item.item_type == 'executive':
+            executive_item = ExecutiveItem.objects.get(pk=item.item_id)
+            stock_before = executive_item.qty_stock
+            executive_item.qty_stock -= item.quantity_requested
+            executive_item.save()
+            ExecutiveTransaction.objects.create(
+                item=executive_item,
+                transaction_type='take',
+                quantity=item.quantity_requested,
+                created_by=request.user,
+                stock_before=stock_before,
+                stock_after=executive_item.qty_stock,
+                notes=f'Request #{item_request.id}',
+            )
+            line = f"• x{item.quantity_requested} - {executive_item.item_name} > Executive Office / {executive_item.category.name}"
             if item.notes:
                 line += f"\n  Note: {item.notes}"
             items_summary.append(line)
@@ -368,6 +400,23 @@ def cancel_request(request, pk):
                 )
             except ApparelVariant.DoesNotExist:
                 pass  # Variant deleted after submission — skip stock restore
+        elif item.item_type == 'executive':
+            try:
+                executive_item = ExecutiveItem.objects.get(pk=item.item_id)
+                stock_before = executive_item.qty_stock
+                executive_item.qty_stock += item.quantity_requested
+                executive_item.save()
+                ExecutiveTransaction.objects.create(
+                    item=executive_item,
+                    transaction_type='return',
+                    quantity=item.quantity_requested,
+                    created_by=request.user,
+                    stock_before=stock_before,
+                    stock_after=executive_item.qty_stock,
+                    notes=f'Request #{item_request.id}',
+                )
+            except ExecutiveItem.DoesNotExist:
+                pass  # Item deleted after submission — skip stock restore
         elif item.item_type == 'office':
             try:
                 office_item = OfficeItem.objects.get(pk=item.item_id)
@@ -614,6 +663,31 @@ def confirm_request_item(request, pk, item_pk):
                 created_by=request.user,
                 stock_before=stock_before,
                 stock_after=variant.qty_stock,
+            )
+
+        elif item.item_type == 'executive':
+            try:
+                executive_item = ExecutiveItem.objects.get(pk=item.item_id)
+            except ExecutiveItem.DoesNotExist:
+                return Response(
+                    {"error": f"Executive item #{item.item_id} no longer exists."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if diff > 0 and executive_item.qty_stock < diff:
+                return Response(
+                    {"error": f"Only {executive_item.qty_stock} units available for {executive_item.item_name}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            stock_before = executive_item.qty_stock
+            executive_item.qty_stock -= diff
+            executive_item.save()
+            ExecutiveTransaction.objects.create(
+                item=executive_item,
+                transaction_type='return' if diff < 0 else 'take',
+                quantity=abs(diff),
+                created_by=request.user,
+                stock_before=stock_before,
+                stock_after=executive_item.qty_stock,
             )
 
         elif item.item_type == 'office':

@@ -115,7 +115,7 @@ function Home() {
                     <CategoryCard
                         emoji="💼"
                         title="Executive Office"
-                        subtext=""
+                        subtext="Browse inventory"
                         canAccess={hasAccess("executive_viewer") || hasAccess("executive_access") || hasAccess("admin")}
                         route="/executive"
                     />
