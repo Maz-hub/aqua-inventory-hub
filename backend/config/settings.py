@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "item_requests",
     "office",
     "miscellaneous",
+    "documents",
     "rest_framework",
     'import_export',
 ]

@@ -29,10 +29,14 @@
 
 import { useState } from "react";
 import EditGiftForm from "./EditGiftForm";
+import DocumentsSection from "./DocumentsSection";
+import { useUser } from "../context/UserContext";
 
 function GiftDetailsModal({ gift, onClose, onSuccess, isAdmin = false }) {
     if (!gift) return null;
 
+    const { hasAccess } = useUser();
+    const canManageDocuments = hasAccess("gifts_access") || hasAccess("admin");
     const [showEditForm, setShowEditForm] = useState(false);
 
     // When editing, replace the entire modal content with the edit form.
@@ -149,6 +153,18 @@ function GiftDetailsModal({ gift, onClose, onSuccess, isAdmin = false }) {
                                     </div>
                                 )}
                             </div>
+
+                            {/* Documents — PDF attachments; hidden entirely unless the user
+                                has gifts_access or admin (viewers never see this section) */}
+                            {canManageDocuments && (
+                                <div className="mt-6">
+                                    <DocumentsSection
+                                        contentType="gift"
+                                        objectId={gift.id}
+                                        canManage={canManageDocuments}
+                                    />
+                                </div>
+                            )}
 
                             {/* Customs & Logistics — only shown when at least one field has a value */}
                             {(gift.hs_code || gift.country_of_origin || gift.merchant_product_id || gift.manufacturer_product_id || gift.standardised_product_id) && (

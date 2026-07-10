@@ -18,10 +18,14 @@
 
 import { useState } from "react";
 import EditMiscForm from "./EditMiscForm";
+import DocumentsSection from "./DocumentsSection";
+import { useUser } from "../context/UserContext";
 
 function MiscDetailsModal({ item, onClose, onSuccess, isAdmin = false }) {
     if (!item) return null;
 
+    const { hasAccess } = useUser();
+    const canManageDocuments = hasAccess("misc_access") || hasAccess("admin");
     const [showEditForm, setShowEditForm] = useState(false);
 
     if (showEditForm) {
@@ -108,6 +112,18 @@ function MiscDetailsModal({ item, onClose, onSuccess, isAdmin = false }) {
                                 </div>
                             )}
                         </div>
+
+                        {/* Documents — PDF attachments; hidden entirely unless the user
+                            has misc_access or admin (viewers never see this section) */}
+                        {canManageDocuments && (
+                            <div className="mt-6">
+                                <DocumentsSection
+                                    contentType="miscellaneous"
+                                    objectId={item.id}
+                                    canManage={canManageDocuments}
+                                />
+                            </div>
+                        )}
 
                         {/* Customs & Logistics */}
                         {(item.hs_code || item.country_of_origin || item.merchant_product_id || item.manufacturer_product_id || item.standardised_product_id) && (

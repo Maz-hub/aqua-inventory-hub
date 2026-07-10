@@ -50,6 +50,7 @@ urlpatterns = [
     path("api/requests/", include("item_requests.urls")),    # item requests
     path("api/office/", include("office.urls")),             # office & events inventory
     path("api/miscellaneous/", include("miscellaneous.urls")), # miscellaneous inventory
+    path("api/documents/", include("documents.urls")),       # shared file attachments
     path("api/auth/", include("accounts.urls")),             # Microsoft SSO login
 
     # Catch-all — must be last. Serves React's index.html for all non-API routes.

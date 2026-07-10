@@ -15,10 +15,14 @@
 
 import { useState } from "react";
 import EditOfficeForm from "./EditOfficeForm";
+import DocumentsSection from "./DocumentsSection";
+import { useUser } from "../context/UserContext";
 
 function OfficeDetailsModal({ item, onClose, onSuccess, isAdmin = false }) {
     if (!item) return null;
 
+    const { hasAccess } = useUser();
+    const canManageDocuments = hasAccess("office_access") || hasAccess("admin");
     const [showEditForm, setShowEditForm] = useState(false);
 
     if (showEditForm) {
@@ -105,6 +109,18 @@ function OfficeDetailsModal({ item, onClose, onSuccess, isAdmin = false }) {
                                 </div>
                             )}
                         </div>
+
+                        {/* Documents — PDF attachments; hidden entirely unless the user
+                            has office_access or admin (viewers never see this section) */}
+                        {canManageDocuments && (
+                            <div className="mt-6">
+                                <DocumentsSection
+                                    contentType="office"
+                                    objectId={item.id}
+                                    canManage={canManageDocuments}
+                                />
+                            </div>
+                        )}
 
                         {/* Customs & Logistics */}
                         {(item.hs_code || item.country_of_origin || item.merchant_product_id || item.manufacturer_product_id || item.standardised_product_id) && (

@@ -30,11 +30,15 @@
 
 import { useState } from "react";
 import EditApparelProductForm from "./EditApparelProductForm";
+import DocumentsSection from "./DocumentsSection";
+import { useUser } from "../context/UserContext";
 
 const GENDER_LABELS = { M: 'Men', W: 'Women', U: 'Unisex', Y: 'Youth' };
 
 function ApparelDetailsModal({ product, onClose, onSuccess, isAdmin = false }) {
   const [isEditing, setIsEditing] = useState(false);
+  const { hasAccess } = useUser();
+  const canManageDocuments = hasAccess("apparel_access") || hasAccess("admin");
 
   if (!product) return null;
 
@@ -127,6 +131,18 @@ function ApparelDetailsModal({ product, onClose, onSuccess, isAdmin = false }) {
                 </div>
               )}
             </div>
+
+            {/* Documents — PDF attachments; hidden entirely unless the user has
+                apparel_access or admin (viewers never see this section) */}
+            {canManageDocuments && (
+              <div className="mt-6">
+                <DocumentsSection
+                  contentType="apparel"
+                  objectId={product.id}
+                  canManage={canManageDocuments}
+                />
+              </div>
+            )}
 
             {/* Variants / Stock Levels — each card is highlighted red when at or below minimum */}
             <div>
